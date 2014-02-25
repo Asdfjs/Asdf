@@ -235,6 +235,15 @@
 			return fn.apply(this, arguments);
 		};
 	}
+    function compose2() {
+        var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+        return function(){
+            var self = this;
+            return Asdf.A.first(fns).apply(this, Asdf.A.map(Asdf.A.rest(fns), function(f){
+                return f.apply(self, arguments);
+            }));
+        }
+    }
 	var exisFunction = function (fn) {
 		if($_.O.isNotFunction(fn)){
 			throw new TypeError();
@@ -361,18 +370,17 @@
         }
     }
     function cases(obj, defaults){
-        if(!Asdf.O.isPlainObject(obj) || !Asdf.O.isFunction(defaults)) throw new TypeError();
+        if(!Asdf.O.isPlainObject(obj)) throw new TypeError();
         defaults = defaults || function(){};
         return function(key){
-            var arg = slice.call(arguments, 1);
             var fn;
-            if(fn = get(obj, key)){
+            if(fn = Asdf.O.get(obj, key)){
                 if(Asdf.O.isFunction(fn)){
-                    return fn.apply(this, arg);
+                    return fn.apply(this, arguments);
                 }
                 return fn;
             }else {
-                return defaults.apply(this, arg);
+                return defaults.apply(this, arguments);
             }
         }
     }
@@ -398,6 +406,7 @@
 		after:after,
 		methodize: methodize,
 		compose:compose,
+        compose2:compose2,
 		composeRight:composeRight,
 		extract:extract,
 		partial: partial,

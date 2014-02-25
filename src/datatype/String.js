@@ -502,6 +502,120 @@
             return 1;
         return 0;
     }
+    function interpreter(conf, str, arg){
+        var args = Array.prototype.slice.call(arguments,2);
+        return tokenizer(conf, str, args)();
+    }
+    function tokenizer(c, str , args){
+        var conf = {
+            varToken: '%v',
+            token:{
+                'false': false,
+                'true': true,
+                'null': null,
+                'undefined': undefined,
+                '#s': ' '
+            },
+            functions:{
+                '+': function(a,b) {return a+b;},
+                '-': function(a,b) {return a-b;},
+                '*': function(a,b) {return a*b;},
+                '/': function(a,b) {return a/b;}
+            },
+            separator:{
+                startToken: '(',
+                endToken: ')',
+                separator: /\s+/
+            },
+            autoNumber: true
+        };
+        Asdf.O.extend(conf, c);
+        var i = 0;
+        var tokenKeys = Asdf.O.keys(conf.token);
+        var token = separator(conf.separator, {token:[], rest:str});
+        var vars = new RegExp('^'+toRegExp(conf.varToken)+'[0-9]{1,2}$');
+        function r(token){
+            var fns = [];
+            var a = Asdf.A.map(token, function(v, k){
+                if(k === 0){
+                    var fn = conf.functions[v];
+                    if(!fn) throw new TypeError(v + 'is undefined.');
+                    return conf.functions[v];
+                }
+                else if(v.type=='token'){
+                    fns.push(r(v));
+                    return undefined;
+                }else if(Asdf.A.include(tokenKeys,v)){
+                    return conf.token[v];
+                }else if(conf.autoNumber&&Number(v) == v){
+                    return Number(v);
+                }else if(v === conf.varToken || vars.test(v)){
+                    var j = parseInt(v.substring(conf.varToken.length),10);
+                    j = isNaN(j)?i++:j;
+                    if (args.length <= j)
+                        throw new TypeError('too short argument '+ j);
+                    return args[j];
+                }
+                return v;
+            });
+            fns.unshift(Asdf.F.partial.apply(null, a))
+            return Asdf.F.compose2.apply(null, fns);
+        }
+        return r(token.token);
+    }
+    function toRegExp(str){
+         return str.replace(/([\\^$()[\]])/g,'\\$1');
+    }
+    function separator(c, o){
+        var stack = [], m;
+        var conf = c;
+        var tokenReg = new RegExp('('+toRegExp(conf.startToken)+')|'+
+            '('+toRegExp(conf.endToken)+')');
+        function functionToken(array){
+            return Asdf.A.merge({length:0, type:'token'},Asdf.A.compact(array));
+        }
+        function endToken(o, end){
+            if(!stack.length)
+                throw new TypeError(conf.endToken + ' parse Error');
+            var pos = stack.pop();
+            var res = o.token.splice(pos);
+            var a = trim(o.rest.substring(0, end)).split(conf.separator);
+            if(a!='')
+                Asdf.A.merge(res, a);
+            o.token.push(functionToken(res));
+            return {token: o.token, rest: o.rest.substring(end+conf.endToken.length)};
+        }
+        function startToken(o, start){
+            var p = o.token.length;
+            if(start !== 0)
+                p = Asdf.A.merge(o.token, trim(o.rest.substring(0, start)).split(conf.separator)).length;
+            stack.push(p);
+            return {token: o.token, rest: o.rest.substring(start+conf.startToken.length)};
+        }
+        o.rest = trim(o.rest);
+        while(m = tokenReg.exec(o.rest)){
+            var res;
+            if(m[2]){
+                res = endToken(o, m.index);
+            }else if(m[1]){
+                res = startToken(o, m.index);
+            }else{
+                continue;
+            }
+            if(!res)
+                throw new TypeError('parse Error');
+            o.rest = trim(res.rest);
+        }
+        if(stack.length)
+            throw new TypeError(conf.startToken + ' parse Error');
+        return {token: o.token[0], rest: o.rest};
+
+    }
+
+
+    function format(str, args){
+        var args = Array.prototype.slice.call(arguments,1);
+     }
 	$_.O.extend($_.S, {
 		truncate: truncate,
 		trim: trim,
@@ -527,6 +641,9 @@
 		lpad: lpad,
 		rpad: rpad,
 		template:template,
-        compareVersion: compareVersion
+        compareVersion: compareVersion,
+        format:format,
+        tokenizer:tokenizer,
+        interpreter: interpreter
 	});
 })(Asdf);
