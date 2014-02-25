@@ -361,18 +361,17 @@
         }
     }
     function cases(obj, defaults){
-        if(!Asdf.O.isPlainObject(obj) || !Asdf.O.isFunction(defaults)) throw new TypeError();
+        if(!Asdf.O.isPlainObject(obj)) throw new TypeError();
         defaults = defaults || function(){};
         return function(key){
-            var arg = slice.call(arguments, 1);
             var fn;
-            if(fn = get(obj, key)){
+            if(fn = Asdf.O.get(obj, key)){
                 if(Asdf.O.isFunction(fn)){
-                    return fn.apply(this, arg);
+                    return fn.apply(this, arguments);
                 }
                 return fn;
             }else {
-                return defaults.apply(this, arg);
+                return defaults.apply(this, arguments);
             }
         }
     }

@@ -1252,18 +1252,17 @@
         }
     }
     function cases(obj, defaults){
-        if(!Asdf.O.isPlainObject(obj) || !Asdf.O.isFunction(defaults)) throw new TypeError();
+        if(!Asdf.O.isPlainObject(obj)) throw new TypeError();
         defaults = defaults || function(){};
         return function(key){
-            var arg = slice.call(arguments, 1);
             var fn;
-            if(fn = get(obj, key)){
+            if(fn = Asdf.O.get(obj, key)){
                 if(Asdf.O.isFunction(fn)){
-                    return fn.apply(this, arg);
+                    return fn.apply(this, arguments);
                 }
                 return fn;
             }else {
-                return defaults.apply(this, arg);
+                return defaults.apply(this, arguments);
             }
         }
     }
@@ -2641,6 +2640,48 @@
             return 1;
         return 0;
     }
+
+    function format(str, args){
+        var args = Array.prototype.slice.call(arguments,1);
+        var i=0 ;
+        var stack = [];
+        var startToken = '{{';
+        var endToken = '}}';
+        function tokenizer(o){
+            var arr = o.arr;
+            var rest = o.rest;
+            var start = rest.indexOf(startToken);
+            var end = rest.indexOf(endToken);
+            start === -1 && (start = Number.POSITIVE_INFINITY);
+            end ===-1 && (end = Number.POSITIVE_INFINITY);
+            if(end > start ){
+                stack.push(arr.push(rest.substring(0, start)));
+                return tokenizer({arr:arr, rest: rest.substring(start+startToken.length)})
+            }else if(start > end){
+                if(!stack.length)
+                    throw new TypeError(endToken + ' parse Error');
+                var pos = stack.pop();
+                var arrLength = arr.length;
+                var a = arr.splice(pos);
+                Asdf.A.merge(a, rest.substring(0, end).split(/\s+/));
+                arr.push(arrayExec(a, arrLength == pos?args[i++]: null));
+                return tokenizer({arr: arr, rest: rest.substring(end+endToken.length)})
+            }
+            if(stack.length)
+                throw new TypeError(startToken + ' parse Error');
+            arr.push(rest);
+            return {arr: arr};
+        }
+        function arrayExec(array, data){
+            if(Asdf.O.isUndefined(data)) throw new TypeError('arg too short');
+            var args = Asdf.A.rest(array);
+            if(data!=null)
+                args = Asdf.A.merge([data], args);
+            return $_.S[Asdf.S.trim(array[0])].apply(null, args);
+        }
+        return tokenizer({arr:[], rest:str}).arr.join('');
+
+     }
 	$_.O.extend($_.S, {
 		truncate: truncate,
 		trim: trim,
@@ -2666,7 +2707,8 @@
 		lpad: lpad,
 		rpad: rpad,
 		template:template,
-        compareVersion: compareVersion
+        compareVersion: compareVersion,
+        format:format
 	});
 })(Asdf);
 (function($_) {
