@@ -134,6 +134,20 @@ test("Asdf.Element.nexts", function(){
     throws(function(){Asdf.Element.siblings('1')}, 'not Element throw Exceptions');
     ok(Asdf.A.include(siblings, pc)&&Asdf.A.include(siblings, nc), 'siblings ok');
 });
+test("Asdf.Element.childNodes", function(){
+    var text = document.createTextNode('aa');
+    var c = document.createElement('div');
+    var pc = document.createElement('div');
+    var nc = document.createElement('div');
+    div.appendChild(text);
+    div.appendChild(pc);
+    div.appendChild(c);
+    div.appendChild(nc);
+
+    var children = Asdf.Element.childNodes(div);
+    throws(function(){Asdf.Element.children('1')}, 'not Element throw Exceptions');
+    ok(Asdf.A.include(children, pc)&&Asdf.A.include(children, nc)&&Asdf.A.include(children, c)&&Asdf.A.include(children, text), 'childNodes ok');
+});
 test("Asdf.Element.children", function(){
     var text = document.createTextNode('aa');
     var c = document.createElement('div');
@@ -146,7 +160,7 @@ test("Asdf.Element.children", function(){
 
     var children = Asdf.Element.children(div);
     throws(function(){Asdf.Element.children('1')}, 'not Element throw Exceptions');
-    ok(Asdf.A.include(children, pc)&&Asdf.A.include(children, nc)&&Asdf.A.include(children, c)&&Asdf.A.include(children, text), 'children ok');
+    ok(Asdf.A.include(children, pc)&&Asdf.A.include(children, nc)&&Asdf.A.include(children, c)&&!Asdf.A.include(children, text), 'children ok');
 });
 test("Asdf.Element.contents", function(){
     var text = document.createTextNode('aa');
@@ -201,4 +215,72 @@ test("Asdf.Element.createDom", function(){
     equal(Asdf.Element.attr(el, 'width'), '100px', 'width ok');
     equal(Asdf.Element.attr(input, 'type'), 'button', 'type ok');
     equal(el.childNodes.length, 2, 'children ok');
+});
+test("Asdf.Element.append", function(){
+    var c = document.createElement('div');
+    var cs = document.createElement('span');
+    Asdf.Element.append(div, c);
+    Asdf.Element.append(div, cs);
+    var resdom = document.createElement('div');
+    resdom.innerHTML = '<div></div><span></span>';
+    equal(div.innerHTML, resdom.innerHTML, 'append ok');
+});
+test("Asdf.Element.prepend", function(){
+    var c = document.createElement('div');
+    var cs = document.createElement('span');
+    Asdf.Element.prepend(div, c);
+    Asdf.Element.prepend(div, cs);
+    var resdom = document.createElement('div');
+    resdom.innerHTML = '<span></span><div></div>';
+    equal(div.innerHTML, resdom.innerHTML, 'prepend ok');
+});
+test("Asdf.Element.before", function(){
+    var c = document.createElement('div');
+    var cs = document.createElement('span');
+    Asdf.Element.append(div, c);
+    Asdf.Element.before(c, cs);
+    var resdom = document.createElement('div');
+    resdom.innerHTML = '<span></span><div></div>';
+    equal(div.innerHTML, resdom.innerHTML, 'before ok');
+});
+test("Asdf.Element.after", function(){
+    var c = document.createElement('div');
+    var cs = document.createElement('span');
+    Asdf.Element.append(div, c);
+    Asdf.Element.after(c, cs);
+    var resdom = document.createElement('div');
+    resdom.innerHTML = '<div></div><span></span>';
+    equal(div.innerHTML, resdom.innerHTML, 'after ok');
+});
+test("Asdf.Element.empty", function(){
+    var c = document.createElement('div');
+    Asdf.Element.append(div, c);
+    Asdf.Element.empty(div);
+    var resdom = document.createElement('div');
+    resdom.innerHTML = '';
+    equal(div.innerHTML, resdom.innerHTML, 'empty ok');
+});
+test("Asdf.Element.first", function(){
+    var text = Asdf.Element.createText(document, 'aa');
+    var c = document.createElement('div');
+    Asdf.Element.append(div, text);
+    Asdf.Element.append(div, c);
+    equal(Asdf.Element.first(div), c, 'first ok');
+});
+test("Asdf.Element.last", function(){
+    var text = Asdf.Element.createText(document, 'aa');
+    var c = document.createElement('div');
+    Asdf.Element.append(div, c);
+    Asdf.Element.append(div, text);
+    equal(Asdf.Element.last(div), c, 'last ok');
+});
+test("Asdf.Element.eq", function(){
+    var text = Asdf.Element.createText(document, 'aa');
+    var c = document.createElement('div');
+    var c1 = document.createElement('div');
+    Asdf.Element.append(div, c);
+    Asdf.Element.append(div, text);
+    Asdf.Element.append(div, c1);
+    equal(Asdf.Element.eq(div, 0), c, 'eq ok');
+    equal(Asdf.Element.eq(div, 1), c1, 'eq ok');
 });

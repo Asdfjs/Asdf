@@ -321,13 +321,20 @@
      * p.appendChild(pc);
      * p.appendChild(c);
      * p.appendChild(nc);
-     * Asdf.Element.children(p); //return [text, pc,c,nc];
+     * Asdf.Element.childNodes(p); //return [text, pc,c,nc];
      */
-	function children(element) {
+	function childNodes(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
+    function children(element){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if($_.Bom.features.CanUseChildrenAttribute)
+            return element.children;
+        return $_.A.filter(element.children, $_.O.isElement);
+    }
     /**
      * @memberof Element
      * @param {element} element 대상element
@@ -391,7 +398,7 @@
 			throw new TypeError();
 		var bin = document.createDocumentFragment();
 		var parentNode = element.parentNode;
-		Asdf.A.each(children(element), function(el){
+		Asdf.A.each(childNodes(element), function(el){
             bin.appendChild(el);
         });
 		parentNode.replaceChild(bin, element);
@@ -442,6 +449,20 @@
         if(Asdf.O.isNotString(string)) throw new TypeError();
         return doc.createTextNode(string);
     }
+    /**
+     * @memberof Element
+     * @param {element} element 부모Element
+     * @param {element} newContent 새Element
+     * @returns {element} 부모Element를 반환한다.
+     * @desc 부모Element에 자식으로 마지막에 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.append(p, cs);
+     * p.innerHTML; //'<div></div><span></span>'
+     */
 	function append(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
@@ -451,6 +472,20 @@
 		}
 		return element;
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 부모Element
+     * @param {element} newContent 새Element
+     * @returns {element} 부모Element를 반환한다.
+     * @desc 부모Element에 자식 첫번째로 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.prepend(p, c);
+     * Asdf.Element.prepend(p, cs);
+     * p.innerHTML; //'<span></span><div></div>'
+     */
 	function prepend(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
@@ -460,18 +495,59 @@
 		}
 		return element;
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 기준Element
+     * @param {element} newContent 새Element
+     * @returns {element} 기준Element를 반환한다.
+     * @desc 기준Element를 앞에 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.before(c, cs);
+     * p.innerHTML; //'<span></span><div></div>'
+     */
 	function before(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
 		element.parentNode.insertBefore(newContent, element);
 		return element;
 	}
+
+    /**
+     * @memberof Element
+     * @param {element} element 기준Element
+     * @param {element} newContent 새Element
+     * @returns {element} 기준Element를 반환한다.
+     * @desc 기준Element를 뒤에 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.after(c, cs);
+     * p.innerHTML; //'<div></div><span></span>'
+     */
 	function after(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
 		element.parentNode.insertBefore(newContent, element.nextSibling);
 		return element;		
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 대상Element
+     * @returns {element} 대상Element를 반환한다.
+     * @desc 대상Element를 빈Element로 만든다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.empty(p);
+     * p.innerHTML; //''
+     */
 	function empty(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -483,6 +559,24 @@
 			throw new TypeError();
 		element.parentNode.removeChild(element);
 	}
+    function first(element){
+        if(!$_.O.isElement(element))
+          throw new TypeError();
+        var c = children(element);
+        return c&&c[0];
+    }
+    function last(element){
+        if(!$_.O.isElement(element))
+            throw new TypeError();
+        var c = children(element);
+        return c&& c[c.length-1];
+    }
+    function eq(element, n){
+        if(!$_.O.isElement(element))
+            throw new TypeError();
+        var c = children(element);
+        return c&& c[n];
+    }
 	function attr(element, name, value) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -725,6 +819,7 @@
 		nexts: nexts,
 		prevs: prevs,
 		siblings: siblings,
+        childNodes:childNodes,
 		children: children,
 		contents: contents,
 		wrap: wrap,
@@ -734,6 +829,9 @@
 		before: before,
 		after: after,
 		empty: empty,
+        first: first,
+        eq: eq,
+        last:last,
 		attr: attr,
 		removeAttr: removeAttr,
 		prop: prop,
