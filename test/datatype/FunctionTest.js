@@ -127,3 +127,10 @@ test("Asdf.F.overload", function(){
     equal(add([],[]), 0, 'ok');
     throws(function(){add(1,[])}, 'throws');
 });
+test("Asdf.F.errorHandler", function(){
+    function f(){
+        throw new Error();
+    };
+    var ef = Asdf.F.errorHandler(f, function(){return true;});
+    equal(ef(), true, 'errorHandler');
+});

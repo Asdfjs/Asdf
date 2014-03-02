@@ -1278,6 +1278,15 @@
         }
         return orElse(f, overloadedFn, stop)
     }
+    function errorHandler(fn, handler){
+        return function(){
+            try{
+                return fn.apply(this, arguments);
+            }catch(e){
+                return handler(e)
+            }
+        }
+    }
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -1299,7 +1308,8 @@
         guarded: guarded,
         sequence: sequence,
         cases:cases,
-        overload:overload
+        overload:overload,
+        errorHandler:errorHandler
 	}, true);
 
 })(Asdf);/**
@@ -2671,17 +2681,39 @@
 })(Asdf);
 (function($_) {
 	$_.Arg = {};
-	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
-	var curry = $_.Core.combine.curry;
-	var partial = $_.Core.combine.partial;
-	var not = curry(compose, $_.Core.op["!"]);
-	var isNotNaN = not(isNaN);
 	function toArray(){
 		return $_.A.toArray(arguments);
 	}
-	
+    function relocate(arr, fn, context){
+        if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotNumber))
+            throw new TypeError()
+        return function(){
+            var res = [];
+            var arg = $_.A.toArray(arguments);
+            $_.A.each(arr, function(v, k){
+                if($_.O.isUndefined(v))
+                    return;
+                res[k] = arg[v];
+            });
+            return fn.apply(context, res);
+        }
+    }
+    function transfer(arr, fn, context){
+        if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotFunction))
+            throw new TypeError()
+        return function(){
+            var res = [];
+            var arg = $_.A.toArray(arguments);
+            $_.A.each(arr, function(v, k){
+                res[k] = v(arg[k]);
+            });
+            return fn.apply(context, res);
+        }
+    }
 	$_.O.extend($_.Arg, {
-		toArray:toArray
+		toArray:toArray,
+        relocate:relocate,
+        transfer:transfer
 	});
 })(Asdf);(function($_) {
 	$_.N = {};

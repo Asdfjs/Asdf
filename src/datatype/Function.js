@@ -387,6 +387,15 @@
         }
         return orElse(f, overloadedFn, stop)
     }
+    function errorHandler(fn, handler){
+        return function(){
+            try{
+                return fn.apply(this, arguments);
+            }catch(e){
+                return handler(e)
+            }
+        }
+    }
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -408,7 +417,8 @@
         guarded: guarded,
         sequence: sequence,
         cases:cases,
-        overload:overload
+        overload:overload,
+        errorHandler:errorHandler
 	}, true);
 
 })(Asdf);
