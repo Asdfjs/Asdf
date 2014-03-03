@@ -554,10 +554,23 @@
 		element.innerHTML = '';
 		return element;
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 대상Element
+     * @returns {element} 대상Element를 반환한다.
+     * @desc 대상Element를 삭제한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.remove(c);
+     * p.innerHTML; //''
+     */
 	function remove(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		element.parentNode.removeChild(element);
+        return element;
 	}
     function first(element){
         if(!$_.O.isElement(element))
@@ -577,16 +590,22 @@
         var c = children(element);
         return c&& c[n];
     }
+    /**
+     * @memberof Element
+     * @param {element} element 대상Element
+     * @param {string} name 속성명
+     * @param {string=} value 속성값
+     * @returns {element|string} 대상Element를 반환한다.
+     * @desc 속성값이 있는 경우 대상Element에 속성 값을 설정하고, 대상 Element를 반환한다. 속성값이 없는 경우 속성값을 반환한다.
+     * @example
+     * var c = document.createElement('div');
+     * Asdf.Element.attr(c, 'width', '100px');
+     * Asdf.Element.attr(c, 'width'); //return '100px'
+     */
 	function attr(element, name, value) {
-		if(!$_.O.isNode(element))
+		if(!$_.O.isElement(element) || !isString(name))
 			throw new TypeError();
 		var result, key;
-		if(!name || !isString(name)){
-			return null;
-		}
-		if(element.nodeType !== 1){
-			return null;
-		}
 		if(value == null){
 			if(name === 'value' && element.nodeName === 'INPUT' ){
 				return element.value;
@@ -602,13 +621,36 @@
 			return element;
 		}
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 대상Element
+     * @param {string} name 속성명
+     * @returns {element} 대상Element를 반환한다.
+     * @desc 속성명에 해당하는 속성을 삭제한다.
+     * @example
+     * var c = document.createElement('div');
+     * Asdf.Element.attr(c, 'width', '100px');
+     * Asdf.Element.removeAttr(c, 'width');
+     * Asdf.Element.attr(c, 'width') //undefined;
+     */
 	function removeAttr(element, name) {
-		if(!$_.O.isNode(element))
+		if(!$_.O.isElement(element) || !isString(name))
 			throw new TypeError();
-		if(element.nodeType === 1)
-			element.removeAttribute(name);
+        element.removeAttribute(name);
 		return element;
 	}
+    /**
+     * @memberof Element
+     * @param {node} element 대상Element
+     * @param {string} name property name
+     * @param {string=} value property value
+     * @returns {element|*} value가 있으면 대상 Element를 반환하고 없으면 property value를 반환한다.
+     * @desc property value가 없으면 property name 해당하는 value값을 반환한다. value가 있으면 value를 설정하고 element를 반환한다.
+     * @example
+     * var c = document.createElement('div');
+     * Asdf.Element.prop(c, 'id', 'aa'); //return c;
+     * Asdf.Element.prop(c, 'id);//return 'aa'
+     */
 	function prop(element, name, value) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();

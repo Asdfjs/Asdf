@@ -183,16 +183,16 @@
     <h1>Code coverage report for <span class="entity">./src/datatype/Argument.js</span></h1>
     <h2>
         
-        Statements: <span class="metric">100% <small>(10 / 10)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Statements: <span class="metric">88% <small>(22 / 25)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Branches: <span class="metric">100% <small>(0 / 0)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Branches: <span class="metric">70% <small>(7 / 10)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Functions: <span class="metric">100% <small>(2 / 2)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Functions: <span class="metric">100% <small>(8 / 8)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Lines: <span class="metric">100% <small>(10 / 10)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Lines: <span class="metric">88% <small>(22 / 25)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
     </h2>
     <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">./src/datatype\</a> &#187; Argument.js</div>
@@ -213,40 +213,106 @@
 12
 13
 14
-15</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-yes">1</span>
-<span class="cline-any cline-yes">1</span>
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">(function($_) {
 	$_.Arg = {};
-	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
-	var curry = $_.Core.combine.curry;
-	var partial = $_.Core.combine.partial;
-	var not = curry(compose, $_.Core.op["!"]);
-	var isNotNaN = not(isNaN);
 	function toArray(){
 		return $_.A.toArray(arguments);
 	}
-	
+    function relocate(arr, fn, context){
+        <span class="missing-if-branch" title="if path not taken"" >I</span>if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotNumber))
+<span class="cstat-no" title="statement not covered" >            throw new TypeError()</span>
+        return function(){
+            var res = [];
+            var arg = $_.A.toArray(arguments);
+            $_.A.each(arr, function(v, k){
+                <span class="missing-if-branch" title="if path not taken"" >I</span>if($_.O.isUndefined(v))
+<span class="cstat-no" title="statement not covered" >                    return;</span>
+                res[k] = arg[v];
+            });
+            return fn.apply(context, res);
+        }
+    }
+    function transfer(arr, fn, context){
+        <span class="missing-if-branch" title="if path not taken"" >I</span>if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotFunction))
+<span class="cstat-no" title="statement not covered" >            throw new TypeError()</span>
+        return function(){
+            var res = [];
+            var arg = $_.A.toArray(arguments);
+            $_.A.each(arr, function(v, k){
+                res[k] = v(arg[k]);
+            });
+            return fn.apply(context, res);
+        }
+    }
 	$_.O.extend($_.Arg, {
-		toArray:toArray
+		toArray:toArray,
+        relocate:relocate,
+        transfer:transfer
 	});
 })(Asdf);</pre></td></tr>
 </table></pre>
 
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Mar 01 2014 12:02:39 GMT+0900 (대한민국 표준시)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Mar 02 2014 23:45:24 GMT+0900 (대한민국 표준시)</div>
 </div>
 
 <script src="../prettify.js"></script>

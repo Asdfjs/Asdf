@@ -284,3 +284,28 @@ test("Asdf.Element.eq", function(){
     equal(Asdf.Element.eq(div, 0), c, 'eq ok');
     equal(Asdf.Element.eq(div, 1), c1, 'eq ok');
 });
+test("Asdf.Element.remove", function(){
+    var c = document.createElement('div');
+    Asdf.Element.append(div,c);
+    equal(Asdf.Element.remove(c), c, 'remove return Element');
+    equal(div.innerHTML, '', 'remove ok');
+});
+test("Asdf.Element.attr", function(){
+    var c = document.createElement('div');
+    var input = Asdf.Element.createDom(document, 'input', {type: 'text'});
+    Asdf.Element.attr(input, 'value', 'aa');
+    equal(Asdf.Element.attr(c, 'width', '100px'), c, 'return ok');
+    equal(Asdf.Element.attr(c, 'width'), '100px', 'with attr ok');
+    equal(Asdf.Element.attr(input, 'value'), 'aa', 'input value ok');
+});
+test("Asdf.Element.removeAttr", function(){
+    var c = document.createElement('div');
+    Asdf.Element.attr(c, 'width', '100px');
+    Asdf.Element.removeAttr(c, 'width');
+    equal(Asdf.Element.attr(c, 'width'), undefined, 'removeAttr ok');
+});
+test("Asdf.Element.prop", function(){
+    var c = document.createElement('div');
+    equal(Asdf.Element.prop(c, 'id', 'aa'), c, 'prop set ok');
+    equal(Asdf.Element.prop(c, 'id'), 'aa', 'prop get ok');
+});
