@@ -931,7 +931,7 @@
 			$_.A.merge(a, args);
 			$_.A.merge(a, arguments);
 			return __method.apply(context, a);
-		};
+		}
 	}
 		
 	/**
@@ -1031,7 +1031,7 @@
 			if(!(pres = pre.apply(this,arguments))&&stop) return pres;
 			return func.apply(this,arguments);
 		};
-	};
+	}
 	
 	/**
 	 * @memberof F
@@ -1056,7 +1056,7 @@
 			if(!res && stop) return res;
 			return after.apply(this, $_.A.merge([res], arguments));
 		};
-	};
+	}
 	
 	/**
 	 * @memberof F
@@ -1078,7 +1078,7 @@
 		return func._methodized = function() {
 			var a = $_.A.merge([ this ], slice.call(arguments,0));
 			return __method.apply(null, a);
-		};
+		}
 	}
 	
 	/**
@@ -1214,12 +1214,15 @@
 	}
 	var then = partial(after, undefined, undefined, true);
 	
-	function orElse(func, elseFn){
+	function orElse(func, elseFn, stop){
 		if(!$_.O.isFunction(func)||!$_.O.isFunction(elseFn)) throw new TypeError;
 		return function() {
 			var res = func.apply(this, arguments);
-			if(res) return res;
-			return elseFn.apply(this, arguments);
+            if(Asdf.O.isNotUndefined(stop)&&stop===res||Asdf.O.isUndefined(stop)&&!res)
+                return elseFn.apply(this, arguments);
+            return res;
+
+
 		};
 	}
     function guarded(guards){
@@ -1249,18 +1252,38 @@
         }
     }
     function cases(obj, defaults){
-        if(!isPlainObject(obj) || !isFunction(defaults)) throw new TypeError();
+        if(!Asdf.O.isPlainObject(obj) || !Asdf.O.isFunction(defaults)) throw new TypeError();
         defaults = defaults || function(){};
         return function(key){
             var arg = slice.call(arguments, 1);
             var fn;
             if(fn = get(obj, key)){
-                if(isFunction(fn)){
+                if(Asdf.O.isFunction(fn)){
                     return fn.apply(this, arg);
                 }
                 return fn;
             }else {
                 return defaults.apply(this, arg);
+            }
+        }
+    }
+    var stop = {};
+    function overload(fn, typeFn, overloadedFn){
+        overloadedFn = overloadedFn||function(){throw new TypeError;};
+        var f = function(){
+            if(!typeFn.apply(this, arguments)){
+                return stop;
+            }
+            return fn.apply(this, arguments);
+        }
+        return orElse(f, overloadedFn, stop)
+    }
+    function errorHandler(fn, handler){
+        return function(){
+            try{
+                return fn.apply(this, arguments);
+            }catch(e){
+                return handler(e)
             }
         }
     }
@@ -1284,7 +1307,9 @@
 		orElse: orElse,
         guarded: guarded,
         sequence: sequence,
-        cases:cases
+        cases:cases,
+        overload:overload,
+        errorHandler:errorHandler
 	}, true);
 
 })(Asdf);/**
@@ -2656,17 +2681,39 @@
 })(Asdf);
 (function($_) {
 	$_.Arg = {};
-	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
-	var curry = $_.Core.combine.curry;
-	var partial = $_.Core.combine.partial;
-	var not = curry(compose, $_.Core.op["!"]);
-	var isNotNaN = not(isNaN);
 	function toArray(){
 		return $_.A.toArray(arguments);
 	}
-	
+    function relocate(arr, fn, context){
+        if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotNumber))
+            throw new TypeError()
+        return function(){
+            var res = [];
+            var arg = $_.A.toArray(arguments);
+            $_.A.each(arr, function(v, k){
+                if($_.O.isUndefined(v))
+                    return;
+                res[k] = arg[v];
+            });
+            return fn.apply(context, res);
+        }
+    }
+    function transfer(arr, fn, context){
+        if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotFunction))
+            throw new TypeError()
+        return function(){
+            var res = [];
+            var arg = $_.A.toArray(arguments);
+            $_.A.each(arr, function(v, k){
+                res[k] = v(arg[k]);
+            });
+            return fn.apply(context, res);
+        }
+    }
 	$_.O.extend($_.Arg, {
-		toArray:toArray
+		toArray:toArray,
+        relocate:relocate,
+        transfer:transfer
 	});
 })(Asdf);(function($_) {
 	$_.N = {};
@@ -3319,13 +3366,20 @@
      * p.appendChild(pc);
      * p.appendChild(c);
      * p.appendChild(nc);
-     * Asdf.Element.children(p); //return [text, pc,c,nc];
+     * Asdf.Element.childNodes(p); //return [text, pc,c,nc];
      */
-	function children(element) {
+	function childNodes(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
+    function children(element){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if($_.Bom.features.CanUseChildrenAttribute)
+            return element.children;
+        return $_.A.filter(element.children, $_.O.isElement);
+    }
     /**
      * @memberof Element
      * @param {element} element 대상element
@@ -3389,7 +3443,7 @@
 			throw new TypeError();
 		var bin = document.createDocumentFragment();
 		var parentNode = element.parentNode;
-		Asdf.A.each(children(element), function(el){
+		Asdf.A.each(childNodes(element), function(el){
             bin.appendChild(el);
         });
 		parentNode.replaceChild(bin, element);
@@ -3440,6 +3494,20 @@
         if(Asdf.O.isNotString(string)) throw new TypeError();
         return doc.createTextNode(string);
     }
+    /**
+     * @memberof Element
+     * @param {element} element 부모Element
+     * @param {element} newContent 새Element
+     * @returns {element} 부모Element를 반환한다.
+     * @desc 부모Element에 자식으로 마지막에 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.append(p, cs);
+     * p.innerHTML; //'<div></div><span></span>'
+     */
 	function append(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
@@ -3449,6 +3517,20 @@
 		}
 		return element;
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 부모Element
+     * @param {element} newContent 새Element
+     * @returns {element} 부모Element를 반환한다.
+     * @desc 부모Element에 자식 첫번째로 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.prepend(p, c);
+     * Asdf.Element.prepend(p, cs);
+     * p.innerHTML; //'<span></span><div></div>'
+     */
 	function prepend(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
@@ -3458,18 +3540,59 @@
 		}
 		return element;
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 기준Element
+     * @param {element} newContent 새Element
+     * @returns {element} 기준Element를 반환한다.
+     * @desc 기준Element를 앞에 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.before(c, cs);
+     * p.innerHTML; //'<span></span><div></div>'
+     */
 	function before(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
 		element.parentNode.insertBefore(newContent, element);
 		return element;
 	}
+
+    /**
+     * @memberof Element
+     * @param {element} element 기준Element
+     * @param {element} newContent 새Element
+     * @returns {element} 기준Element를 반환한다.
+     * @desc 기준Element를 뒤에 새Element를 추가한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var cs = document.createElement('span');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.after(c, cs);
+     * p.innerHTML; //'<div></div><span></span>'
+     */
 	function after(element, newContent) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
 			throw new TypeError();
 		element.parentNode.insertBefore(newContent, element.nextSibling);
 		return element;		
 	}
+    /**
+     * @memberof Element
+     * @param {element} element 대상Element
+     * @returns {element} 대상Element를 반환한다.
+     * @desc 대상Element를 빈Element로 만든다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * Asdf.Element.append(p, c);
+     * Asdf.Element.empty(p);
+     * p.innerHTML; //''
+     */
 	function empty(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -3481,6 +3604,24 @@
 			throw new TypeError();
 		element.parentNode.removeChild(element);
 	}
+    function first(element){
+        if(!$_.O.isElement(element))
+          throw new TypeError();
+        var c = children(element);
+        return c&&c[0];
+    }
+    function last(element){
+        if(!$_.O.isElement(element))
+            throw new TypeError();
+        var c = children(element);
+        return c&& c[c.length-1];
+    }
+    function eq(element, n){
+        if(!$_.O.isElement(element))
+            throw new TypeError();
+        var c = children(element);
+        return c&& c[n];
+    }
 	function attr(element, name, value) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -3723,6 +3864,7 @@
 		nexts: nexts,
 		prevs: prevs,
 		siblings: siblings,
+        childNodes:childNodes,
 		children: children,
 		contents: contents,
 		wrap: wrap,
@@ -3732,6 +3874,9 @@
 		before: before,
 		after: after,
 		empty: empty,
+        first: first,
+        eq: eq,
+        last:last,
 		attr: attr,
 		removeAttr: removeAttr,
 		prop: prop,

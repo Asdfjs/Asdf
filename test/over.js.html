@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="../stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="../stylesheets/pygment_trac.css" media="screen" />
+    <script src="../javascripts/asdf.js"></script>
+    <script src="../javascripts/over.js"></script>
+    <title>OVER Library</title>
+</head>
+
+<body>
+<div class="container">
+    <section id="main_content">
+        <h1>OVER.js (DEV)</h1>
+        <h2>왜 만들었는가?</h2>
+        <ul>
+            <li>API가 너무 복잡하고 외우기 어려워서 최대한 간단한 API로..</li>
+        </ul>
+        <h2>어떻게 사용하는가?</h2>
+<pre><code>
+ov.add..
+
+ov.add(1,2);
+//return 3;
+
+ov.add([], 0);
+//return [0];
+
+ov.add([1,2], [3,4]);
+//return [1,2,3,4];
+
+ov.add(true, false);
+//return true;
+
+ov.add(document.createElement('div'), document.createTextNode('aa'));
+//return &lt;div>aa&lt;div>
+
+</code></pre>
+        <p>console에서 테스트를 하셔도 됩니다. ^^</p>
+        <h2>개발된 API</h2>
+        <ul>
+            <li>add</li>
+        </ul>
+    </section>
+</div>
+</body>
+</html>

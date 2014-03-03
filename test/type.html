@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="../stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="../stylesheets/pygment_trac.css" media="screen" />
+    <script src="../javascripts/asdf.js"></script>
+    <script src="../javascripts/Type.js"></script>
+    <title>TYPE Library</title>
+</head>
+
+<body>
+<div class="container">
+    <section id="main_content">
+        <h1>TYPE.js (DEV)</h1>
+        <h2>왜 만들었는가?</h2>
+        <ul>
+            <li>jQuery에서는 왜 Element만 chainning을 하는가?</li>
+            <li>function, array, string.. 내가 만든 객체도 chainning</li>
+        </ul>
+        <h2>어떻게 사용하는가?</h2>
+<pre><code>
+type.isDom
+
+var dom = type.isDom(document.getElementById('test'));
+dom.first().first().text('aa').next().text('bb').next().text('cc').end();
+
+type.isArray
+var array = [5,2,1,6,2];
+var a = type.isArray(array).sort().rest().rest().end(); //[2,5,6];
+
+type.isFunction
+function fn(){return Asdf.A.merge([this.name],arguments)};
+var f = type.isFunction(fn).bind({name: 'kim'}).curry('aa','bb').end();
+f(); //['kim', 'aa', 'bb']
+
+/**
+* 내가 만든 객체
+* type.create(name, 타입체크함수, prototype);
+* type.isName 으로 객체 생성.
+*/
+type.create('people',
+    function (obj){ return obj.name && obj.age},
+    {
+        name: function(name){
+            this.data.name = name;
+            return this;
+        },
+        age: function(age){
+            this.data.age = age;
+            return this;
+        }
+    }
+);
+
+type.isPeople({name:'kim', age: '20'}).name('lee').age('25').end();
+//{name:'lee', age: '25'}
+</code></pre>
+        <p>console에서 테스트를 하셔도 됩니다. ^^</p>
+        <h2>개발된 API</h2>
+        <ul>
+            <li>dom</li>
+            <li>function</li>
+            <li>array</li>
+        </ul>
+        <h2>test</h2>
+        <div id="test">
+            <ul>
+                <li>a</li>
+                <li>b</li>
+                <li>c</li>
+            </ul>
+        </div>
+
+    </section>
+</div>
+</body>
+</html>
