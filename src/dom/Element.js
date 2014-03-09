@@ -328,6 +328,24 @@
 			throw new TypeError();
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
+	
+	/**
+     * @memberof Element
+     * @param {element} element 대상element
+     * @returns {array} 자식 element를 반환한다.
+     * @desc 자식 element들을 반환한다.
+     * @example
+     * var p = document.createElement('div');
+     * var c = document.createElement('div');
+     * var nc = document.createElement('div');
+     * var pc = document.createElement('div');
+     * var text = document.createTextNode('aa');
+     * p.appendChild(text);
+     * p.appendChild(pc);
+     * p.appendChild(c);
+     * p.appendChild(nc);
+     * Asdf.Element.childNodes(p); //return [pc,c,nc];
+     */
     function children(element){
         if(!$_.O.isNode(element))
             throw new TypeError();
