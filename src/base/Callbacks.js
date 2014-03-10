@@ -1,4 +1,5 @@
 (function($_) {
+    var Callbacks;
 	$_.Callbacks = Callbacks = {};
 	var getCallbacks = function(options) {
 		var list = $_.Store.getStore();

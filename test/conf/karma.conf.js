@@ -27,7 +27,7 @@ module.exports = function(config) {
         'src/event/Event.js',
         'src/dom/Element.js',
         'src/util/utils.js',
-        'src/util/Callbacks.js',
+        '../../src/base/Callbacks.js',
         'src/util/Promise.js',
         'src/base/base.js',
         'src/ajax/Ajax.js',

@@ -30,7 +30,7 @@
 			if(a == null|| b == null) return false;
 			if(!(a.constructor === Object || a.constructor === Array) || a.constructor !== b.constructor) return false;
 			function f(a, b) {
-				var key;
+				var key, res;
 				for(key in a){
 					if(hasOwnProperty.call(a, key))
 						res = equals(a[key],b[key]);

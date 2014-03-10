@@ -1,5 +1,5 @@
 (function ($_) {
-    var o = $_.Utils.namespace($_, 'C')
+    var o = $_.Utils.namespace($_, 'C');
     function doFilter(name, when, args){
         var self = this;
         $_.A.each(this._filters||[], function(v){
@@ -61,7 +61,7 @@
             return this;
         }
     }
-    var c = $_.Base.Class(publicP)
+    var c = $_.Base.Class(publicP);
     $_.O.extend(o, {
       Events:  c
     });

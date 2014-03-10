@@ -649,6 +649,22 @@
 		
 		return res;
 	}
+    function equals(obj, obj2){
+        if(obj == null|| obj2 == null) return false;
+        if(obj===obj2) return true;
+        if(obj.equals)
+           return obj.equals(obj2);
+        if(!(isPlainObject(obj)||isArray(obj))|| obj.constructor !== obj2.constructor) return false;
+        var k1 = keys(obj);
+        var k2 = keys(obj2);
+        if(k1.length !== k2.length) return false;
+        var key, res;
+        for(key in obj){
+            res = equals(obj[key],obj2[key]);
+            if(!res) return false;
+        }
+        return true;
+    }
 
 	extend($_.O, {
 		each: each,
@@ -702,6 +718,7 @@
 		get: get,
 		getOrElse: getOrElse,
 		set: set,
-		type:type
+		type:type,
+        equals:equals
 	});
 })(Asdf);

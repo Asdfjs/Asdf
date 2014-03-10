@@ -154,3 +154,12 @@ test("Asdf.O.type", function() {
 	ok(Asdf.O.type(obj, type1), '덕타입 테스트');
 	ok(!Asdf.O.type(obj, type2), '덕타입 실패 테스트');
 });
+
+test("Asdf.O.equals", function(){
+    ok(Asdf.O.equals('aa', 'aa'), 'string ok');
+    ok(Asdf.O.equals(1,1), 'number ok');
+    ok(Asdf.O.equals([1,2],[1,2]), 'array ok');
+    ok(Asdf.O.equals([1,[2,3]],[1,[2,3]]), 'deep Array ok');
+    ok(Asdf.O.equals({a:1, b:2}, {a:1, b:2}), 'object ok');
+    ok(Asdf.O.equals({a:1, b:2, c:[1,2], d:{aa:'a',bb:'b'}}, {a:1, b:2, c:[1,2], d:{aa:'a',bb:'b'}}), 'complex ok');
+});
