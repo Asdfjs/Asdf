@@ -44,6 +44,12 @@
             return $_.A.include($_.O.keys(this._data),key)
         },
         remove: function(key) {
+            if(this._options.value)
+                throw new Error('valueObject can\'t remove value');
+            if(this._options.freeze && this.has(key))
+                throw new Error('freezeObject can\'t remove value');
+            if(this._options.types[key])
+                delete this._options.types[key];
             delete this._data[key];
         },
         equals: function(obj){
