@@ -7,13 +7,17 @@
         _data: {},
         _options: {
             safe: false,
-            value: false
+            value: false,
+            freeze: false,
+            types: {}
         },
         initialize: function(data, options){
             if(data==null && options==null)
                 return
             else if(!$_.O.isPlainObject(data)&& !$_.O.isPlainObject(options))
-                throw new TypeError()
+                throw new TypeError();
+            if(options.types && !$_.O.type(data, options.types))
+                throw new TypeError();
             data && $_.O.extend(this._data, data);
             options && $_.O.extend(this._options, options);
         },
@@ -25,9 +29,15 @@
             }
             return;
         },
-        set: function(key, value) {
+        set: function(key, value, typeFn) {
             if(this._options.value)
                 throw new Error('valueObject can\'t set value');
+            if(this._options.freeze && !$_.A.include($_.O.keys(this._data),key))
+                throw new Error('freezeObject can\'t set new value');
+            typeFn = typeFn||this._options.types[key];
+            if(typeFn&&!typeFn(value))
+                throw new TypeError();
+            typeFn && (this._options.types[key] = typeFn);
             this._data[key] = (this._options.safe)? safeObject(value):value;
         },
         has: function(key) {
