@@ -32,7 +32,7 @@
         set: function(key, value, typeFn) {
             if(this._options.value)
                 throw new Error('valueObject can\'t set value');
-            if(this._options.freeze && !$_.A.include($_.O.keys(this._data),key))
+            if(this._options.freeze && !this.has(key))
                 throw new Error('freezeObject can\'t set new value');
             typeFn = typeFn||this._options.types[key];
             if(typeFn&&!typeFn(value))
@@ -41,7 +41,7 @@
             this._data[key] = (this._options.safe)? safeObject(value):value;
         },
         has: function(key) {
-            return !!this._data[key];
+            return $_.A.include($_.O.keys(this._data),key)
         },
         remove: function(key) {
             delete this._data[key];
