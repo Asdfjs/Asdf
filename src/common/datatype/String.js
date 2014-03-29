@@ -5,7 +5,7 @@
  * @name S
  */
 (function($_) {
-	$_.S = {};
+    var o = $_.Core.namespace($_, 'S');
 	var ScriptFragment = '<script[^>]*>([\\S\\s]*?)<\/script>';
 	
 	/**
@@ -308,38 +308,7 @@
 		if(!$_.O.isString(str)) throw new TypeError();
 	    return /^\s*$/.test(str);
 	}
-	
-	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @returns {node} 대상 문자열을 node로 변경한다.
-	 * @desc 대상 문자열을 node로 변경한다.
-	 * @example
-	 * Asdf.S.toElement('<div id='abc'>abc</div> '); // return <div id='abc'>abc</div>;
-	 * 
-	 */
-	function toElement(str){
-		if(!$_.O.isString(str)) throw new TypeError();
-		var el = document.createElement('div');
-		el.innerHTML = str;
-		return el.firstChild;
-	}
-	
-	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @returns {documentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
-	 * @desc 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
-	 * 
-	 */
-	function toDocumentFragment(str) {
-		if(!$_.O.isString(str)) throw new TypeError();
-		var el = document.createElement('div'), frg = document.createDocumentFragment();
-		el.innerHTML = str;
-		while(el.childNodes.length) frg.appendChild(el.childNodes[0]);
-		return frg;	
-	}
-	
+
 	/**
 	 * @memberof S
 	 * @param {string} str 대상 문자열
@@ -502,7 +471,7 @@
             return 1;
         return 0;
     }
-	$_.O.extend($_.S, {
+	$_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
 		stripTags: stripTags,
@@ -522,8 +491,6 @@
 		endsWith: endsWith,
 		isEmpty: isEmpty,
 		isBlank: isBlank,
-		toDocumentFragment:toDocumentFragment,
-		toElement: toElement,
 		lpad: lpad,
 		rpad: rpad,
 		template:template,

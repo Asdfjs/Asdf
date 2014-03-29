@@ -39,7 +39,7 @@
 			if(a == null|| b == null) return false;
 			if(!(a.constructor === Object || a.constructor === Array) || a.constructor !== b.constructor) return false;
 			function f(a, b) {
-				var key;
+				var key, res;
 				for(key in a){
 					if(hasOwnProperty.call(a, key))
 						res = equals(a[key],b[key]);
@@ -143,6 +143,22 @@
 			};
 		}
 	};
+    function namespace(/*[parent], ns_string*/) {
+        var parts, i, parent;
+        var args = $_.A.toArray(arguments);
+        if ($_.O.isPlainObject(args[0])) {
+            parent = args.shift();
+        }
+        parent = parent || window;
+        parts = args[0].split('.');
+        for (i = 0; i < parts.length; i++) {
+            if (typeof parent[parts[i]] === 'undefined') {
+                parent[parts[i]] = {};
+            }
+            parent = parent[parts[i]];
+        }
+        return parent;
+    }
 /*
 	var reg = {
 		"number": /^\d+$/,
@@ -181,6 +197,7 @@
 	core.behavior = behavior;
 	core.returnType = returnType;
 	core.combine = combine;
+    core.namespace = namespace;
 })(Asdf);
 /**
  * @project Asdf.js
@@ -833,6 +850,22 @@
 		
 		return res;
 	}
+    function equals(obj, obj2){
+        if(obj == null|| obj2 == null) return false;
+        if(obj===obj2) return true;
+        if(obj.equals)
+           return obj.equals(obj2);
+        if(!(isPlainObject(obj)||isArray(obj))|| obj.constructor !== obj2.constructor) return false;
+        var k1 = keys(obj);
+        var k2 = keys(obj2);
+        if(k1.length !== k2.length) return false;
+        var key, res;
+        for(key in obj){
+            res = equals(obj[key],obj2[key]);
+            if(!res) return false;
+        }
+        return true;
+    }
 
 	extend($_.O, {
 		each: each,
@@ -886,7 +919,8 @@
 		get: get,
 		getOrElse: getOrElse,
 		set: set,
-		type:type
+		type:type,
+        equals:equals
 	});
 })(Asdf);
 /**
@@ -2154,7 +2188,7 @@
  * @name S
  */
 (function($_) {
-	$_.S = {};
+    var o = $_.Core.namespace($_, 'S');
 	var ScriptFragment = '<script[^>]*>([\\S\\s]*?)<\/script>';
 	
 	/**
@@ -2457,38 +2491,7 @@
 		if(!$_.O.isString(str)) throw new TypeError();
 	    return /^\s*$/.test(str);
 	}
-	
-	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @returns {node} 대상 문자열을 node로 변경한다.
-	 * @desc 대상 문자열을 node로 변경한다.
-	 * @example
-	 * Asdf.S.toElement('<div id='abc'>abc</div> '); // return <div id='abc'>abc</div>;
-	 * 
-	 */
-	function toElement(str){
-		if(!$_.O.isString(str)) throw new TypeError();
-		var el = document.createElement('div');
-		el.innerHTML = str;
-		return el.firstChild;
-	}
-	
-	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @returns {documentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
-	 * @desc 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
-	 * 
-	 */
-	function toDocumentFragment(str) {
-		if(!$_.O.isString(str)) throw new TypeError();
-		var el = document.createElement('div'), frg = document.createDocumentFragment();
-		el.innerHTML = str;
-		while(el.childNodes.length) frg.appendChild(el.childNodes[0]);
-		return frg;	
-	}
-	
+
 	/**
 	 * @memberof S
 	 * @param {string} str 대상 문자열
@@ -2651,7 +2654,7 @@
             return 1;
         return 0;
     }
-	$_.O.extend($_.S, {
+	$_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
 		stripTags: stripTags,
@@ -2671,8 +2674,6 @@
 		endsWith: endsWith,
 		isEmpty: isEmpty,
 		isBlank: isBlank,
-		toDocumentFragment:toDocumentFragment,
-		toElement: toElement,
 		lpad: lpad,
 		rpad: rpad,
 		template:template,
@@ -2783,6 +2784,70 @@
 		isNotUntil: isNotLessThan
 	});
 })(Asdf);(function($_) {
+	$_.P = {};
+	function mix(fn, sorce) {
+		if(!$_.O.isFunction(fn) || !$_.O.isPlainObject(sorce))
+			throw new TypeError();
+		$_.O.each(sorce, function(value, key) {
+			var pk = fn.prototype[key];
+			if(pk == null){
+				fn.prototype[key] = value;
+			}else if($_.O.isFunction(pk)&&$_.O.isFunction(value)){
+				fn.prototype[key] = $_.F.compose(pk, value);
+			}else
+				new TypeError();
+		});
+	}
+	$_.O.extend($_.P, {
+		mix:mix
+	});
+})(Asdf);/**
+ * @project Asdf.js
+ * @author N3735
+ * @namespace
+ * @name S
+ */
+(function($_) {
+    var o = $_.Core.namespace($_, 'S');
+
+	/**
+	 * @memberof S
+	 * @param {string} str 대상 문자열
+	 * @returns {node} 대상 문자열을 node로 변경한다.
+	 * @desc 대상 문자열을 node로 변경한다.
+	 * @example
+	 * Asdf.S.toElement('<div id='abc'>abc</div> '); // return <div id='abc'>abc</div>;
+	 *
+	 */
+	function toElement(str){
+		if(!$_.O.isString(str)) throw new TypeError();
+		var el = document.createElement('div');
+		el.innerHTML = str;
+		return el.firstChild;
+	}
+	
+	/**
+	 * @memberof S
+	 * @param {string} str 대상 문자열
+	 * @returns {documentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
+	 * @desc 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
+	 * 
+	 */
+	function toDocumentFragment(str) {
+		if(!$_.O.isString(str)) throw new TypeError();
+		var el = document.createElement('div'), frg = document.createDocumentFragment();
+		el.innerHTML = str;
+		while(el.childNodes.length) frg.appendChild(el.childNodes[0]);
+		return frg;	
+	}
+	
+
+	$_.O.extend(o, {
+		toDocumentFragment:toDocumentFragment,
+		toElement: toElement
+	});
+})(Asdf);
+(function($_) {
 	$_.Bom = {};
 	var Browser = (function() {
 		var ua = navigator.userAgent;
@@ -3954,7 +4019,7 @@
 	};
 	$_.Template.bind = bind;
 })(Asdf);(function($_) {
-	$_.Utils = {};
+    var o = $_.Core.namespace($_, 'Utils');
 	function randomMax8HexChars() {
 		return (((1 + Math.random()) * 0x100000000) | 0).toString(16)
 				.substring(1);
@@ -3962,7 +4027,43 @@
 	function makeuid() {
 		return randomMax8HexChars() + randomMax8HexChars();
 	}
-	
+
+	function parseJson(jsonString) {
+		if (typeof jsonString == "string") {
+			if (jsonString) {
+				if (JSON && JSON.parse) {
+					return JSON.parse(jsonString);
+				}
+				return (new Function("return " + jsonString))();
+			}
+		}
+		return null;
+	}
+    function getTimer(){
+        return Asdf.F.bind((performance.now||
+            performance.mozNow||
+            performance.msNow||
+            performance.oNow||
+            performance.webkitNow||
+            function() { return new Date().getTime(); }), performance||{});
+    }
+    function time(fn){
+        var timer = getTimer();
+        var startTime = timer();
+        var res = fn(Array.prototype.slice.call(arguments, 1));
+        var endTime = timer();
+        if(endTime == startTime)
+            endTime = timer();
+        console.log(endTime - startTime);
+        return res;
+    }
+	$_.O.extend(o, {
+		makeuid : makeuid,
+		parseJson : parseJson,
+        time:time
+	});
+})(Asdf);(function($_) {
+    var o = $_.Core.namespace($_, 'Utils');
 	var ready = (function() {
 		var domReadyfn = [];
 		var timer, defer = $_.F.defer;
@@ -4004,57 +4105,8 @@
 		}
 		return function(callback) {domReadyfn.push(callback);};
 	})();
-	function parseJson(jsonString) {
-		if (typeof jsonString == "string") {
-			if (jsonString) {
-				if (window.JSON && window.JSON.parse) {
-					return window.JSON.parse(jsonString);
-				}
-				return (new Function("return " + jsonString))();
-			}
-		}
-		return null;
-	}
-	function namespace(/*[parent], ns_string*/) {
-		var parts, i, parent;
-		var args = $_.A.toArray(arguments);
-		if ($_.O.isPlainObject(args[0])) {
-			parent = args.shift();
-		}
-		parent = parent || window;
-		parts = args[0].split('.');
-		for (i = 0; i < parts.length; i++) {
-			if (typeof parent[parts[i]] === 'undefined') {
-				parent[parts[i]] = {};
-			}
-			parent = parent[parts[i]];
-		}
-		return parent;
-	}
-    function getTimer(){
-        return Asdf.F.bind((performance.now||
-            performance.mozNow||
-            performance.msNow||
-            performance.oNow||
-            performance.webkitNow||
-            function() { return new Date().getTime(); }), performance||{});
-    }
-    function time(fn){
-        var timer = getTimer();
-        var startTime = timer();
-        var res = fn(Array.prototype.slice.call(arguments, 1));
-        var endTime = timer();
-        if(endTime == startTime)
-            endTime = timer();
-        console.log(endTime - startTime);
-        return res;
-    }
-	$_.O.extend($_.Utils, {
-		makeuid : makeuid,
-		ready : ready,
-		parseJson : parseJson,
-		namespace : namespace,
-        time:time
+	$_.O.extend(o, {
+		ready : ready
 	});
 })(Asdf);(function ($_) {
 	$_.Base = {};
@@ -4104,10 +4156,187 @@
 		child.prototype.constructor = child;
 		return child;
 	};
-
+    function getDefaultConstructor(){
+        return function constructor(){
+            if(this.constructor !== constructor) return new constructor();
+            var self = this;
+            $_.O.each(constructor.prototype, function(v, k){
+                if(!$_.O.isFunction(v))self[k] = $_.O.clone(v);
+            });
+        }
+    }
 	$_.O.extend($_.Base, {
-		Class: Class
+		Class: Class,
+        getDefaultConstructor: getDefaultConstructor
 	});
+})(Asdf);(function($_) {
+    var Callbacks;
+	$_.Callbacks = Callbacks = {};
+	var getCallbacks = function(options) {
+		var list = $_.Store.getStore();
+		var on = function(fn) {
+			var tmp = list.get('any')||[];
+			tmp.push(fn);
+			list.set('any', tmp);
+		};
+		var remove = function(fn){
+			var tmp = list.get('any')||[];
+			list.set('any', $_.A.without(tmp,fn));
+		};
+		var has = function(fn){
+			var tmp = list.get('any')||[];
+			return $_.A.include(tmp, fn);
+		};
+		var emit = function(context, args){
+			var tmp = list.get('any')||[];
+			$_.A.each(tmp, function(fn){
+				fn.apply(context, args);
+			});
+			return this;
+		};
+		return {
+			on: on,
+			remove: remove,
+			has: has,
+			emit: emit
+		};
+	};
+	$_.O.extend(Callbacks, {
+		getCallbacks: getCallbacks
+	});
+})(Asdf);(function ($_) {
+    var o = $_.Core.namespace($_, 'C');
+    function doFilter(name, when, args){
+        var self = this;
+        $_.A.each(this._filters||[], function(v){
+            if(when == v[2] && $_.A.include(v[0], name))
+                v[1].apply(self, args);
+        });
+    }
+    var publicP = {
+        _events: {},
+        _filters: [],
+        on: function (name, fn){
+            if(!$_.O.isString(name)||!$_.O.isFunction(fn))
+                throw new TypeError();
+            this._events || (this._events = {});
+            var e = this._events[name]||(this._events[name] = []);
+            e.push(fn);
+            return this;
+        },
+        once: function (name, fn){
+            var tfn = $_.F.after(fn, function(){
+               this.remove(name, tfn);
+            });
+            this.on(name, tfn);
+        },
+        remove: function(name, fn){
+            if(!$_.O.isString(name)) throw new TypeError();
+            var e = this._events && this._events[name];
+            if(!e)
+                return this;
+            if(!fn)
+                $_.A.clear(e);
+            var index = $_.A.indexOf(e, fn);
+            if(index === -1)
+                return this;
+            e.splice(index, 1);
+        },
+        emit: function(name, args){
+            var args = Array.prototype.slice.call(arguments, 1);
+            if(!$_.O.isString(name))
+                throw new TypeError();
+            var e = this._events && this._events[name];
+            if(!e)
+                return this;
+            var self = this;
+            doFilter.call(this, name, 'before', args);
+            $_.A.each(e, function(fn){
+                fn.apply(self, args);
+            });
+            doFilter.call(this, name, 'after', args);
+            return this;
+        },
+        addFilter: function(name, fn, when){
+            if(!($_.O.isString(name)||$_.O.isArray(name))||!$_.O.isFunction(fn))
+                throw new TypeError();
+            when = when||'after';
+            $_.O.isString(name) && (name = [name]);
+            this._filters || (this._filters = []);
+            this._filters.push([name, fn, when]);
+            return this;
+        }
+    }
+    var c = $_.Base.Class(publicP);
+    c.mixin = publicP;
+    $_.O.extend(o, {
+      Events:  c
+    });
+})(Asdf);
+(function($_) {
+    var o = $_.Core.namespace($_, 'C');
+	var safeObject = function(obj) {
+		return ($_.O.isArray(obj)||$_.O.isPlainObject(obj))? $_.O.clone(obj):obj;
+	};
+    var publicP = {
+        _data: {},
+        _options: {
+            safe: false,
+            value: false,
+            freeze: false,
+            types: {}
+        },
+        initialize: function(data, options){
+            if(data==null && options==null)
+                return
+            else if(!$_.O.isPlainObject(data)&& !$_.O.isPlainObject(options))
+                throw new TypeError();
+            if(options.types && !$_.O.type(data, options.types))
+                throw new TypeError();
+            data && $_.O.extend(this._data, data);
+            options && $_.O.extend(this._options, options);
+        },
+        get: function(key){
+            var res;
+            if (this.has(key)) {
+                res = this._data[key];
+                return (this._options.safe)? safeObject(res):res;
+            }
+            return;
+        },
+        set: function(key, value, typeFn) {
+            if(this._options.value)
+                throw new Error('valueObject can\'t set value');
+            if(this._options.freeze && !this.has(key))
+                throw new Error('freezeObject can\'t set new value');
+            typeFn = typeFn||this._options.types[key];
+            if(typeFn&&!typeFn(value))
+                throw new TypeError();
+            typeFn && (this._options.types[key] = typeFn);
+            this._data[key] = (this._options.safe)? safeObject(value):value;
+        },
+        has: function(key) {
+            return $_.A.include($_.O.keys(this._data),key)
+        },
+        remove: function(key) {
+            if(this._options.value)
+                throw new Error('valueObject can\'t remove value');
+            if(this._options.freeze && this.has(key))
+                throw new Error('freezeObject can\'t remove value');
+            if(this._options.types[key])
+                delete this._options.types[key];
+            delete this._data[key];
+        },
+        equals: function(obj){
+            return $_.O.equals(this._data, obj._data);
+        }
+
+    };
+    var c = $_.Base.Class(publicP);
+    c.mixin = publicP;
+    $_.O.extend(o, {
+        Store:  c
+    });
 })(Asdf);(function($_) {
 	$_.Ajax = {};
 	var activeRequestCount = 0, emptyFunction = function () {};

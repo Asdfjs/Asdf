@@ -134,6 +134,22 @@
 			};
 		}
 	};
+    function namespace(/*[parent], ns_string*/) {
+        var parts, i, parent;
+        var args = $_.A.toArray(arguments);
+        if ($_.O.isPlainObject(args[0])) {
+            parent = args.shift();
+        }
+        parent = parent || window;
+        parts = args[0].split('.');
+        for (i = 0; i < parts.length; i++) {
+            if (typeof parent[parts[i]] === 'undefined') {
+                parent[parts[i]] = {};
+            }
+            parent = parent[parts[i]];
+        }
+        return parent;
+    }
 /*
 	var reg = {
 		"number": /^\d+$/,
@@ -172,4 +188,5 @@
 	core.behavior = behavior;
 	core.returnType = returnType;
 	core.combine = combine;
+    core.namespace = namespace;
 })(Asdf);

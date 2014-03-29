@@ -46,8 +46,17 @@
 		child.prototype.constructor = child;
 		return child;
 	};
-
+    function getDefaultConstructor(){
+        return function constructor(){
+            if(this.constructor !== constructor) return new constructor();
+            var self = this;
+            $_.O.each(constructor.prototype, function(v, k){
+                if(!$_.O.isFunction(v))self[k] = $_.O.clone(v);
+            });
+        }
+    }
 	$_.O.extend($_.Base, {
-		Class: Class
+		Class: Class,
+        getDefaultConstructor: getDefaultConstructor
 	});
 })(Asdf);

@@ -1,5 +1,5 @@
 (function ($_) {
-    var o = $_.Utils.namespace($_, 'C');
+    var o = $_.Core.namespace($_, 'C');
     function doFilter(name, when, args){
         var self = this;
         $_.A.each(this._filters||[], function(v){
@@ -62,6 +62,7 @@
         }
     }
     var c = $_.Base.Class(publicP);
+    c.mixin = publicP;
     $_.O.extend(o, {
       Events:  c
     });

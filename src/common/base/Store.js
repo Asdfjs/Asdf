@@ -1,5 +1,5 @@
 (function($_) {
-    var o = $_.Utils.namespace($_, 'C');
+    var o = $_.Core.namespace($_, 'C');
 	var safeObject = function(obj) {
 		return ($_.O.isArray(obj)||$_.O.isPlainObject(obj))? $_.O.clone(obj):obj;
 	};
@@ -58,6 +58,7 @@
 
     };
     var c = $_.Base.Class(publicP);
+    c.mixin = publicP;
     $_.O.extend(o, {
         Store:  c
     });
