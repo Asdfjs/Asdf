@@ -30,7 +30,7 @@
     function time(fn){
         var timer = getTimer();
         var startTime = timer();
-        var res = fn(Array.prototype.slice.call(arguments, 1));
+        var res = fn.apply(null, (Array.prototype.slice.call(arguments, 1)));
         var endTime = timer();
         if(endTime == startTime)
             endTime = timer();
