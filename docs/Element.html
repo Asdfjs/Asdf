@@ -69,7 +69,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line1">line 1</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3111">line 3111</a>
     </li></ul></dd>
     
     
@@ -103,7 +103,508 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="children"><span class="type-signature">&lt;static> </span>children<span class="signature">(element)</span><span class="type-signature"> &rarr; {array}</span></h4>
+    <h4 class="name" id="after"><span class="type-signature">&lt;static> </span>after<span class="signature">(element, newContent)</span><span class="type-signature"> &rarr; {element}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        기준Element를 뒤에 새Element를 추가한다.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">기준Element</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>newContent</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">새Element</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3643">line 3643</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    기준Element를 반환한다.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">element</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var cs = document.createElement('span');Asdf.Element.append(p, c);Asdf.Element.after(c, cs);p.innerHTML; //'&lt;div>&lt;/div>&lt;span>&lt;/span>'</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="append"><span class="type-signature">&lt;static> </span>append<span class="signature">(element, newContent)</span><span class="type-signature"> &rarr; {element}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        부모Element에 자식으로 마지막에 새Element를 추가한다.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">부모Element</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>newContent</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">새Element</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3576">line 3576</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    부모Element를 반환한다.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">element</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var cs = document.createElement('span');Asdf.Element.append(p, c);Asdf.Element.append(p, cs);p.innerHTML; //'&lt;div>&lt;/div>&lt;span>&lt;/span>'</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="before"><span class="type-signature">&lt;static> </span>before<span class="signature">(element, newContent)</span><span class="type-signature"> &rarr; {element}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        기준Element를 앞에 새Element를 추가한다.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">기준Element</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>newContent</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">새Element</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3622">line 3622</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    기준Element를 반환한다.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">element</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var cs = document.createElement('span');Asdf.Element.append(p, c);Asdf.Element.before(c, cs);p.innerHTML; //'&lt;span>&lt;/span>&lt;div>&lt;/div>'</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="childNodes"><span class="type-signature">&lt;static> </span>childNodes<span class="signature">(element)</span><span class="type-signature"> &rarr; {array}</span></h4>
     
     
 </dt>
@@ -192,7 +693,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line326">line 326</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3436">line 3436</a>
     </li></ul></dd>
     
     
@@ -239,7 +740,7 @@
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var nc = document.createElement('div');var pc = document.createElement('div');var text = document.createTextNode('aa');p.appendChild(text);p.appendChild(pc);p.appendChild(c);p.appendChild(nc);Asdf.Element.children(p); //return [text, pc,c,nc];</code></pre>
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var nc = document.createElement('div');var pc = document.createElement('div');var text = document.createTextNode('aa');p.appendChild(text);p.appendChild(pc);p.appendChild(c);p.appendChild(nc);Asdf.Element.childNodes(p); //return [text, pc,c,nc];</code></pre>
 
     
 </dd>
@@ -336,7 +837,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line349">line 349</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3466">line 3466</a>
     </li></ul></dd>
     
     
@@ -387,6 +888,150 @@
         <h5>Example</h5>
         
     <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var nc = document.createElement('div');var pc = document.createElement('div');p.appendChild(text);p.appendChild(pc);p.appendChild(c);p.appendChild(nc);Asdf.Element.contents(p); //return [text, pc,c,nc];var iframe = document.createElement('iframe');var doc = Asdf.Element.contents(iframe);</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="empty"><span class="type-signature">&lt;static> </span>empty<span class="signature">(element)</span><span class="type-signature"> &rarr; {element}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        대상Element를 빈Element로 만든다.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">대상Element</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3661">line 3661</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    대상Element를 반환한다.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">element</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');Asdf.Element.append(p, c);Asdf.Element.empty(p);p.innerHTML; //''</code></pre>
 
     
 </dd>
@@ -483,7 +1128,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line86">line 86</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3196">line 3196</a>
     </li></ul></dd>
     
     
@@ -670,7 +1315,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line170">line 170</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3280">line 3280</a>
     </li></ul></dd>
     
     
@@ -817,7 +1462,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line224">line 224</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3334">line 3334</a>
     </li></ul></dd>
     
     
@@ -1004,7 +1649,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line263">line 263</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3373">line 3373</a>
     </li></ul></dd>
     
     
@@ -1148,7 +1793,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line186">line 186</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3296">line 3296</a>
     </li></ul></dd>
     
     
@@ -1335,7 +1980,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line206">line 206</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3316">line 3316</a>
     </li></ul></dd>
     
     
@@ -1383,6 +2028,173 @@
         <h5>Example</h5>
         
     <pre class="prettyprint"><code>var pp = document.createElement('div');var p = document.createElement('div');var c = document.createElement('div');pp.appendChild(p);p.appendChild(c);Asdf.Element.parents(c); //return [p, pp];Asdf.Element.parents(c, p); //return [p];</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="prepend"><span class="type-signature">&lt;static> </span>prepend<span class="signature">(element, newContent)</span><span class="type-signature"> &rarr; {element}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        부모Element에 자식 첫번째로 새Element를 추가한다.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">부모Element</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>newContent</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">새Element</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3599">line 3599</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    부모Element를 반환한다.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">element</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var cs = document.createElement('span');Asdf.Element.prepend(p, c);Asdf.Element.prepend(p, cs);p.innerHTML; //'&lt;span>&lt;/span>&lt;div>&lt;/div>'</code></pre>
 
     
 </dd>
@@ -1479,7 +2291,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line242">line 242</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3352">line 3352</a>
     </li></ul></dd>
     
     
@@ -1666,7 +2478,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line284">line 284</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3394">line 3394</a>
     </li></ul></dd>
     
     
@@ -1810,7 +2622,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line104">line 104</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3214">line 3214</a>
     </li></ul></dd>
     
     
@@ -1954,7 +2766,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line304">line 304</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3414">line 3414</a>
     </li></ul></dd>
     
     
@@ -2141,7 +2953,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line121">line 121</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3231">line 3231</a>
     </li></ul></dd>
     
     
@@ -2288,7 +3100,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line70">line 70</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3180">line 3180</a>
     </li></ul></dd>
     
     
@@ -2336,6 +3148,150 @@
         <h5>Example</h5>
         
     <pre class="prettyprint"><code>var div = document.createElement('div');Asdf.Element.toggle(div);Asdf.Element.visible(div); //return false;</code></pre>
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="unwrap"><span class="type-signature">&lt;static> </span>unwrap<span class="signature">(element)</span><span class="type-signature"> &rarr; {element}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        대상element를 제거하고 대상 하위 element를 대상 부모 element로 이동시킨 후 대상 element를 반환한다.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">대상element</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3506">line 3506</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    대상 element를 반환한다.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">element</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var wrap = document.createElement('div');p.appendChild(wrap);wrap.appendChild(c);var el = Asdf.Element.unwrap(wrap); //return wrap;p.innerHTML; //'&lt;div>&lt;/div>'</code></pre>
 
     
 </dd>
@@ -2475,7 +3431,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line154">line 154</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3264">line 3264</a>
     </li></ul></dd>
     
     
@@ -2622,7 +3578,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line55">line 55</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3165">line 3165</a>
     </li></ul></dd>
     
     
@@ -2835,7 +3791,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">dom/Element.js</a>, <a href="Element.js.html#line39">line 39</a>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3149">line 3149</a>
     </li></ul></dd>
     
     
@@ -2887,6 +3843,173 @@
     
 </dd>
 
+        
+            
+<dt>
+    <h4 class="name" id="wrap"><span class="type-signature">&lt;static> </span>wrap<span class="signature">(element, element)</span><span class="type-signature"> &rarr; {element}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        대상element를 wrapElement로 감싼 후 wrapElement를 반환한다.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">대상element</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">element</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">wrapElement</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="asdf.client.js.html">asdf.client.js</a>, <a href="asdf.client.js.html#line3485">line 3485</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    wrapElement를 반환한다.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">element</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var p = document.createElement('div');var c = document.createElement('div');var wrap = document.createElement('div');p.appendChild(c);var el = Asdf.Element.wrap(c, wrap); //return wrap;el.innerHTML; //'&lt;div>&lt;/div>'</code></pre>
+
+    
+</dd>
+
         </dl>
     
     
@@ -2909,7 +4032,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha4</a> on Sat Feb 15 2014 00:01:25 GMT+0900 (대한민국 표준시)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha4</a> on Fri Apr 18 2014 23:17:59 GMT+0900 (대한민국 표준시)
 </footer>
 
 <script> prettyPrint(); </script>
