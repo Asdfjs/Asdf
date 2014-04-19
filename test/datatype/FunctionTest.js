@@ -134,3 +134,24 @@ test("Asdf.F.errorHandler", function(){
     var ef = Asdf.F.errorHandler(f, function(){return true;});
     equal(ef(), true, 'errorHandler');
 });
+test("Asdf.F.trys", function(){
+    function f1(b){
+       if(b)
+           throw new Error();
+       return 'aaa';
+    }
+    function f2(b){
+        if(b)
+            throw new Error();
+        return 'bbb';
+    }
+    function f3(b){
+        return 'ccc';
+    }
+
+    var f = Asdf.F.trys(f1, f2, f3);
+
+    equal(f(true), 'ccc', 'error test');
+    equal(f(false), 'aaa', 'error test');
+
+});

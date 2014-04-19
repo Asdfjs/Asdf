@@ -208,9 +208,7 @@
 	function composeRight() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = $_.A.reduce(fns, $_.Core.behavior.compose);
-		return function () {
-			return fn.apply(this, arguments);
-		};
+		return fn;
 	}
 	
 	/**
@@ -231,9 +229,7 @@
 	function compose() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = $_.A.reduceRight(fns, $_.Core.behavior.compose);
-		return function () {
-			return fn.apply(this, arguments);
-		};
+		return fn;
 	}
 	var exisFunction = function (fn) {
 		if($_.O.isNotFunction(fn)){
@@ -396,6 +392,13 @@
             }
         }
     }
+
+    function trys(){
+        var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+        var fn = $_.A.reduce(fns, errorHandler);
+        return fn;
+    }
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -418,7 +421,8 @@
         sequence: sequence,
         cases:cases,
         overload:overload,
-        errorHandler:errorHandler
+        errorHandler:errorHandler,
+        trys:trys
 	}, true);
 
 })(Asdf);
