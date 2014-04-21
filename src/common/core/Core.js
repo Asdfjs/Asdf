@@ -122,7 +122,7 @@
 			return function () {
 				var arg = 0;
 				var a = args.slice();
-				for ( var i = 0; i < args.length && arg < arguments.length; i++ )
+				for ( var i = 0; arg < arguments.length; i++ )
 					if(args[i] === undefined)
 						a[i] = arguments[arg++];
 				return fn.apply(this, a);
@@ -136,8 +136,8 @@
 	};
     function namespace(/*[parent], ns_string*/) {
         var parts, i, parent;
-        var args = $_.A.toArray(arguments);
-        if ($_.O.isPlainObject(args[0])) {
+        var args = Array.prototype.slice.call(arguments);
+        if (typeof args[0] === 'object') {
             parent = args.shift();
         }
         parent = parent || window;

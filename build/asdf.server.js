@@ -124,7 +124,7 @@ module.exports = Asdf;
 			return function () {
 				var arg = 0;
 				var a = args.slice();
-				for ( var i = 0; i < args.length && arg < arguments.length; i++ )
+				for ( var i = 0; arg < arguments.length; i++ )
 					if(args[i] === undefined)
 						a[i] = arguments[arg++];
 				return fn.apply(this, a);
@@ -138,8 +138,8 @@ module.exports = Asdf;
 	};
     function namespace(/*[parent], ns_string*/) {
         var parts, i, parent;
-        var args = $_.A.toArray(arguments);
-        if ($_.O.isPlainObject(args[0])) {
+        var args = Array.prototype.slice.call(arguments);
+        if (typeof args[0] === 'object') {
             parent = args.shift();
         }
         parent = parent || window;
@@ -199,8 +199,8 @@ module.exports = Asdf;
  * @name O
  */
 (function($_) {
-	$_.O = {};
-	var ObjProto = Object.prototype, ArrayProto = Array.prototype, 
+    var o = $_.Core.namespace($_, 'O');
+	var ObjProto = Object.prototype, ArrayProto = Array.prototype,
 	nativeToString = ObjProto.toString,
 	hasOwnProperty = ObjProto.hasOwnProperty, slice = ArrayProto.slice ;
 	
@@ -614,7 +614,6 @@ module.exports = Asdf;
 	 * @desc 해당 메소드를 사용하면 객체가 collection아닌지 판단한다.
 	 */
 	var isNotCollection = not(isCollection);
-	
 	/**
 	 * @memberof O
 	 * @func
@@ -860,7 +859,7 @@ module.exports = Asdf;
         return true;
     }
 
-	extend($_.O, {
+	extend(o, {
 		each: each,
 		map: map,
 		extend: extend,
@@ -1126,9 +1125,7 @@ module.exports = Asdf;
 	function composeRight() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = $_.A.reduce(fns, $_.Core.behavior.compose);
-		return function () {
-			return fn.apply(this, arguments);
-		};
+		return fn;
 	}
 	
 	/**
@@ -1149,9 +1146,7 @@ module.exports = Asdf;
 	function compose() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = $_.A.reduceRight(fns, $_.Core.behavior.compose);
-		return function () {
-			return fn.apply(this, arguments);
-		};
+		return fn;
 	}
 	var exisFunction = function (fn) {
 		if($_.O.isNotFunction(fn)){
@@ -1314,6 +1309,13 @@ module.exports = Asdf;
             }
         }
     }
+
+    function trys(){
+        var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+        var fn = $_.A.reduce(fns, errorHandler);
+        return fn;
+    }
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -1336,7 +1338,8 @@ module.exports = Asdf;
         sequence: sequence,
         cases:cases,
         overload:overload,
-        errorHandler:errorHandler
+        errorHandler:errorHandler,
+        trys:trys
 	}, true);
 
 })(Asdf);/**
@@ -2485,6 +2488,15 @@ module.exports = Asdf;
 	    return /^\s*$/.test(str);
 	}
 
+    function isJSON(str) {
+        if($_.O.isNotString(str)) throw new TypeError();
+        if(isBlank(str)) return false
+        str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
+        str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
+        str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+        return (/^[\],:{}\s]*$/).test(str);
+    }
+
 	/**
 	 * @memberof S
 	 * @param {string} str 대상 문자열
@@ -2670,7 +2682,8 @@ module.exports = Asdf;
 		lpad: lpad,
 		rpad: rpad,
 		template:template,
-        compareVersion: compareVersion
+        compareVersion: compareVersion,
+        isJSON:isJSON
 	});
 })(Asdf);
 (function($_) {

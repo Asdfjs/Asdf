@@ -88,6 +88,8 @@ test("Asdf.F.partial", function(){
 		return a/b;
 	}
 	equal(Asdf.F.partial(f, undefined, 2)(4), 2, 'partial');
+    equal(Asdf.F.partial(f, 4)(2), 2, 'partial');
+    equal(Asdf.F.partial(f, 4, 2)(), 2, 'partial');
 });
 test("Asdf.F.orElse", function(){
 	function fn(i){

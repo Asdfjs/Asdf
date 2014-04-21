@@ -70,3 +70,7 @@ test("Asdf.S.lpad", function(){
 test("Asdf.S.rpad", function(){
 	equal(Asdf.S.rpad('1', '0', 4), '1000', 'rpad ok');
 });
+test("Asdf.S.isJSON", function(){
+    ok(Asdf.S.isJSON('{"a":1}', 'json ok'));
+    ok(!Asdf.S.isJSON('aa'), 'aa string is not json');
+});

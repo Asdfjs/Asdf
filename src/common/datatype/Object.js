@@ -5,8 +5,8 @@
  * @name O
  */
 (function($_) {
-	$_.O = {};
-	var ObjProto = Object.prototype, ArrayProto = Array.prototype, 
+    var o = $_.Core.namespace($_, 'O');
+	var ObjProto = Object.prototype, ArrayProto = Array.prototype,
 	nativeToString = ObjProto.toString,
 	hasOwnProperty = ObjProto.hasOwnProperty, slice = ArrayProto.slice ;
 	
@@ -420,7 +420,6 @@
 	 * @desc 해당 메소드를 사용하면 객체가 collection아닌지 판단한다.
 	 */
 	var isNotCollection = not(isCollection);
-	
 	/**
 	 * @memberof O
 	 * @func
@@ -666,7 +665,7 @@
         return true;
     }
 
-	extend($_.O, {
+	extend(o, {
 		each: each,
 		map: map,
 		extend: extend,

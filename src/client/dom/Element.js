@@ -757,34 +757,33 @@
 			var elementStyle = element.style;
 			elementStyle[name] =  value;
 		}else {
-			var cssStyle, res, i;
-			// IE
-			if (element.currentStyle) {
-				cssStyle = element.currentStyle;
-			} else if (document.defaultView &&
-					document.defaultView.getComputedStyle) {
-				cssStyle = document.defaultView.getComputedStyle(element, null);
-			} else {
+			var cssStyle, res;
+            if (window.getComputedStyle) {
+                cssStyle = window.getComputedStyle(element, null);
+            } //ie
+			else if (element.currentStyle) {
+                cssStyle = element.currentStyle;
+            } else {
 				return TypeError();
 			}
-			var styleVal = $_.O.extend({},element.style);
-			$_.O.each(styleVal, function(value, key, obj) {
-				if(!value || value == 'auto')
-					obj[key] = cssStyle[key] && cssStyle[key] != 'auto'?  cssStyle[key]: '';
-			});
+
 			if(!name) {
-				return styleVal;
+                res = {};
+				$_.O.each(cssStyle, function(value, key) {
+                    res[key] = value == 'auto'? '': value;
+                });
+                return res;
 			}
 			else if (isString(name)) {
-				res = styleVal[name];
+				return res = cssStyle[name];
 			} else if($_.O.isArray(name)){
 				res = {};
-				for (i = 0; i < name.length; i++) {
-					res[name[i]] = styleVal[name[i]];
-				}
+                $_.O.each(name, function(v){
+                    res[v] = cssStyle[v] == 'auto'? '' : cssStyle[v];
+                });
+                return res;
 			} else 
 				throw TypeError();
-			return res;
 		}
 	}
 	function toHTML(element){
