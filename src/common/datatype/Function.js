@@ -398,6 +398,14 @@
         var fn = $_.A.reduce(fns, errorHandler);
         return fn;
     }
+	
+	function asyncThen(func, after, async, stop){
+		return function(){ 
+			var res = func.apply(this, arguments); 
+			if(!res && stop) return res; 
+			return async(after) 
+		}
+	}
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -422,7 +430,8 @@
         cases:cases,
         overload:overload,
         errorHandler:errorHandler,
-        trys:trys
+        trys:trys,
+		asyncThen:asyncThen
 	}, true);
 
 })(Asdf);
