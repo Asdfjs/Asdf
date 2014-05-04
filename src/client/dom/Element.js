@@ -801,6 +801,50 @@
 			throw new TypeError();
 		return $_.S.isBlank(element.innerHTML);
 	}
+
+    var data = (function(){
+        var data = {};
+        var id = 0;
+        var prefix = 'ae';
+        var getData = function (el, key){
+            if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
+            if(!el.aeid || !hasData(el, key)){
+                var p = parent(el);
+                if(!p) return;
+                return getData(p, key);
+            }
+            return data[el.aeid] && data[el.aeid][key];
+        };
+        var hasData = function (el, key){
+            if(!el.aeid || !data[el.aeid])
+                return false;
+            var d = data[el.aeid];
+            return key in d && Object.prototype.hasOwnProperty.call(d, key);
+        };
+        var setData = function (el, key, value){
+            if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
+            if(value == null) throw new TypeError();
+            if(!el.aeid)
+                el.aeid = prefix+id++;
+            var aeid = el.aeid;
+            if(!data[aeid])
+                data[aeid] = {};
+            data[aeid][key] = value;
+            return el;
+        };
+        function parent( element) {
+            do {
+                element = element['parentNode'];
+            } while ( element && element.nodeType !== 1 );
+            return element;
+        }
+
+        return {
+            getData: getData,
+            setData: setData,
+            hasData: hasData
+        }
+    })();
 	extend($_.Element,  {
 		walk: walk,
 		visible: visible,
@@ -850,6 +894,9 @@
 		toHTML: toHTML,
 		isWhitespace: isWhitespace,
         createDom: createDom,
-        createText: createText
+        createText: createText,
+        getData: data.getData,
+        setData: data.setData,
+        hasData: data.hasData
 	});
 })(Asdf);

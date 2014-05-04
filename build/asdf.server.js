@@ -1315,6 +1315,14 @@ module.exports = Asdf;
         var fn = $_.A.reduce(fns, errorHandler);
         return fn;
     }
+	
+	function asyncThen(func, after, async, stop){
+		return function(){ 
+			var res = func.apply(this, arguments); 
+			if(!res && stop) return res; 
+			return async(after) 
+		}
+	}
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -1339,10 +1347,12 @@ module.exports = Asdf;
         cases:cases,
         overload:overload,
         errorHandler:errorHandler,
-        trys:trys
+        trys:trys,
+		asyncThen:asyncThen
 	}, true);
 
-})(Asdf);/**
+})(Asdf);
+/**
  * @project Asdf.js
  * @author N3735
  * @namespace
@@ -2659,7 +2669,145 @@ module.exports = Asdf;
             return 1;
         return 0;
     }
-	$_.O.extend(o, {
+
+    function interpreter(/*c, str , args*/){
+        var c = {};
+        var args = Array.prototype.slice.call(arguments);
+        if($_.O.isPlainObject(arguments[0])){
+            c = args.shift();
+        }
+        var str = args.shift();
+        if($_.O.isNotString(str))
+            throw new TypeError();
+        var conf = {
+            varToken: '%v',
+            argToken: '%a',
+            token:{
+                'false': false,
+                'true': true,
+                'null': null,
+                'undefined': undefined,
+                '#s': ' '
+            },
+            functions:{
+            },
+            separator:{
+                startToken: '(',
+                endToken: ')',
+                separator: /\s+|,/
+            },
+            autoNumber: true
+        };
+        $_.A.each(['O','S','F','A','N'], function(v){
+            $_.O.extend(conf.functions, $_[v]);
+        });
+        $_.O.extend(conf, c);
+
+        var tokenKeys = Asdf.O.keys(conf.token);
+        var tokenTree = tokenizer(conf.separator, {token:[], rest:str});
+        var vars = new RegExp('^'+toRegExp(conf.varToken)+'[0-9]{1,2}$');
+        var argsReg = new RegExp('^'+toRegExp(conf.argToken)+'[0-9]{1,2}$');
+        function isFunction(fn, paramsObj){
+            return $_.O.isFunction(fn)  && paramsObj && paramsObj.type == 'token';
+        }
+        function r(tokenTree){
+            return $_.A.reduce(tokenTree, function(m, v){
+                if(conf.functions[v]){
+                    m.push(conf.functions[v]);
+                    return m;
+                }
+                else if(isFunction($_.A.last(m), v)){
+                    var fn = m.pop();
+                    var parameter = r(v);
+                    function fun(){
+                        var arg = arguments;
+                        for(var i = 0; i < parameter.length; i++) {
+                            var v = parameter[i];
+                            if (argsReg.test(v)) {
+                                var j = parseInt(v.substring(conf.argToken.length), 10);
+                                parameter[i] = arg[j];
+                            }
+                        }
+                        return fn.apply(this, $_.A.map(parameter, function(f){
+                                if($_.O.isFunction(f) && f.type == 'token')
+                                    return f.apply(this, arg);
+                                return f;
+                            })
+                        );
+                    }
+                    fun.type = 'token';
+                    m.push(fun);
+                    return m;
+                }else if($_.A.include(tokenKeys,v)) {
+                    m.push(conf.token[v]);
+                    return m;
+                }else if(conf.autoNumber&&Number(v) == v){
+                    m.push(Number(v));
+                    return m;
+                }else if(vars.test(v)){
+                    var j = parseInt(v.substring(conf.varToken.length),10);
+                    if (args.length <= j)
+                        throw new TypeError('too short variables '+ j);
+                    m.push(args[j]);
+                    return m;
+                }
+                m.push(v);
+                return m;
+            }, []);
+        }
+        return r(tokenTree.token)[0];
+    }
+
+    function toRegExp(str){
+        return str.replace(/([\\^$()[\]])/g,'\\$1');
+    }
+
+    function tokenizer(c, o){
+        var stack = [], m;
+        var conf = c;
+        var tokenReg = new RegExp('('+toRegExp(conf.startToken)+')|'+
+            '('+toRegExp(conf.endToken)+')');
+        function functionToken(array){
+            return $_.A.merge({length:0, type:'token'},$_.A.compact(array));
+        }
+        function endToken(o, end){
+            if(!stack.length)
+                throw new TypeError(conf.endToken + ' parse Error');
+            var pos = stack.pop();
+            var res = o.token.splice(pos);
+            var a = trim(o.rest.substring(0, end)).split(conf.separator);
+            if(a!='')
+                $_.A.merge(res, a);
+            o.token.push(functionToken(res));
+            return {token: o.token, rest: o.rest.substring(end+conf.endToken.length)};
+        }
+        function startToken(o, start){
+            var p = o.token.length;
+            if(start !== 0)
+                p = $_.A.merge(o.token, trim(o.rest.substring(0, start)).split(conf.separator)).length;
+            stack.push(p);
+            return {token: o.token, rest: o.rest.substring(start+conf.startToken.length)};
+        }
+        o.rest = trim(o.rest);
+        while(m = tokenReg.exec(o.rest)){
+            var res;
+            if(m[2]){
+                res = endToken(o, m.index);
+            }else if(m[1]){
+                res = startToken(o, m.index);
+            }else{
+                continue;
+            }
+            if(!res)
+                throw new TypeError('parse Error');
+            o.rest = trim(res.rest);
+        }
+        if(stack.length)
+            throw new TypeError(conf.startToken + ' parse Error');
+        return o;
+
+    }
+    $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
 		stripTags: stripTags,
@@ -2683,7 +2831,8 @@ module.exports = Asdf;
 		rpad: rpad,
 		template:template,
         compareVersion: compareVersion,
-        isJSON:isJSON
+        isJSON:isJSON,
+        interpreter:interpreter
 	});
 })(Asdf);
 (function($_) {
