@@ -406,6 +406,44 @@
 			return async(after) 
 		}
 	}
+	
+	function toFunction(value){
+		return function(){
+			return value;
+		}
+	};
+
+	function async(async, callback){
+		return curry(defer, curry(async, callback));
+	}
+
+	function when(/*async, callback*/){
+		var asyncs = slice.call(arguments);
+		var callback = asyncs.pop();
+		var l = asyncs.length-1;
+		return function(){
+			function r(){
+				if(l == 0)
+					return callback.apply(this, arguments);
+				l--;
+			}
+			$_.A.each(asyncs, function(v){
+				v(r);
+			});
+		}
+	}
+
+	function loadImg(src, cb){
+		var i = new Image();
+		i.src=src;
+		i.onload = function(){cb()}
+	}
+
+	function loadImgs(src, cb){
+		var fn = $_.A.map(src, function(v){return curry(loadImg, v)});
+		fn.push(cb)
+		when.apply(this, fn)();
+	}
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -431,7 +469,11 @@
         overload:overload,
         errorHandler:errorHandler,
         trys:trys,
-		asyncThen:asyncThen
+		asyncThen:asyncThen,
+		toFunction:toFunction,
+		async:async,
+		when:when,
+		loadImgs:loadImgs
 	}, true);
 
 })(Asdf);
