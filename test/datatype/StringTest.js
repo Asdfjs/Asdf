@@ -74,3 +74,7 @@ test("Asdf.S.isJSON", function(){
     ok(Asdf.S.isJSON('{"a":1}', 'json ok'));
     ok(!Asdf.S.isJSON('aa'), 'aa string is not json');
 });
+test("Asdf.S.interpreter", function(){
+    var f = Asdf.S.interpreter('capitalize(truncate (times(%a0, 20),8))');
+    equal(f('ab'), 'Ababa...', 'interpreter ok');
+});

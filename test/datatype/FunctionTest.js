@@ -157,3 +157,14 @@ test("Asdf.F.trys", function(){
     equal(f(false), 'aaa', 'error test');
 
 });
+asyncTest("Asdf.F.asyncThen", function(){
+    var b = false;
+    var f = Asdf.F.asyncThen(function(){}, function(){
+        b=true;
+        ok(b, 'asyncThen ok')
+        start();
+    }, function(f){
+        setTimeout(f, 200);
+    });
+    f();
+});
