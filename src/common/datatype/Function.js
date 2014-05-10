@@ -380,7 +380,7 @@
                 return stop;
             }
             return fn.apply(this, arguments);
-        }
+        };
         return orElse(f, overloadedFn, stop)
     }
     function errorHandler(fn, handler){
@@ -400,6 +400,7 @@
     }
 	
 	function asyncThen(func, after, async, stop){
+        if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
 		return function(){ 
 			var res = func.apply(this, arguments); 
 			if(!res && stop) return res; 
@@ -411,39 +412,33 @@
 		return function(){
 			return value;
 		}
-	};
+	}
 
 	function async(async, callback){
+        if(!$_.O.isFunction(async)) throw new TypeError();
 		return curry(defer, curry(async, callback));
 	}
 
 	function when(/*async, callback*/){
 		var asyncs = slice.call(arguments);
+        if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
 		var callback = asyncs.pop();
 		var l = asyncs.length-1;
 		return function(){
-			function r(){
+            var res = [];
+			function r(index, value){
+                res[index] = value;
 				if(l == 0)
-					return callback.apply(this, arguments);
+					return callback.apply(this, res);
 				l--;
 			}
-			$_.A.each(asyncs, function(v){
-				v(r);
+			$_.A.each(asyncs, function(v, k){
+				v(curry(r, k));
 			});
 		}
 	}
 
-	function loadImg(src, cb){
-		var i = new Image();
-		i.src=src;
-		i.onload = function(){cb()}
-	}
 
-	function loadImgs(src, cb){
-		var fn = $_.A.map(src, function(v){return curry(loadImg, v)});
-		fn.push(cb)
-		when.apply(this, fn)();
-	}
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -472,8 +467,7 @@
 		asyncThen:asyncThen,
 		toFunction:toFunction,
 		async:async,
-		when:when,
-		loadImgs:loadImgs
+		when:when
 	}, true);
 
 })(Asdf);
