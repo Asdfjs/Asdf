@@ -1304,7 +1304,7 @@
                 return stop;
             }
             return fn.apply(this, arguments);
-        }
+        };
         return orElse(f, overloadedFn, stop)
     }
     function errorHandler(fn, handler){
@@ -1324,12 +1324,47 @@
     }
 	
 	function asyncThen(func, after, async, stop){
+        if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
 		return function(){ 
 			var res = func.apply(this, arguments); 
 			if(!res && stop) return res; 
 			return async(after) 
 		}
 	}
+	
+	function toFunction(value){
+		return function(){
+			return value;
+		}
+	}
+
+	function async(async){
+        if(!$_.O.isFunction(async)) throw new TypeError();
+		return function(cb) {
+            async.call(this,cb);
+        }
+	}
+
+	function when(/*async, callback*/){
+		var asyncs = slice.call(arguments);
+        if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
+		var l = asyncs.length-1;
+		return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
+            var res = [];
+			function r(index, value){
+                res[index] = value;
+				if(l == 0)
+					return cb.apply(this, res);
+				l--;
+			}
+			$_.A.each(asyncs, function(v, k){
+				v(curry(r, k));
+			});
+		}
+	}
+
+
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -1355,7 +1390,10 @@
         overload:overload,
         errorHandler:errorHandler,
         trys:trys,
-		asyncThen:asyncThen
+		asyncThen:asyncThen,
+		toFunction:toFunction,
+		async:async,
+		when:when
 	}, true);
 
 })(Asdf);
@@ -4589,6 +4627,22 @@
     c.mixin = publicP;
     $_.O.extend(o, {
         Store:  c
+    });
+})(Asdf);(function($_){
+    var o = $_.Core.namespace( $_, 'Async');
+    function loadImg(src, cb){
+        var i = new Image();
+        i.src=src;
+        i.onload = function(){cb(i)}
+    }
+
+    function loadImgs(src, cb){
+        var fn = $_.A.map(src, function(v){return $_.F.curry(loadImg, v)});
+        $_.F.when.apply(this, fn)(cb);
+    }
+    $_.O.extend(o, {
+        loadImg:loadImg,
+        loadImgs:loadImgs
     });
 })(Asdf);(function($_) {
 	$_.Ajax = {};

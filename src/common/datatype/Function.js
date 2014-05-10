@@ -414,22 +414,24 @@
 		}
 	}
 
-	function async(async, callback){
+	function async(async){
         if(!$_.O.isFunction(async)) throw new TypeError();
-		return curry(defer, curry(async, callback));
+		return function(cb) {
+            async.call(this,cb);
+        }
 	}
 
 	function when(/*async, callback*/){
 		var asyncs = slice.call(arguments);
         if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
-		var callback = asyncs.pop();
 		var l = asyncs.length-1;
-		return function(){
+		return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
             var res = [];
 			function r(index, value){
                 res[index] = value;
 				if(l == 0)
-					return callback.apply(this, res);
+					return cb.apply(this, res);
 				l--;
 			}
 			$_.A.each(asyncs, function(v, k){

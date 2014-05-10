@@ -8,8 +8,7 @@
 
     function loadImgs(src, cb){
         var fn = $_.A.map(src, function(v){return $_.F.curry(loadImg, v)});
-        fn.push(cb);
-        $_.F.when.apply(this, fn)();
+        $_.F.when.apply(this, fn)(cb);
     }
     $_.O.extend(o, {
         loadImg:loadImg,

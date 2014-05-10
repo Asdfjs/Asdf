@@ -173,11 +173,10 @@ asyncTest("Asdf.F.when", function(){
         function(cb){setTimeout(function(){cb(1)}, 50)},
         function(cb){setTimeout(function(){cb(2)}, 25)},
         function(cb){setTimeout(function(){cb(3)}, 70)},
-        function(cb){setTimeout(function(){cb(4)}, 10)},
-        function(){
-            deepEqual(Asdf.A.toArray(arguments), [1,2,3,4], 'Asdf.F.when ok')
-            start();
-        }
-    )()
+        function(cb){setTimeout(function(){cb(4)}, 10)}
+    )(function(){
+        deepEqual(Asdf.A.toArray(arguments), [1,2,3,4], 'Asdf.F.when ok')
+        start();
+    })
 
 });

@@ -17,6 +17,7 @@
 					<filelist  dir="${src}/common/util" files="utils.js" />
                     <filelist  dir="${src}/client/util" files="utils.js" />
                     <filelist  dir="${src}/common/base" files="base.js, Callbacks.js, Events.js, Store.js" />
+					<fileset  dir="${src}/client/async" includes="*.js" />
 					<fileset  dir="${src}/client/ajax" includes="*.js" />
 					<fileset  dir="${src}/client/history" includes="*.js" />
 				</concat>
