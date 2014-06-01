@@ -26,7 +26,6 @@
 		return str.length > length ?
 		str.slice(0, length - truncation.length) + truncation : str;
 	}
-	
 	/**
 	 * @memberof S
 	 * @param {string} str 대상 문자열

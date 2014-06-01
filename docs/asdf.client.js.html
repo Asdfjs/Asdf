@@ -158,7 +158,7 @@
 			return function () {
 				var arg = 0;
 				var a = args.slice();
-				for ( var i = 0; i &lt; args.length &amp;&amp; arg &lt; arguments.length; i++ )
+				for ( var i = 0; arg &lt; arguments.length; i++ )
 					if(args[i] === undefined)
 						a[i] = arguments[arg++];
 				return fn.apply(this, a);
@@ -172,8 +172,8 @@
 	};
     function namespace(/*[parent], ns_string*/) {
         var parts, i, parent;
-        var args = $_.A.toArray(arguments);
-        if ($_.O.isPlainObject(args[0])) {
+        var args = Array.prototype.slice.call(arguments);
+        if (typeof args[0] === 'object') {
             parent = args.shift();
         }
         parent = parent || window;
@@ -233,8 +233,8 @@
  * @name O
  */
 (function($_) {
-	$_.O = {};
-	var ObjProto = Object.prototype, ArrayProto = Array.prototype, 
+    var o = $_.Core.namespace($_, 'O');
+	var ObjProto = Object.prototype, ArrayProto = Array.prototype,
 	nativeToString = ObjProto.toString,
 	hasOwnProperty = ObjProto.hasOwnProperty, slice = ArrayProto.slice ;
 	
@@ -648,7 +648,6 @@
 	 * @desc 해당 메소드를 사용하면 객체가 collection아닌지 판단한다.
 	 */
 	var isNotCollection = not(isCollection);
-	
 	/**
 	 * @memberof O
 	 * @func
@@ -894,7 +893,7 @@
         return true;
     }
 
-	extend($_.O, {
+	extend(o, {
 		each: each,
 		map: map,
 		extend: extend,
@@ -953,14 +952,16 @@
 /**
  * @project Asdf.js
  * @author N3735
- * @namespace F
  */
 (function($_) {
+    /**
+     * @namespace Asdf.F
+     */
 	$_.F = {};
 	var slice = Array.prototype.slice, fnProto = Function.prototype, nativeBind = fnProto.bind;
-	
+
 	/**
-	 * @memberof F
+     * @memberof Asdf.F
 	 * @param {*} value value
 	 * @returns {*} value를 리턴한다. 
 	 * @desc value를 리턴한다.
@@ -968,9 +969,9 @@
 	function identity(value) {
 		return value;
 	}
-	
+
 	/**
-	 * @memberof F
+     * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {object} context 실행 함수 context
 	 * @returns {function} context에서 실행할 함수를 반환한다.
@@ -996,7 +997,7 @@
 	}
 		
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {...*=} args 미리 넣을 인자들
 	 * @returns {function} func에 미리 인자를 넣은 함수를 반환한다.
@@ -1021,7 +1022,7 @@
 	}
 
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {number} timeout 지연시간(초) 
 	 * @returns {*} setTimeoutId를 반환한다.
@@ -1035,9 +1036,9 @@
 			return __method.apply(__method, args);
 		}, timeout);
 	}
-	
+
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @returns {*} setTimeoutId를 반환한다.
 	 * @desc 실행함수를 0.01초 후에 실행한다. 
@@ -1049,7 +1050,7 @@
 	}
 
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} wrapper wrapper 함수 
 	 * @returns {function} 실행함수를 wrapper로 감싼 함수를 반환한다.
@@ -1070,7 +1071,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} pre 이전 실행 함수
 	 * @param {boolean} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정 
@@ -1095,7 +1096,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} after 이후 실행 함수
 	 * @param {boolean} stop 실행 함수의 결과값여부에 따라 이후 실행 함수를 실행여부를 결정 
@@ -1120,7 +1121,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @returns {function} 실행 함수 첫번째 인자를 this로 넣은 함수를 반환한다.
 	 * @desc 순수 함수를 특정 객체의 매소드로 만들 경우 유용한 함수이다. 이 함수를 실행하면 첫번째 인자에 this를 넣은 함수를 반환한다.
@@ -1143,7 +1144,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다.
 	 * @desc 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다. composeRight(f, g) -> g(f(x))
@@ -1160,13 +1161,11 @@
 	function composeRight() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = $_.A.reduce(fns, $_.Core.behavior.compose);
-		return function () {
-			return fn.apply(this, arguments);
-		};
+		return fn;
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다.
 	 * @desc 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다. compose(f, g) -> f(g(x))
@@ -1183,9 +1182,7 @@
 	function compose() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = $_.A.reduceRight(fns, $_.Core.behavior.compose);
-		return function () {
-			return fn.apply(this, arguments);
-		};
+		return fn;
 	}
 	var exisFunction = function (fn) {
 		if($_.O.isNotFunction(fn)){
@@ -1195,7 +1192,7 @@
 	};
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {function} func 실행 함수
 	 * @param {number} number 제거할 인자 갯수.
@@ -1209,7 +1206,7 @@
 	var extract = before($_.Core.combine.extract, exisFunction);
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {function} func 실행 함수
 	 * @param {...*=} args 미리 넣을 인자들
@@ -1224,7 +1221,7 @@
 	var partial = before($_.Core.combine.partial, exisFunction);
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수 실행 결과 값 중 하나만 참이면 결과는 참인 함수를 반환한다.
@@ -1245,7 +1242,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수 실행 결과 값 중 하나만 거짓이면 결과는 거짓인 함수를 반환한다.
@@ -1274,7 +1271,7 @@
 		};
 	}
 	var then = partial(after, undefined, undefined, true);
-	
+
 	function orElse(func, elseFn, stop){
 		if(!$_.O.isFunction(func)||!$_.O.isFunction(elseFn)) throw new TypeError;
 		return function() {
@@ -1291,7 +1288,7 @@
         var guardType = {
             test: function(v){return Asdf.O.isFunction(v)},
             fn: function(v){return Asdf.O.isFunction(v)}
-        }
+        };
         if(!Asdf.A.any(guards, partial(Asdf.O.type, undefined, guardType)))
             throw new TypeError();
         return function(){
@@ -1336,7 +1333,7 @@
                 return stop;
             }
             return fn.apply(this, arguments);
-        }
+        };
         return orElse(f, overloadedFn, stop)
     }
     function errorHandler(fn, handler){
@@ -1348,6 +1345,56 @@
             }
         }
     }
+
+    function trys(){
+        var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+        var fn = $_.A.reduce(fns, errorHandler);
+        return fn;
+    }
+	
+	function asyncThen(func, after, async, stop){
+        if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
+		return function(){ 
+			var res = func.apply(this, arguments); 
+			if(!res &amp;&amp; stop) return res; 
+			return async(after) 
+		}
+	}
+	
+	function toFunction(value){
+		return function(){
+			return value;
+		}
+	}
+
+	function async(async){
+        if(!$_.O.isFunction(async)) throw new TypeError();
+		return function(cb) {
+            async.call(this,cb);
+        }
+	}
+
+	function when(/*async*/){
+		var asyncs = slice.call(arguments);
+        if(asyncs.length &lt; 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
+		var l = asyncs.length-1;
+		return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
+            var res = [];
+			function r(index, value){
+                res[index] = value;
+				if(l == 0)
+					return cb.apply(this, res);
+				l--;
+			}
+			$_.A.each(asyncs, function(v, k){
+				v(curry(r, k));
+			});
+		}
+	}
+
+
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -1370,10 +1417,16 @@
         sequence: sequence,
         cases:cases,
         overload:overload,
-        errorHandler:errorHandler
+        errorHandler:errorHandler,
+        trys:trys,
+		asyncThen:asyncThen,
+		toFunction:toFunction,
+		async:async,
+		when:when
 	}, true);
 
-})(Asdf);/**
+})(Asdf);
+/**
  * @project Asdf.js
  * @author N3735
  * @namespace
@@ -2236,7 +2289,6 @@
 		return str.length > length ?
 		str.slice(0, length - truncation.length) + truncation : str;
 	}
-	
 	/**
 	 * @memberof S
 	 * @param {string} str 대상 문자열
@@ -2519,6 +2571,15 @@
 	    return /^\s*$/.test(str);
 	}
 
+    function isJSON(str) {
+        if($_.O.isNotString(str)) throw new TypeError();
+        if(isBlank(str)) return false
+        str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
+        str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
+        str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+        return (/^[\],:{}\s]*$/).test(str);
+    }
+
 	/**
 	 * @memberof S
 	 * @param {string} str 대상 문자열
@@ -2681,7 +2742,145 @@
             return 1;
         return 0;
     }
-	$_.O.extend(o, {
+
+    function interpreter(/*c, str , args*/){
+        var c = {};
+        var args = Array.prototype.slice.call(arguments);
+        if($_.O.isPlainObject(arguments[0])){
+            c = args.shift();
+        }
+        var str = args.shift();
+        if($_.O.isNotString(str))
+            throw new TypeError();
+        var conf = {
+            varToken: '%v',
+            argToken: '%a',
+            token:{
+                'false': false,
+                'true': true,
+                'null': null,
+                'undefined': undefined,
+                '#s': ' '
+            },
+            functions:{
+            },
+            separator:{
+                startToken: '(',
+                endToken: ')',
+                separator: /\s+|,/
+            },
+            autoNumber: true
+        };
+        $_.A.each(['O','S','F','A','N'], function(v){
+            $_.O.extend(conf.functions, $_[v]);
+        });
+        $_.O.extend(conf, c);
+
+        var tokenKeys = Asdf.O.keys(conf.token);
+        var tokenTree = tokenizer(conf.separator, {token:[], rest:str});
+        var vars = new RegExp('^'+toRegExp(conf.varToken)+'[0-9]{1,2}$');
+        var argsReg = new RegExp('^'+toRegExp(conf.argToken)+'[0-9]{1,2}$');
+        function isFunction(fn, paramsObj){
+            return $_.O.isFunction(fn)  &amp;&amp; paramsObj &amp;&amp; paramsObj.type == 'token';
+        }
+        function r(tokenTree){
+            return $_.A.reduce(tokenTree, function(m, v){
+                if(conf.functions[v]){
+                    m.push(conf.functions[v]);
+                    return m;
+                }
+                else if(isFunction($_.A.last(m), v)){
+                    var fn = m.pop();
+                    var parameter = r(v);
+                    function fun(){
+                        var arg = arguments;
+                        for(var i = 0; i &lt; parameter.length; i++) {
+                            var v = parameter[i];
+                            if (argsReg.test(v)) {
+                                var j = parseInt(v.substring(conf.argToken.length), 10);
+                                parameter[i] = arg[j];
+                            }
+                        }
+                        return fn.apply(this, $_.A.map(parameter, function(f){
+                                if($_.O.isFunction(f) &amp;&amp; f.type == 'token')
+                                    return f.apply(this, arg);
+                                return f;
+                            })
+                        );
+                    }
+                    fun.type = 'token';
+                    m.push(fun);
+                    return m;
+                }else if($_.A.include(tokenKeys,v)) {
+                    m.push(conf.token[v]);
+                    return m;
+                }else if(conf.autoNumber&amp;&amp;Number(v) == v){
+                    m.push(Number(v));
+                    return m;
+                }else if(vars.test(v)){
+                    var j = parseInt(v.substring(conf.varToken.length),10);
+                    if (args.length &lt;= j)
+                        throw new TypeError('too short variables '+ j);
+                    m.push(args[j]);
+                    return m;
+                }
+                m.push(v);
+                return m;
+            }, []);
+        }
+        return r(tokenTree.token)[0];
+    }
+
+    function toRegExp(str){
+        return str.replace(/([\\^$()[\]])/g,'\\$1');
+    }
+
+    function tokenizer(c, o){
+        var stack = [], m;
+        var conf = c;
+        var tokenReg = new RegExp('('+toRegExp(conf.startToken)+')|'+
+            '('+toRegExp(conf.endToken)+')');
+        function functionToken(array){
+            return $_.A.merge({length:0, type:'token'},$_.A.compact(array));
+        }
+        function endToken(o, end){
+            if(!stack.length)
+                throw new TypeError(conf.endToken + ' parse Error');
+            var pos = stack.pop();
+            var res = o.token.splice(pos);
+            var a = trim(o.rest.substring(0, end)).split(conf.separator);
+            if(a!='')
+                $_.A.merge(res, a);
+            o.token.push(functionToken(res));
+            return {token: o.token, rest: o.rest.substring(end+conf.endToken.length)};
+        }
+        function startToken(o, start){
+            var p = o.token.length;
+            if(start !== 0)
+                p = $_.A.merge(o.token, trim(o.rest.substring(0, start)).split(conf.separator)).length;
+            stack.push(p);
+            return {token: o.token, rest: o.rest.substring(start+conf.startToken.length)};
+        }
+        o.rest = trim(o.rest);
+        while(m = tokenReg.exec(o.rest)){
+            var res;
+            if(m[2]){
+                res = endToken(o, m.index);
+            }else if(m[1]){
+                res = startToken(o, m.index);
+            }else{
+                continue;
+            }
+            if(!res)
+                throw new TypeError('parse Error');
+            o.rest = trim(res.rest);
+        }
+        if(stack.length)
+            throw new TypeError(conf.startToken + ' parse Error');
+        return o;
+
+    }
+    $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
 		stripTags: stripTags,
@@ -2704,7 +2903,9 @@
 		lpad: lpad,
 		rpad: rpad,
 		template:template,
-        compareVersion: compareVersion
+        compareVersion: compareVersion,
+        isJSON:isJSON,
+        interpreter:interpreter
 	});
 })(Asdf);
 (function($_) {
@@ -2829,6 +3030,29 @@
 		mix:mix
 	});
 })(Asdf);/**
+ * Created by kim on 2014-04-20.
+ */
+/**
+ * @project Asdf.js
+ * @author N3735
+ * @namespace
+ * @name O
+ */
+(function($_) {
+    var o = $_.Core.namespace($_, 'O');
+    var curry = $_.Core.combine.curry;
+    var compose = $_.Core.behavior.compose;
+    var not = curry(compose, $_.Core.op["!"]);
+
+    function isXML(el){
+        return (el.ownerDocument || el.documentElement.nodeName.toLowerCase() !== 'html');
+    }
+    var isNotXML = not(isXML);
+    $_.O.extend(o, {
+        isXML: isXML,
+        isNotXML:isNotXML
+    });
+})(Asdf);/**
  * @project Asdf.js
  * @author N3735
  * @namespace
@@ -2948,192 +3172,214 @@
 		features:features
 	});
 })(Asdf);(function($_) {
-	$_.Event = {};
-	var extend = $_.O.extend, slice = Array.prototype.slice;
-	var cach = [];
-	function getIndex(element, eventName, handler) {
-		var i;
-		for(i = 0; i &lt; cach.length; i++){
-			if(cach[i].element == element &amp;&amp;
-					cach[i].eventName == eventName &amp;&amp;
-					cach[i].handler == handler)
-				return i;
-		}
-		return -1;
-	}
-	function getWrapedhandler(element, eventName, handler) {
-		var i;
-		for(i = 0; i &lt; cach.length; i++){
-			if(cach[i].element == element &amp;&amp;
-					cach[i].eventName == eventName &amp;&amp;
-					cach[i].handler == handler)
-				return cach[i].wrapedhandler.pop();
-		}
-	}
-	function addEventListener(element, eventName, handler, filterFn) {
-		var wrapedhandler = $_.F.wrap(handler, 
-			function(ofn, e) {
-				e = e||window.event;
-				e = fix(e);
-				if(filterFn &amp;&amp; !filterFn(e)) return null;
-				return ofn(e);
-			}
-		);
-		if (element.addEventListener) {
-			element.addEventListener(eventName, wrapedhandler, false);
-			
-		}else {
-			element.attachEvent("on"+ eventName, wrapedhandler);
-		}
-		var index = getIndex(element, eventName, handler);
-		if(index === -1){
-			var obj = {element:element, eventName:eventName, handler:handler, wrapedhandler:[wrapedhandler]};
-			cach.push(obj);
-		}else{
-			cach[index].wrapedhandler.push(wrapedhandler);
-		}
-		
-	}
-	function removeEventListener(element, eventName, handler){
-		if(element.removeEventListener){
-			element.removeEventListener( eventName, handler, false );
-		}else {
-			var ieeventName = 'on'+eventName;
-			if(element[ieeventName] === void 0){
-				element[ieeventName] = null;
-			}
-			element.detachEvent( ieeventName, handler );
-		}
-		
-	}
-	function fix(event){
-		if(!event.target){
-			event.target = event.srcElement || document;
-		}
-		if(event.target.nodeType === 3) {
-			event.target = event.target.parentNode;
-		}
-		event.metaKey = !!event.metaKey;
-		fixEvent(event);
-		event.stop = $_.F.methodize(stop);
-		return fixHooks(event);
-	}
-	function fixEvent(event){
-		if(!event.stopPropagation){
-			event.stopPropagation = function() { event.cancelBubble = true; };
-			event.preventDefault = function() { event.returnValue = false; };
-		}
-	}
-	function stop(event){
-		if(!event.stopPropagation){
-			fixEvent(event);
-		}
-		event.preventDefault();
-	    event.stopPropagation();
-	}
-	function fixHooks(event){
-		function keyHooks(event){
-			if(!event.which) {
-				event.which = event.charCode? event.charCode : event.keyCode;
-			}
-			return event;
-		}
-		function mouseHooks(event){
-			var eventDoc, doc, body, button = event.button, fromElement = event.fromElement;
-			if( event.pageX == null &amp;&amp; event.clientX != null ) {
-				eventDoc = event.target.ownderDocument || document;
-				doc = eventDoc.documentElement;
-				body = eventDoc.body;
-				event.pageX = event.clientX + ( doc &amp;&amp; doc.scrollLeft || body &amp;&amp; body.scrollLeft || 0 ) - ( doc &amp;&amp; doc.clientLeft || body &amp;&amp; body.clientLeft || 0 );
-				event.pageY = event.clientY + ( doc &amp;&amp; doc.scrollTop  || body &amp;&amp; body.scrollTop  || 0 ) - ( doc &amp;&amp; doc.clientTop  || body &amp;&amp; body.clientTop  || 0 );
-			}
-			if ( !event.relatedTarget &amp;&amp; fromElement ) {
-				event.relatedTarget = fromElement === event.target ? event.toElement : fromElement;
-			}
-			if ( !event.which &amp;&amp; button !== undefined ) {
-				event.which = ( button &amp; 1 ? 1 : ( button &amp; 2 ? 3 : ( button &amp; 4 ? 2 : 0 ) ) );
-			}
-			return event;
-		}
-		var rkeyEvent = /^key/, rmouseEvent = /^(?:mouse|contextmenu)|click/ ;
-		if ( rkeyEvent.test( event.type ) ) {
-			return keyHooks(event);
-		}
-		if ( rmouseEvent.test( event.type ) ) {
-			return mouseHooks(event);
-		}
-		return event;
-	}
-	function on(element, eventName, fn, filterFn){
-		addEventListener(element, eventName, fn, filterFn);
-		return element;
-	}
-	function once(element, eventName, fn, filterFn){
-		var tfn = $_.F.wrap(fn, function(ofn){
-			var arg = slice.call(arguments, 1);
-			ofn.apply(this,arg);
-			remove(element, eventName, tfn);
-		});
-		addEventListener(element, eventName, tfn, filterFn);
-		return element;
-	}
-	function remove(element, eventName, handler) {
-		var wrapedhandler = getWrapedhandler(element, eventName, handler)||handler;
-		removeEventListener(element, eventName, wrapedhandler);
-		return element;
-	}
-	function removeAll(element, eventName) {
-		var events, i, j;
-		events = $_.A.filter(cach, function (val, i) {
-			if(element === val.element) {
-				if(eventName &amp;&amp; eventName !== val.eventName){
-					return false;
-				}
-				return true;
-				
-			}
-		});
-		for ( i = 0; events &amp;&amp; i &lt; events.length; i++){
-			var event = events[i];
-			for(j = 0 ; j &lt; event.wrapedhandler.length; j++ )
-				removeEventListener(event.element, event.eventName, event.wrapedhandler[j]);
-		}
-		return element;
-	}
-	function createEvent(name) {
-		var event;
-		if(document.createEvent) {
-			event = document.createEvent('HTMLEvents');
-			event.initEvent(name, true, true);
-		}else {
-			event = document.createEventObject();
-		}
-		return event;
-		
-	}
-	function emit(element, name, data){
-		if(element == document &amp;&amp; document.createEvent &amp;&amp; !element.dispatchEvent)
-			element = document.documentElement;
-		var event;
-		
-		event = createEvent(name);
-		event.data = data;
-		event.eventName = name;
-		if(document.createEvent) {
-			element.dispatchEvent(event);
-		}else {
-			element.fireEvent("on"+name, event);
-		}
-		return element;
-	}
+    $_.Event = {};
+    var extend = $_.O.extend, slice = Array.prototype.slice;
+    var cache = {};
+    var id = 1;
+    function getIndex(element, eventName, handler){
+        if(!element.eId || !cache[element.eId] || !cache[element.eId][eventName])
+            return -1;
+        var i = -1;
+        var arr = cache[element.eId][eventName];
+        for (i = 0; i &lt; arr.length; i++ ){
+            if(arr[i].handler == handler)
+                return i;
+        }
+        return -1;
+
+    }
+    function getWrapedhandler(element, eventName, handler){
+        var index = getIndex(element, eventName, handler);
+        if(index == -1){
+            return handler;
+        }
+        return cache[element.eId][eventName][index].wrapedhandler.pop();
+
+    }
+    function addEventListener(element, eventName, handler, filterFn) {
+        var wrapedhandler = $_.F.wrap(handler,
+            function(ofn, e) {
+                e = e||window.event;
+                e = fix(e);
+                if(filterFn &amp;&amp; !filterFn(e)) return null;
+                return ofn(e);
+            }
+        );
+        var eId;
+        if (element.addEventListener) {
+            element.addEventListener(eventName, wrapedhandler, false);
+
+        }else {
+            element.attachEvent("on"+ eventName, wrapedhandler);
+        }
+        if(!element.eId){
+            element.eId = 'e'+(id++);
+        }
+        eId = element.eId;
+        var index = getIndex(element, eventName, handler);
+        if(!cache[eId]){
+            cache[eId] = {};
+        }
+        if(!cache[eId][eventName]){
+            cache[eId][eventName] = [];
+        }
+        if(index != -1)
+            cache[eId][eventName][index].wrapedhandler.push(wrapedhandler);
+        else
+            cache[eId][eventName].push({handler:handler, wrapedhandler:[wrapedhandler]});
+
+    }
+    function removeEventListener(element, eventName, handler){
+        if(element.removeEventListener){
+            element.removeEventListener( eventName, handler, false );
+        }else {
+            var ieeventName = 'on'+eventName;
+            if(element[ieeventName] === void 0){
+                element[ieeventName] = null;
+            }
+            element.detachEvent( ieeventName, handler );
+        }
+
+    }
+    function fix(event){
+        if(!event.target){
+            event.target = event.srcElement || document;
+        }
+        if(event.target.nodeType === 3) {
+            event.target = event.target.parentNode;
+        }
+        event.metaKey = !!event.metaKey;
+        fixEvent(event);
+        event.stop = $_.F.methodize(stop);
+        return fixHooks(event);
+    }
+    function fixEvent(event){
+        if(!event.stopPropagation){
+            event.stopPropagation = function() { event.cancelBubble = true; };
+            event.preventDefault = function() { event.returnValue = false; };
+        }
+    }
+    function stop(event){
+        if(!event.stopPropagation){
+            fixEvent(event);
+        }
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    function fixHooks(event){
+        function keyHooks(event){
+            if(!event.which) {
+                event.which = event.charCode? event.charCode : event.keyCode;
+            }
+            return event;
+        }
+        function mouseHooks(event){
+            var eventDoc, doc, body, button = event.button, fromElement = event.fromElement;
+            if( event.pageX == null &amp;&amp; event.clientX != null ) {
+                eventDoc = event.target.ownderDocument || document;
+                doc = eventDoc.documentElement;
+                body = eventDoc.body;
+                event.pageX = event.clientX + ( doc &amp;&amp; doc.scrollLeft || body &amp;&amp; body.scrollLeft || 0 ) - ( doc &amp;&amp; doc.clientLeft || body &amp;&amp; body.clientLeft || 0 );
+                event.pageY = event.clientY + ( doc &amp;&amp; doc.scrollTop  || body &amp;&amp; body.scrollTop  || 0 ) - ( doc &amp;&amp; doc.clientTop  || body &amp;&amp; body.clientTop  || 0 );
+            }
+            if ( !event.relatedTarget &amp;&amp; fromElement ) {
+                event.relatedTarget = fromElement === event.target ? event.toElement : fromElement;
+            }
+            if ( !event.which &amp;&amp; button !== undefined ) {
+                event.which = ( button &amp; 1 ? 1 : ( button &amp; 2 ? 3 : ( button &amp; 4 ? 2 : 0 ) ) );
+            }
+            return event;
+        }
+        var rkeyEvent = /^key/, rmouseEvent = /^(?:mouse|contextmenu)|click/ ;
+        if ( rkeyEvent.test( event.type ) ) {
+            return keyHooks(event);
+        }
+        if ( rmouseEvent.test( event.type ) ) {
+            return mouseHooks(event);
+        }
+        return event;
+    }
+    function on(element, eventName, fn, filterFn){
+        addEventListener(element, eventName, fn, filterFn);
+        return element;
+    }
+    function once(element, eventName, fn, filterFn){
+        var tfn = $_.F.wrap(fn, function(ofn){
+            var arg = slice.call(arguments, 1);
+            ofn.apply(this,arg);
+            remove(element, eventName, tfn);
+        });
+        addEventListener(element, eventName, tfn, filterFn);
+        return element;
+    }
+    function remove(element, eventName, handler) {
+        var wrapedhandler = getWrapedhandler(element, eventName, handler)||handler;
+        removeEventListener(element, eventName, wrapedhandler);
+        return element;
+    }
+    function removeAll(element, eventName) {
+        if(!element.eId || !cache[element.eId])
+            return element;
+        var events = [], i, j;
+        if(eventName){
+            events = $_.A.map(cache[element.eId][eventName], function(v) {
+                v.eventName = eventName;
+                return v;
+            });
+            cache[element.eId][eventName] = null;
+        }else {
+            $_.A.each(cache[element.eId], function(arr, key) {
+                if($_.O.isArray(arr)){
+                    Array.prototype.push.apply(events, $_.A.map(arr, function(value) {
+                            value.eventName = key;
+                            return value;}
+                    ));
+                }
+            });
+            cache[element.eId] = null;
+        }
+        for ( i = 0; events &amp;&amp; i &lt; events.length; i++){
+            var e = events[i];
+            for(j = 0 ; j &lt; e.wrapedhandler.length; j++ ){
+                removeEventListener(element, e.eventName, e.wrapedhandler[j]);
+            }
+        }
+        return element;
+    }
+    function createEvent(name) {
+        var event;
+        if(document.createEvent) {
+            event = document.createEvent('HTMLEvents');
+            event.initEvent(name, true, true);
+        }else {
+            event = document.createEventObject();
+        }
+        return event;
+
+    }
+    function emit(element, name, data){
+        if(element == document &amp;&amp; document.createEvent &amp;&amp; !element.dispatchEvent)
+            element = document.documentElement;
+        var event;
+
+        event = createEvent(name);
+        event.data = data;
+        event.eventName = name;
+        if(document.createEvent) {
+            element.dispatchEvent(event);
+        }else {
+            element.fireEvent("on"+name, event);
+        }
+        return element;
+    }
     extend($_.Event, {
-    	fix: fix,
-    	stop:stop,
-    	on:on,
-    	remove:remove,
-    	removeAll:removeAll,
-    	once: once,
-    	emit: emit
+        fix: fix,
+        stop:stop,
+        on:on,
+        remove:remove,
+        removeAll:removeAll,
+        once: once,
+        emit: emit
     });
 })(Asdf);/**
  * @project Asdf.js
@@ -3894,34 +4140,33 @@
 			var elementStyle = element.style;
 			elementStyle[name] =  value;
 		}else {
-			var cssStyle, res, i;
-			// IE
-			if (element.currentStyle) {
-				cssStyle = element.currentStyle;
-			} else if (document.defaultView &amp;&amp;
-					document.defaultView.getComputedStyle) {
-				cssStyle = document.defaultView.getComputedStyle(element, null);
-			} else {
+			var cssStyle, res;
+            if (window.getComputedStyle) {
+                cssStyle = window.getComputedStyle(element, null);
+            } //ie
+			else if (element.currentStyle) {
+                cssStyle = element.currentStyle;
+            } else {
 				return TypeError();
 			}
-			var styleVal = $_.O.extend({},element.style);
-			$_.O.each(styleVal, function(value, key, obj) {
-				if(!value || value == 'auto')
-					obj[key] = cssStyle[key] &amp;&amp; cssStyle[key] != 'auto'?  cssStyle[key]: '';
-			});
+
 			if(!name) {
-				return styleVal;
+                res = {};
+				$_.O.each(cssStyle, function(value, key) {
+                    res[key] = value == 'auto'? '': value;
+                });
+                return res;
 			}
 			else if (isString(name)) {
-				res = styleVal[name];
+				return res = cssStyle[name];
 			} else if($_.O.isArray(name)){
 				res = {};
-				for (i = 0; i &lt; name.length; i++) {
-					res[name[i]] = styleVal[name[i]];
-				}
+                $_.O.each(name, function(v){
+                    res[v] = cssStyle[v] == 'auto'? '' : cssStyle[v];
+                });
+                return res;
 			} else 
 				throw TypeError();
-			return res;
 		}
 	}
 	function toHTML(element){
@@ -3939,6 +4184,50 @@
 			throw new TypeError();
 		return $_.S.isBlank(element.innerHTML);
 	}
+
+    var data = (function(){
+        var data = {};
+        var id = 0;
+        var prefix = 'ae';
+        var getData = function (el, key){
+            if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
+            if(!el.aeid || !hasData(el, key)){
+                var p = parent(el);
+                if(!p) return;
+                return getData(p, key);
+            }
+            return data[el.aeid] &amp;&amp; data[el.aeid][key];
+        };
+        var hasData = function (el, key){
+            if(!el.aeid || !data[el.aeid])
+                return false;
+            var d = data[el.aeid];
+            return key in d &amp;&amp; Object.prototype.hasOwnProperty.call(d, key);
+        };
+        var setData = function (el, key, value){
+            if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
+            if(value == null) throw new TypeError();
+            if(!el.aeid)
+                el.aeid = prefix+id++;
+            var aeid = el.aeid;
+            if(!data[aeid])
+                data[aeid] = {};
+            data[aeid][key] = value;
+            return el;
+        };
+        function parent( element) {
+            do {
+                element = element['parentNode'];
+            } while ( element &amp;&amp; element.nodeType !== 1 );
+            return element;
+        }
+
+        return {
+            getData: getData,
+            setData: setData,
+            hasData: hasData
+        }
+    })();
 	extend($_.Element,  {
 		walk: walk,
 		visible: visible,
@@ -3988,7 +4277,10 @@
 		toHTML: toHTML,
 		isWhitespace: isWhitespace,
         createDom: createDom,
-        createText: createText
+        createText: createText,
+        getData: data.getData,
+        setData: data.setData,
+        hasData: data.hasData
 	});
 })(Asdf);(function ($_) {
 	$_.Template = {};
@@ -4364,6 +4656,22 @@
     $_.O.extend(o, {
         Store:  c
     });
+})(Asdf);(function($_){
+    var o = $_.Core.namespace( $_, 'Async');
+    function loadImg(src, cb){
+        var i = new Image();
+        i.src=src;
+        i.onload = function(){cb(i)}
+    }
+
+    function loadImgs(src, cb){
+        var fn = $_.A.map(src, function(v){return $_.F.curry(loadImg, v)});
+        $_.F.when.apply(this, fn)(cb);
+    }
+    $_.O.extend(o, {
+        loadImg:loadImg,
+        loadImgs:loadImgs
+    });
 })(Asdf);(function($_) {
 	$_.Ajax = {};
 	var activeRequestCount = 0, emptyFunction = function () {};
@@ -4665,13 +4973,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="A.html">A</a></li><li><a href="Element.html">Element</a></li><li><a href="F.html">F</a></li><li><a href="O.html">O</a></li><li><a href="S.html">S</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Namespaces</h3><ul><li><a href="A.html">A</a></li><li><a href="Asdf.F.html">F</a></li><li><a href="Element.html">Element</a></li><li><a href="O.html">O</a></li><li><a href="S.html">S</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha4</a> on Fri Apr 18 2014 23:17:59 GMT+0900 (대한민국 표준시)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha4</a> on Sun May 25 2014 13:26:18 GMT+0900 (대한민국 표준시)
 </footer>
 
 <script> prettyPrint(); </script>

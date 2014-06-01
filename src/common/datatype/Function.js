@@ -1,14 +1,16 @@
 /**
  * @project Asdf.js
  * @author N3735
- * @namespace F
  */
 (function($_) {
+    /**
+     * @namespace Asdf.F
+     */
 	$_.F = {};
 	var slice = Array.prototype.slice, fnProto = Function.prototype, nativeBind = fnProto.bind;
-	
+
 	/**
-	 * @memberof F
+     * @memberof Asdf.F
 	 * @param {*} value value
 	 * @returns {*} value를 리턴한다. 
 	 * @desc value를 리턴한다.
@@ -16,9 +18,9 @@
 	function identity(value) {
 		return value;
 	}
-	
+
 	/**
-	 * @memberof F
+     * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {object} context 실행 함수 context
 	 * @returns {function} context에서 실행할 함수를 반환한다.
@@ -44,7 +46,7 @@
 	}
 		
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {...*=} args 미리 넣을 인자들
 	 * @returns {function} func에 미리 인자를 넣은 함수를 반환한다.
@@ -69,7 +71,7 @@
 	}
 
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {number} timeout 지연시간(초) 
 	 * @returns {*} setTimeoutId를 반환한다.
@@ -83,9 +85,9 @@
 			return __method.apply(__method, args);
 		}, timeout);
 	}
-	
+
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @returns {*} setTimeoutId를 반환한다.
 	 * @desc 실행함수를 0.01초 후에 실행한다. 
@@ -97,7 +99,7 @@
 	}
 
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} wrapper wrapper 함수 
 	 * @returns {function} 실행함수를 wrapper로 감싼 함수를 반환한다.
@@ -118,7 +120,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} pre 이전 실행 함수
 	 * @param {boolean} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정 
@@ -143,7 +145,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} after 이후 실행 함수
 	 * @param {boolean} stop 실행 함수의 결과값여부에 따라 이후 실행 함수를 실행여부를 결정 
@@ -168,7 +170,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @returns {function} 실행 함수 첫번째 인자를 this로 넣은 함수를 반환한다.
 	 * @desc 순수 함수를 특정 객체의 매소드로 만들 경우 유용한 함수이다. 이 함수를 실행하면 첫번째 인자에 this를 넣은 함수를 반환한다.
@@ -191,7 +193,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다.
 	 * @desc 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다. composeRight(f, g) -> g(f(x))
@@ -212,7 +214,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다.
 	 * @desc 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다. compose(f, g) -> f(g(x))
@@ -239,7 +241,7 @@
 	};
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {function} func 실행 함수
 	 * @param {number} number 제거할 인자 갯수.
@@ -253,7 +255,7 @@
 	var extract = before($_.Core.combine.extract, exisFunction);
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {function} func 실행 함수
 	 * @param {...*=} args 미리 넣을 인자들
@@ -268,7 +270,7 @@
 	var partial = before($_.Core.combine.partial, exisFunction);
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수 실행 결과 값 중 하나만 참이면 결과는 참인 함수를 반환한다.
@@ -289,7 +291,7 @@
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수 실행 결과 값 중 하나만 거짓이면 결과는 거짓인 함수를 반환한다.
@@ -318,7 +320,7 @@
 		};
 	}
 	var then = partial(after, undefined, undefined, true);
-	
+
 	function orElse(func, elseFn, stop){
 		if(!$_.O.isFunction(func)||!$_.O.isFunction(elseFn)) throw new TypeError;
 		return function() {
@@ -335,7 +337,7 @@
         var guardType = {
             test: function(v){return Asdf.O.isFunction(v)},
             fn: function(v){return Asdf.O.isFunction(v)}
-        }
+        };
         if(!Asdf.A.any(guards, partial(Asdf.O.type, undefined, guardType)))
             throw new TypeError();
         return function(){
@@ -421,7 +423,7 @@
         }
 	}
 
-	function when(/*async, callback*/){
+	function when(/*async*/){
 		var asyncs = slice.call(arguments);
         if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
 		var l = asyncs.length-1;
