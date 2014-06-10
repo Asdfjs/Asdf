@@ -918,14 +918,16 @@ module.exports = Asdf;
 /**
  * @project Asdf.js
  * @author N3735
- * @namespace F
  */
 (function($_) {
+    /**
+     * @namespace Asdf.F
+     */
 	$_.F = {};
 	var slice = Array.prototype.slice, fnProto = Function.prototype, nativeBind = fnProto.bind;
-	
+
 	/**
-	 * @memberof F
+     * @memberof Asdf.F
 	 * @param {*} value value
 	 * @returns {*} value를 리턴한다. 
 	 * @desc value를 리턴한다.
@@ -933,9 +935,9 @@ module.exports = Asdf;
 	function identity(value) {
 		return value;
 	}
-	
+
 	/**
-	 * @memberof F
+     * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {object} context 실행 함수 context
 	 * @returns {function} context에서 실행할 함수를 반환한다.
@@ -961,7 +963,7 @@ module.exports = Asdf;
 	}
 		
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {...*=} args 미리 넣을 인자들
 	 * @returns {function} func에 미리 인자를 넣은 함수를 반환한다.
@@ -986,7 +988,7 @@ module.exports = Asdf;
 	}
 
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {number} timeout 지연시간(초) 
 	 * @returns {*} setTimeoutId를 반환한다.
@@ -1000,9 +1002,9 @@ module.exports = Asdf;
 			return __method.apply(__method, args);
 		}, timeout);
 	}
-	
+
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @returns {*} setTimeoutId를 반환한다.
 	 * @desc 실행함수를 0.01초 후에 실행한다. 
@@ -1014,7 +1016,7 @@ module.exports = Asdf;
 	}
 
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} wrapper wrapper 함수 
 	 * @returns {function} 실행함수를 wrapper로 감싼 함수를 반환한다.
@@ -1035,7 +1037,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} pre 이전 실행 함수
 	 * @param {boolean} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정 
@@ -1060,7 +1062,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} after 이후 실행 함수
 	 * @param {boolean} stop 실행 함수의 결과값여부에 따라 이후 실행 함수를 실행여부를 결정 
@@ -1085,7 +1087,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @returns {function} 실행 함수 첫번째 인자를 this로 넣은 함수를 반환한다.
 	 * @desc 순수 함수를 특정 객체의 매소드로 만들 경우 유용한 함수이다. 이 함수를 실행하면 첫번째 인자에 this를 넣은 함수를 반환한다.
@@ -1108,7 +1110,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다.
 	 * @desc 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다. composeRight(f, g) -> g(f(x))
@@ -1129,7 +1131,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다.
 	 * @desc 함수들 오른쪽에서 왼쪽으로 실행하는 함수를 반환한다. compose(f, g) -> f(g(x))
@@ -1156,7 +1158,7 @@ module.exports = Asdf;
 	};
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {function} func 실행 함수
 	 * @param {number} number 제거할 인자 갯수.
@@ -1170,7 +1172,7 @@ module.exports = Asdf;
 	var extract = before($_.Core.combine.extract, exisFunction);
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {function} func 실행 함수
 	 * @param {...*=} args 미리 넣을 인자들
@@ -1185,7 +1187,7 @@ module.exports = Asdf;
 	var partial = before($_.Core.combine.partial, exisFunction);
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수 실행 결과 값 중 하나만 참이면 결과는 참인 함수를 반환한다.
@@ -1206,7 +1208,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof F
+	 * @memberof Asdf.F
 	 * @function
 	 * @param {...function} fns 실행 함수들
 	 * @returns {function} 함수 실행 결과 값 중 하나만 거짓이면 결과는 거짓인 함수를 반환한다.
@@ -1235,7 +1237,7 @@ module.exports = Asdf;
 		};
 	}
 	var then = partial(after, undefined, undefined, true);
-	
+
 	function orElse(func, elseFn, stop){
 		if(!$_.O.isFunction(func)||!$_.O.isFunction(elseFn)) throw new TypeError;
 		return function() {
@@ -1252,7 +1254,7 @@ module.exports = Asdf;
         var guardType = {
             test: function(v){return Asdf.O.isFunction(v)},
             fn: function(v){return Asdf.O.isFunction(v)}
-        }
+        };
         if(!Asdf.A.any(guards, partial(Asdf.O.type, undefined, guardType)))
             throw new TypeError();
         return function(){
@@ -1297,7 +1299,7 @@ module.exports = Asdf;
                 return stop;
             }
             return fn.apply(this, arguments);
-        }
+        };
         return orElse(f, overloadedFn, stop)
     }
     function errorHandler(fn, handler){
@@ -1317,12 +1319,47 @@ module.exports = Asdf;
     }
 	
 	function asyncThen(func, after, async, stop){
+        if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
 		return function(){ 
 			var res = func.apply(this, arguments); 
 			if(!res && stop) return res; 
 			return async(after) 
 		}
 	}
+	
+	function toFunction(value){
+		return function(){
+			return value;
+		}
+	}
+
+	function async(async){
+        if(!$_.O.isFunction(async)) throw new TypeError();
+		return function(cb) {
+            async.call(this,cb);
+        }
+	}
+
+	function when(/*async*/){
+		var asyncs = slice.call(arguments);
+        if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
+		var l = asyncs.length-1;
+		return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
+            var res = [];
+			function r(index, value){
+                res[index] = value;
+				if(l == 0)
+					return cb.apply(this, res);
+				l--;
+			}
+			$_.A.each(asyncs, function(v, k){
+				v(curry(r, k));
+			});
+		}
+	}
+
+
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -1348,7 +1385,10 @@ module.exports = Asdf;
         overload:overload,
         errorHandler:errorHandler,
         trys:trys,
-		asyncThen:asyncThen
+		asyncThen:asyncThen,
+		toFunction:toFunction,
+		async:async,
+		when:when
 	}, true);
 
 })(Asdf);
@@ -1375,7 +1415,7 @@ module.exports = Asdf;
 	
 	/**
 	 * @memberof A
-	 * @param {collection} col collection 객체
+	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
 	 * @desc collection을 순환하면서 iterator를 실행한다.
@@ -1397,10 +1437,10 @@ module.exports = Asdf;
 	
 	/**
 	 * @memberof A
-	 * @param {collection} col collection 객체
+	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
-	 * @returns {array} collection을 순환 하면서 iterator 실행 결과를 array type으로 반환한다.
+	 * @returns {Array} collection을 순환 하면서 iterator 실행 결과를 array type으로 반환한다.
 	 * @desc collection을 순환하면서 iterator를 실행결과를 반환한다.
 	 * @example
 	 * Asdf.A.map([1,2,3,4,5], function(n, index){ return n+1 }) //return [2,3,4,5,6]
@@ -1419,7 +1459,7 @@ module.exports = Asdf;
 	
 	/**
 	 * @memberof A
-	 * @param {collection} col collection 객체
+	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
 	 * @param {object=} context iterator의 context
@@ -1452,7 +1492,7 @@ module.exports = Asdf;
 	
 	/**
 	 * @memberof A
-	 * @param {collection} col collection 객체
+	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
 	 * @param {object=} context iterator의 context
@@ -1514,7 +1554,7 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
+	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[0]값을 반환한다.
 	 * @desc col[0]값을 반환한다.
 	 */
@@ -1523,7 +1563,7 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
+	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[col.length-1]값을 반환한다.
 	 * @desc col[length-1]값을 반환한다.
 	 */
@@ -1534,10 +1574,10 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
+	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
-	 * @returns {array} iterator실행이 참으로 만족하는 값만 추출하여 반환한다. 
+	 * @returns {Array} iterator실행이 참으로 만족하는 값만 추출하여 반환한다.
 	 * @desc context에서 iterator 실행이 참으로 만족하는 값만 반환한다. iterator에 인자값은 value, index, col가 들어간다.
 	 * @example
 	 * Asdf.A.filter([1, 2, 3, 4, 5, 6], function(n, index){return n > 3; }) //return [4,5,6];
@@ -1557,10 +1597,10 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
+	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
-	 * @returns {array} iterator실행이 거짓으로 만족하는 값만 추출하여 반환한다. 
+	 * @returns {Array} iterator실행이 거짓으로 만족하는 값만 추출하여 반환한다.
 	 * @desc context에서 iterator 실행이 거짓으로 만족하는 값만 반환한다. iterator에 인자값은 value, index, col가 들어간다.
 	 * @example
 	 * Asdf.A.reject([1, 2, 3, 4, 5, 6], function(n, index){return n > 3; }) //return [1,2,3];
@@ -1572,7 +1612,7 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
+	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
 	 * @returns {boolean} iterator실행이 결과가 모두 참인 경우 참을 반환한다. 
@@ -1595,7 +1635,7 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
+	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
 	 * @returns {boolean} iterator실행이 결과가 하나 이상 참인 경우 참을 반환한다. 
@@ -1641,7 +1681,7 @@ module.exports = Asdf;
 	 * @param {collection} col 대상 객체
 	 * @param {(string|function)} method 이름 또는 function
 	 * @param {...*=} arg method에 들어갈 인자 값
-	 * @returns {array} collection 객체에 method를 실행한 결과를 array Type으로 반환한다. 
+	 * @returns {Array} collection 객체에 method를 실행한 결과를 array Type으로 반환한다.
 	 * @desc 각각의 collection객체 안을 순환하면서 method를 실행하고 그 결과를 반환한다.  
 	 * @example
 	 * Asdf.A.invode([[3,1,2],['c','b','a']], 'sort') //return [[1,2,3],['a','b','c']];
@@ -1658,9 +1698,9 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
-	 * @param {string} key
-	 * @returns {array} collection 객체에서 key값을 추출하여 반환한다. 
+	 * @param {collection|Array} col 대상 객체
+	 * @param {String} key
+	 * @returns {Array} collection 객체에서 key값을 추출하여 반환한다.
 	 * @desc 각각의 collection객체 안을 순환하면서 각각의 객체의 key값을 추출하여 반환한다.
 	 * @example
 	 * Asdf.A.pluck([[1, 2, 3, 4, 5, 6], [1,2,3]], 'length') //return [6,3]
@@ -1718,7 +1758,7 @@ module.exports = Asdf;
 	 * @memberof A
 	 * @func
 	 * @param {collection} col 대상 객체
-	 * @returns {array} 대상객체를 섞은 후 반환한다. 
+	 * @returns {Array} 대상객체를 섞은 후 반환한다.
 	 * @desc 대상 객체를 섞은 후 반환한다.
 	 * @example
 	 * Asdf.A.shuffle([1, 2, 3, 4, 5, 6]) //return [3, 1, 4, 2, 5, 6]
@@ -1738,9 +1778,9 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} arr 대상 객체
+	 * @param {Array} arr 대상 객체
 	 * @param {function=} sort 정렬 함수
-	 * @returns {array} 대상 객체를 sort함수에 맞춰 정렬 한 후 array 객체를 반환한다. 
+	 * @returns {Array} 대상 객체를 sort함수에 맞춰 정렬 한 후 array 객체를 반환한다.
 	 * @desc 대상 객체를 정렬한다. sort 함수를 생략 시 정렬의 기본 sort를 실행한다.
 	 * @example
 	 * Asdf.A.sort([2,1,3]) //return [1,2,3]
@@ -1778,10 +1818,10 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} arr 대상 객체
+	 * @param {Array} arr 대상 객체
 	 * @param {string} key key값
 	 * @param {function=} sort 정렬 함수
-	 * @returns {array} 특정 key값으로 정렬한 후 결과 값을 반환한다. 
+	 * @returns {Array} 특정 key값으로 정렬한 후 결과 값을 반환한다.
 	 * @desc arr안에 객체를 key 값을 기준으로 정렬한다. sort함수가 없는 경우 오름차순으로 정렬한다.
 	 * @example
 	 * Asdf.A.sortBy([[3,1],[4],[2,6,3]], 'length') //return [[4],[3,1],[2,6,3]]
@@ -1830,8 +1870,8 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {collection} col 대상 객체
-	 * @returns {array} array를 반환한다. 
+	 * @param {collection|Array} col 대상 객체
+	 * @returns {Array} array를 반환한다.
 	 * @desc collection 객체를 받아서 array객체로 변환한다.
 	 */
 	function toArray(col) {
@@ -1864,8 +1904,8 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
-	 * @returns {array} 빈 대상 객체를 반환한다.
+	 * @param {Array} array 대상 객체
+	 * @returns {Array} 빈 대상 객체를 반환한다.
 	 * @desc array.length가 0인 빈 array를 반환한다.
 	 */
 	function clear(array) {
@@ -1883,9 +1923,9 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
+	 * @param {Array} array 대상 객체
 	 * @param {number} [n=1] 버릴 갯수
-	 * @returns {array} 앞부터 n개를 버린 array를 반환한다.
+	 * @returns {Array} 앞부터 n개를 버린 array를 반환한다.
 	 * @desc array에서 n부터 나머지 array를 반환한다.
 	 */
 	function rest(array, n){
@@ -1897,8 +1937,8 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
-	 * @returns {array} ==false인 values를 제거하고 나머지 array를 반환한다.
+	 * @param {Array} array 대상 객체
+	 * @returns {Array} ==false인 values를 제거하고 나머지 array를 반환한다.
 	 * @desc ==false('',0,null,undefined,false..)인 values을 제거한 array를 반환한다.
 	 * @example
 	 * Asdf.A.compact([1,null,undefined, false, '', 4]); //return [1,4]
@@ -1911,9 +1951,9 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
+	 * @param {Array} array 대상 객체
 	 * @param {boolean=} shallow deep여부 false면 deep 
-	 * @returns {array} array를 평탄하게 하여 반환한다.
+	 * @returns {Array} array를 평탄하게 하여 반환한다.
 	 * @desc ==false('',0,null,undefined,false..)인 values을 제거한 array를 반환한다.
 	 * @example
 	 * Asdf.A.flatten([1,[2],[3,[4]]]); //return [1,2,3,4]
@@ -1931,9 +1971,9 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
+	 * @param {Array} array 대상 객체
 	 * @param {...*=} values 대상 객체
-	 * @returns {array} array에서 value를 제거한 리스트를 리턴한다.
+	 * @returns {Array} array에서 value를 제거한 리스트를 리턴한다.
 	 * @desc array에서 values와 ===참인 값을 제거하여 array를 반환한다.
 	 * @example
 	 * Asdf.A.without([1,2,3],1,2); //return [3]
@@ -1946,10 +1986,10 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
+	 * @param {Array} array 대상 객체
 	 * @param {boolean=} isSorted 정렬 여부
 	 * @param {function=} iterator 변형 함수
-	 * @returns {array} array에 있는 값 중 중복된 값을 제거한 후 array를 반환한다.
+	 * @returns {Array} array에 있는 값 중 중복된 값을 제거한 후 array를 반환한다.
 	 * @desc array에서 iterator변형 함수가 존재하면 값을 변형한 후 중복된 값을 제거한다.
 	 * @example
 	 * Asdf.A.unique([1,2,1]); //return [1,2]
@@ -1973,8 +2013,8 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {...array} array 대상 객체
-	 * @returns {array} array들의 합집합을 반환한다.
+	 * @param {...Array} array 대상 객체
+	 * @returns {Array} array들의 합집합을 반환한다.
 	 * @desc array들의 합집합을 반환한다.
 	 * @example
 	 * Asdf.A.union([1,2,3],[3,4,5],[1,6]); //return [1,2,3,4,5,6];
@@ -1986,8 +2026,8 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {...array} array 대상 객체
-	 * @returns {array} array들의 교집합을 반환한다.
+	 * @param {...Array} array 대상 객체
+	 * @returns {Array} array들의 교집합을 반환한다.
 	 * @desc array들의 교집합을 반환한다.
 	 * @example
 	 * Asdf.A.intersection([1,2,3],[1,6]); //return [1];
@@ -2004,9 +2044,9 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
-	 * @param {...array} others array 객체
-	 * @returns {array} array에서 others의 차집합을 반환한다.
+	 * @param {Array} array 대상 객체
+	 * @param {...Array} others array 객체
+	 * @returns {Array} array에서 others의 차집합을 반환한다.
 	 * @desc array에서 others의 차집합을 반환한다.
 	 * @example
 	 * Asdf.A.difference([1,2,3],[3,4,5],[1,6]); //return [2];
@@ -2019,8 +2059,8 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {...array} array 대상 객체들
-	 * @returns {array} 대상 객체들이 합쳐친 array 객체를 반환한다.
+	 * @param {...Array} array 대상 객체들
+	 * @returns {Array} 대상 객체들이 합쳐친 array 객체를 반환한다.
 	 * @desc 같은 position에 있는 값을 합쳐서 array로 반환한다.
 	 * @example
 	 * Asdf.A.zip([1,2,3],[3,4,5],[1,6]); //return [[1,3,1], [2,4,6], [3,5, undefined]];
@@ -2036,11 +2076,11 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
+	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
-	 * @param {boolean} isSorted 정렬 여부
-	 * @returns {numbers} array에서 item값을 찾아 그 위치를 반환한다.
-	 * @desc array에서 item 위치를 앞부터 찾아서 그 위치를 반환한다. 만약 없을 경우 -1을 반환한다.
+	 * @param {boolean=} isSorted 정렬 여부
+	 * @returns {Number} array에서 item값을 찾아 그 위치를 반환한다.
+	 * @desc Array에서 item 위치를 앞부터 찾아서 그 위치를 반환한다. 만약 없을 경우 -1을 반환한다.
 	 * @example
 	 * Asdf.A.indexOf([1,2,3,4,2], 2); //return 1;
 	 */
@@ -2059,10 +2099,10 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
+	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
 	 * @param {boolean} isSorted 정렬 여부
-	 * @returns {numbers} array에서 item값을 찾아 그 위치를 반환한다.
+	 * @returns {Number} array에서 item값을 찾아 그 위치를 반환한다.
 	 * @desc array에서 item 위치를 뒤부터 찾아서 그 위치를 반환한다. 만약 없을 경우 -1을 반환한다.
 	 * @example
 	 * Asdf.A.lastIndexOf([1,2,3,4,2], 2); //return 4;
@@ -2078,10 +2118,10 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
-	 * @param {array} fns [function1, functio2..]
-	 * @returns {array} [fns[0](array[0]), fns[1](array[1]),...]을 반환한다.
-	 * @desc {array} [fns[0](array[0]), fns[1](array[1],...]을 반환한다.
+	 * @param {Array} array 대상 객체
+	 * @param {Array} fns [function1, functio2..]
+	 * @returns {Array} [fns[0](array[0]), fns[1](array[1]),...]을 반환한다.
+	 * @desc {Array} [fns[0](array[0]), fns[1](array[1],...]을 반환한다.
 	 * @example
 	 * Asdf.A.batch([1,2,3,4], [function(a){return a-1}, function(a){return a*2}]); //return [0,4,3,4];
 	 */
@@ -2095,9 +2135,10 @@ module.exports = Asdf;
 	/**
 	 * @memberof A
 	 * @func
-	 * @param {array} array 대상 객체
+	 * @param {Array} array 대상 객체
 	 * @param {function} fn 실행 함수
-	 * @desc {array} array를 fn의 인자값으로 사용한다.
+     * @param {Object} context 실행 context
+	 * @desc {Array} array를 fn의 인자값으로 사용한다.
 	 * @example
 	 * Asdf.A.batch([1,2,3,4], [function(a){return a-1}, function(a){return a*2}]); //return [0,4,3,4];
 	 */
@@ -2215,7 +2256,6 @@ module.exports = Asdf;
 		return str.length > length ?
 		str.slice(0, length - truncation.length) + truncation : str;
 	}
-	
 	/**
 	 * @memberof S
 	 * @param {string} str 대상 문자열
@@ -3229,4 +3269,30 @@ module.exports = Asdf;
     $_.O.extend(o, {
         Store:  c
     });
+})(Asdf);(function($_) {
+    //Asdf.Chain("    asdfasdfasdfasdf").bind(Asdf.S.trim).bind(Asdf.S.capitalize).bind(Asdf.S.truncate, undefined, 5, '...').bind(Asdf.S.lpad, undefined, '0', 10).value();
+    function Chain(obj, conf){
+        if(obj instanceof Chain) return obj;
+        if(!(this instanceof Chain)) return new Chain(obj)
+        this._value = obj;
+        this._conf = {};
+        if(conf) {
+            conf.bind && (this.bind = conf.bind);
+            conf.fail && (this.fail = conf.fail);
+        }
+    }
+    $_.Chain = Chain;
+    function bind(fn){
+        var _method = $_.F.partial.apply(this, arguments);
+        if(this._value != this._conf.fail)
+            return Chain(_method(this._value), this._conf);
+        return Chain(this._conf.fail, this._conf);
+    }
+    function value(){
+        return this._value;
+    }
+
+    Chain.prototype.bind = bind;
+    Chain.prototype.value = value;
+
 })(Asdf);

@@ -1,5 +1,6 @@
 (function($_) {
-	$_.Promise = promise = {};
+    var promise = {}
+	$_.Promise = promise;
 	//state : Uninitialized, unfulfill, fulfilled, rejected
 	var toPromise = function(resolver){
 		var fire = true;
