@@ -132,7 +132,7 @@ test("Asdf.F.overload", function(){
 test("Asdf.F.errorHandler", function(){
     function f(){
         throw new Error();
-    };
+    }
     var ef = Asdf.F.errorHandler(f, function(){return true;});
     equal(ef(), true, 'errorHandler');
 });
@@ -161,7 +161,7 @@ asyncTest("Asdf.F.asyncThen", function(){
     var b = false;
     var f = Asdf.F.asyncThen(function(){}, function(){
         b=true;
-        ok(b, 'asyncThen ok')
+        ok(b, 'asyncThen ok');
         start();
     }, function(f){
         setTimeout(f, 200);
@@ -178,5 +178,14 @@ asyncTest("Asdf.F.when", function(){
         deepEqual(Asdf.A.toArray(arguments), [1,2,3,4], 'Asdf.F.when ok')
         start();
     })
+});
 
+test("Asdf.F.curried", function(){
+    function add3(a,b,c){return a+b+c}
+    var f = Asdf.F.curried(add3);
+    equal(f(1,2,3), 6, 'curry ok');
+    equal(f(1)(2)(3), 6, 'curry ok');
+    var f1 = Asdf.F.curried(add3, 4);
+    equal(f1(1,2,3,4), 6, 'argNum ok');
+    equal(f1(1)(2)(3)(4), 6, 'argNum ok');
 });

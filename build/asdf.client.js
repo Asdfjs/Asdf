@@ -1298,6 +1298,11 @@
             }
         }
     }
+
+    /**
+     * @private
+     * @type {Object}
+     */
     var stop = {};
     function overload(fn, typeFn, overloadedFn){
         overloadedFn = overloadedFn||function(){throw new TypeError;};
@@ -1324,7 +1329,15 @@
         var fn = $_.A.reduce(fns, errorHandler);
         return fn;
     }
-	
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {Function} after
+     * @param {Function} async
+     * @param {boolean} stop
+     * @returns {Function}
+     */
 	function asyncThen(func, after, async, stop){
         if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
 		return function(){ 
@@ -1333,12 +1346,27 @@
 			return async(after) 
 		}
 	}
-	
+
+    /**
+     * @memberof Asdf.F
+     * @param {*} value
+     * @returns {Function}
+     * @desc value값을 반환하는 함수를 반환한다.
+     * @example
+     * var T = Asdf.F.toFunction(true);
+     * T(); //true;
+     */
 	function toFunction(value){
 		return function(){
 			return value;
 		}
 	}
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} async
+     * @returns {Function}
+     */
 
 	function async(async){
         if(!$_.O.isFunction(async)) throw new TypeError();
@@ -1347,6 +1375,19 @@
         }
 	}
 
+    /**
+     * @memberof Asdf.F
+     * @param {...Function} async 인자값으로 callback 함수를 받는 함수들
+     * @returns {Function} async 함수들이 다 완료 후 실행 하는 함수를 인자로 받는 함수
+     * @desc async 함수들이 완료 한 경우 callback 함수를 부르는 함수를 반환한다.
+     * @example
+     * Asdf.F.when(
+     * function(cb){setTimeout(function(){cb(1)}, 50)},
+     * function(cb){setTimeout(function(){cb(2)}, 25)},
+     * function(cb){setTimeout(function(){cb(3)}, 70)},
+     * function(cb){setTimeout(function(){cb(4)}, 10)}
+     * )(function(){console.log(arguments}) //[1,2,3,4]
+     */
 	function when(/*async*/){
 		var asyncs = slice.call(arguments);
         if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
@@ -1366,7 +1407,30 @@
 		}
 	}
 
-
+    /**
+     * @memberof Asdf.F
+     * @param {Function} fn
+     * @param {Number=} argNum
+     * @returns {Function|*}
+     * @desc 함수를 커리 함수로 만든다.
+     * @example
+     * function add3(a,b,c){return a+b+c};
+     * var f = curried(add3);
+     * f(1,2,3);
+     * f(1,2)(3);
+     * f(1)(2,3);
+     * f(1)(2)(3);
+     */
+    function curried(fn, argNum){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        if(argNum != null && $_.O.isNotNumber(argNum)) throw new TypeError();
+        return function r(){
+            if(arguments.length >= (argNum||fn.length))
+                return fn.apply(this, arguments);
+            else
+                return r.bind.apply(r,[this].concat([].slice.call(arguments)));
+        }
+    }
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -1395,7 +1459,8 @@
 		asyncThen:asyncThen,
 		toFunction:toFunction,
 		async:async,
-		when:when
+		when:when,
+        curried:curried
 	}, true);
 
 })(Asdf);
@@ -4632,6 +4697,24 @@
     });
 })(Asdf);(function($_) {
     //Asdf.Chain("    asdfasdfasdfasdf").bind(Asdf.S.trim).bind(Asdf.S.capitalize).bind(Asdf.S.truncate, undefined, 5, '...').bind(Asdf.S.lpad, undefined, '0', 10).value();
+    /*var promise = Asdf.Chain(
+        function(f){console.log('start'); f()},
+        {bind:function(async){
+            var ff = Asdf.F.wrap(this._value, function(f,as){
+                return f(function(){
+                    return async.apply(this,Asdf.A.merge([as],arguments))
+                });
+            });
+            return Asdf.Chain(ff, this._conf);
+        }});
+    promise
+        .bind(Asdf.F.async(function(f){console.log('1');setTimeout(f,1000)}))
+        .bind(Asdf.F.async(function(f){console.log('2');setTimeout(f,1000)}))
+        .bind(Asdf.F.async(function(f){console.log('3');setTimeout(f,1000)}))
+        .bind(Asdf.F.async(function(f){console.log('4');setTimeout(f,1000)}))
+        .value()()
+        */
+
     function Chain(obj, conf){
         if(obj instanceof Chain) return obj;
         if(!(this instanceof Chain)) return new Chain(obj, conf)
