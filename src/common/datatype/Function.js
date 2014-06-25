@@ -504,7 +504,7 @@
             if(arguments.length >= (argNum||fn.length))
                 return fn.apply(this, arguments);
             else
-                return r.bind.apply(r,[this].concat([].slice.call(arguments)));
+                return r.bind.apply(r,$_.A.merge([this], arguments));
         }
     }
 
