@@ -250,7 +250,7 @@
 	var map = partial(_mapIn, undefined, undefined, undefined, returnTrue, undefined);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {boolean} [deep=false] deepCopy 여부
 	 * @param {Object} destination 대상 객체
 	 * @param {Object} source 출처 객체
@@ -279,7 +279,7 @@
 		return destination;
 	}
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} obj 대상 객체
 	 * @param {Object} mixin 출처 객체
 	 * @returns {Object} 대상객체를 반환한다.
@@ -294,7 +294,7 @@
 		return obj;
 	}
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} 순수Object여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 순수Object인지 판단한다.
@@ -317,7 +317,7 @@
 		return key === undefined || hasOwnProperty.call(object, key);
 	}
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} 순수Object여부를 반환하다.
@@ -325,7 +325,7 @@
 	 */
 	var isNotPlainObject = not(isPlainObject);
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Element여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Element인지 판단한다.
@@ -334,7 +334,7 @@
 		return !!(object && object.nodeType !== 3);
 	}
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Element여부를 반환하다.
@@ -346,7 +346,7 @@
     }
     var isNotDocument = not(isDocument);
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Node여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Node인지 판단한다.
@@ -356,7 +356,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Node여부를 반환하다.
@@ -365,8 +365,8 @@
 	var isNotNode = not(isNode);
 	
 	/**
-	 * @memberof O
-	 * @param {Object} object 판단 객체
+	 * @memberof Asdf.O
+	 * @param {Object} obj 판단 객체
 	 * @returns {boolean} Window여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 window인지 판단한다.
 	 */
@@ -375,7 +375,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Window여부를 반환하다.
@@ -384,8 +384,8 @@
 	var isNotWindow = not(isWindow);
 	
 	/**
-	 * @memberof O
-	 * @param {Object} object 판단 객체
+	 * @memberof Asdf.O
+	 * @param {Object} obj 판단 객체
 	 * @returns {boolean} 빈 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 빈 객체인지 판단한다.
 	 */
@@ -398,7 +398,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} 빈 객체여부를 반환하다.
@@ -407,7 +407,7 @@
 	var isNotEmptyObject = not(isEmptyObject);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Array 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Array인지 판단한다.
@@ -421,7 +421,7 @@
 		return nativeToString.call(object) === objectType.ARRAY_CLASS;
 	}
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Array 객체여부를 반환하다.
@@ -430,7 +430,7 @@
 	var isNotArray = not(isArray);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Object 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Object인지 판단한다.
@@ -440,7 +440,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Object 객체여부를 반환하다.
@@ -449,7 +449,7 @@
 	var isNotObject = not(isObject);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Arguments 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Arguments인지 판단한다.
@@ -459,7 +459,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Arguments 객체여부를 반환하다.
@@ -468,7 +468,7 @@
 	var isNotArguments = not(isArguments);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} function 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 function인지 판단한다.
@@ -478,7 +478,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} function 객체여부를 반환하다.
@@ -487,7 +487,7 @@
 	var isNotFunction  = not(isFunction);
 
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} String 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 String인지 판단한다.
@@ -497,7 +497,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} String 객체여부를 반환하다.
@@ -506,7 +506,7 @@
 	var isNotString = not(isString);
 
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Number 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Number인지 판단한다.
@@ -516,7 +516,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Number 객체여부를 반환하다.
@@ -525,7 +525,7 @@
 	var isNotNumber = not(isNumber);
 
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Date 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Date인지 판단한다.
@@ -535,7 +535,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Date 객체여부를 반환하다.
@@ -544,7 +544,7 @@
 	var isNotDate = not(isDate);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Regexp인지 판단한다.
@@ -554,7 +554,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
@@ -563,7 +563,7 @@
 	var isNotRegexp = not(isRegexp);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} undefined여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 undefined인지 판단한다.
@@ -573,7 +573,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} undefined여부를 반환하다.
@@ -582,7 +582,7 @@
 	var isNotUndefined = not(isUndefined);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} null여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 null인지 판단한다.
@@ -592,7 +592,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {Object} object 판단 객체
 	 * @returns {boolean} null여부를 반환하다.
@@ -601,7 +601,7 @@
 	var isNotNull = not(isNull);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} obj 판단 객체
 	 * @returns {boolean} collection여부를 반환하다.
@@ -609,12 +609,10 @@
 	 * collection 객체란? length프로퍼티가 존재 하며 숫자 이여야 한다.
 	 */
 	function isCollection(obj) {
-		if(isNotObject(obj)||isNotNumber(obj.length))
-			return false;
-		return true;
+		return isArray(obj)||isObject(obj)&&isNumber(obj.length)
 	}
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} obj 판단 객체
 	 * @returns {boolean} collection여부를 반환하다.
@@ -622,7 +620,7 @@
 	 */
 	var isNotCollection = not(isCollection);
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} object 대상 객체
 	 * @returns {array} object의 key값을 추출하여 Array type으로 반환한다.
@@ -642,7 +640,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} object 대상 객체
 	 * @returns {array} object의 value값을 추출하여 Array type으로 반환한다.
@@ -671,7 +669,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} object 대상 객체
 	 * @returns {array} object의 value값이 function인 key값을 추출하여 Array type으로 반환한다.
@@ -683,7 +681,7 @@
 	var functions = partial(getKeysbyType, undefined, isFunction);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} object 대상 객체
 	 * @returns {array} object의 value값이 null인 key값을 추출하여 Array type으로 반환한다.
@@ -695,7 +693,7 @@
 	var nulls = partial(getKeysbyType, undefined, isNull);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} object 대상 객체
 	 * @returns {array} object의 value값이 undefined key값을 추출하여 Array type으로 반환한다.
@@ -707,7 +705,7 @@
 	var undefineds = partial(getKeysbyType, undefined, isUndefined);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} object 대상 객체
 	 * @returns {array} object의 value값이 plainObject인 key값을 추출하여 Array type으로 반환한다.
@@ -719,7 +717,7 @@
 	var plainObjects = partial(getKeysbyType, undefined, isPlainObject);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} object 대상 객체
 	 * @returns {array} object의 value값이 Array인 key값을 추출하여 Array type으로 반환한다.
@@ -731,7 +729,7 @@
 	var arrays = partial(getKeysbyType, undefined, isArray);
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} obj 대상 객체
 	 * @param {...string} key 추출 key값들
@@ -751,7 +749,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} obj 대상 객체
 	 * @returns {object} obj복사하여 반환한다.
@@ -768,7 +766,7 @@
 	}
 	
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} obj 대상 객체
 	 * @returns {string} obj를 queryString으로 바꾸어 반환한다.
@@ -795,33 +793,54 @@
 		});
 		return res.join('&');
 	}
+
+    /**
+     * @memberof Asdf.O
+     * @param {Object} obj
+     * @param {String} key
+     * @returns {Object}
+     */
 	function remove(obj, key) {
-		if(isNotObject(obj)) throw new TypeError();
-		var res;
-		if((res = key in obj)){
+		if(isNotObject(obj)||isNotString(key)) throw new TypeError();
+		if(key in obj){
 			delete obj[key];
 		}
-		return res;
+		return obj;
 	}
+
 	function getOrElse(obj, key, defult){
 		if(isNotObject(obj)) throw new TypeError();
-		if(key in obj)
+		if(has(obj, key))
 			return obj[key];
 		return defult;
 	}
-	
-	var get = partial(getOrElse, undefined, undefined, null);
-	
+
+    /**
+     * @memberof Asdf.O
+     * @function
+     * @param {Object} object
+     * @param {String} key
+     * @return {*}
+     */
+	var get = partial(getOrElse, undefined, undefined, undefined);
+
 	function has(obj,str){
-		return get(obj, str)!== undefined;
+		return str in obj;
 	}
-	
+
+    /**
+     * @memberof Asdf.O
+     * @param {Object} obj
+     * @param {String} key
+     * @param {*} value
+     */
 	function set(obj, key, value){
 		if(isNotObject(obj)) throw new TypeError();
 		obj[key] = value;
+        return obj;
 	}
 	/**
-	 * @memberof O
+	 * @memberof Asdf.O
 	 * @func
 	 * @param {object} obj 대상 객체
 	 * @param {object} type 타입에 대한 정의 객체 
@@ -849,6 +868,13 @@
 		
 		return res;
 	}
+
+    /**
+     * @memberof Asdf.O
+     * @param {*} obj
+     * @param {*} obj2
+     * @returns {Boolean}
+     */
     function equals(obj, obj2){
         if(obj == null|| obj2 == null) return false;
         if(obj===obj2) return true;
@@ -917,6 +943,8 @@
 		toQueryString: toQueryString,
 		get: get,
 		getOrElse: getOrElse,
+        remove:remove,
+        has:has,
 		set: set,
 		type:type,
         equals:equals
@@ -1428,7 +1456,7 @@
             if(arguments.length >= (argNum||fn.length))
                 return fn.apply(this, arguments);
             else
-                return r.bind.apply(r,[this].concat([].slice.call(arguments)));
+                return r.bind.apply(r,$_.A.merge([this], arguments));
         }
     }
 

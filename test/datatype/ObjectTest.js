@@ -133,6 +133,11 @@ test("Asdf.O.get", function() {
 	equal(Asdf.O.get(obj, 'a'), 'aa','값이 있을 경우');
 	equal(Asdf.O.get(obj, 'c'), null,'값이 없을 경우');
 });
+test("Asdf.O.remove", function(){
+    var obj = {a:'aa', b:'bb'};
+    Asdf.O.remove(obj, 'a');
+    ok(!Asdf.O.has(obj, 'a'), 'property 삭제');
+});
 test("Asdf.O.getOrElse", function() {
 	var obj = {a:'aa', b:'bb'};
 	equal(Asdf.O.getOrElse(obj, 'a', 'cc'), 'aa','값이 있을 경우');
