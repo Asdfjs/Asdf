@@ -203,7 +203,7 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name O
+ * @name Asdf.O
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'O');
@@ -3103,7 +3103,7 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name O
+ * @name Asdf.O
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'O');
@@ -3343,7 +3343,7 @@
         function mouseHooks(event){
             var eventDoc, doc, body, button = event.button, fromElement = event.fromElement;
             if( event.pageX == null && event.clientX != null ) {
-                eventDoc = event.target.ownderDocument || document;
+                eventDoc = event.target.ownerDocument || document;
                 doc = eventDoc.documentElement;
                 body = eventDoc.body;
                 event.pageX = event.clientX + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
@@ -3451,7 +3451,7 @@
 })(Asdf);/**
  * @project Asdf.js
  * @author N3735
- * @namespace Element
+ * @namespace Asdf.Element
  */
 (function($_) {
 	var nativeSlice = Array.prototype.slice, extend = $_.O.extend,
@@ -3475,7 +3475,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {function} fun 실행 함수
      * @param {object=} context 실행 함수 context
@@ -3496,7 +3496,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {boolean} boolean
      * @desc element가 display가 none 여부를 반환한다.
@@ -3508,7 +3508,7 @@
 		return element.style.display !='none';
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element
      * @desc visible(element)가 true면 hide를 실행하고 false면 show를 실행한다.
@@ -3524,7 +3524,7 @@
 	    return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element
      * @desc 대상 element를 style.display를 'none'으로 변경 한다.
@@ -3540,7 +3540,7 @@
 	    return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element
      * @desc 대상 element를 style.display를 ''으로 변경 한다.
@@ -3558,7 +3558,7 @@
 		 return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {string=} value element에 넣을 문자열
      * @returns {element|string} value값이 존재하면 element를 반환하고 value값이 존재 하지 않으면 text값을 반환하다.
@@ -3591,7 +3591,7 @@
 		}
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {string=} value value값
      * @returns {element|string} value값이 존재하면 element를 반환하고 value값이 존재 하지 않으면 value값을 반환하다.
@@ -3607,7 +3607,7 @@
 		return (value==null)? element.value : (element.value = value, element);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {string=} html html값
      * @returns {element|string} html값이 존재하면 element를 반환하고 html값이 존재 하지 않으면 innerHTML값을 반환하다.
@@ -3623,7 +3623,7 @@
 		return (html==null)? element.innerHTML: (element.innerHTML = html, element);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상element parentNode를 반환한다.
      * @desc 대상element parentNode를 반환한다.
@@ -3639,7 +3639,7 @@
 		return recursively(element, 'parentNode');
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element=} until 최종element
      * @returns {array} 대상element에서 최종element까지 모든 조상을 array로 반환한다.
@@ -3659,7 +3659,7 @@
 		 return recursivelyCollect(element, 'parentNode', until);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상element nextSibling 반환한다.
      * @desc 대상element nextSibling 반환한다.
@@ -3677,7 +3677,7 @@
 		return recursively(element, 'nextSibling');
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상element previousSibling 반환한다.
      * @desc 대상element previousSibling 반환한다.
@@ -3695,7 +3695,7 @@
 		return recursively(element, 'previousSibling');
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element=} until 최종element
      * @returns {array} 대상element에서 최종element까지 nextSibling들을 반환한다.
@@ -3716,7 +3716,7 @@
 		return recursivelyCollect(element, 'nextSibling', until);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element=} until 최종element
      * @returns {array} 대상element에서 최종element까지 previousSibling 반환한다.
@@ -3737,7 +3737,7 @@
 		return recursivelyCollect(element, 'previousSibling', until);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {array} 본인을 제외한 형제 노드들을 반환한다.
      * @desc 본인을 제외한 형제 노드들을 반환한다.
@@ -3757,9 +3757,9 @@
 		return $_.A.without($_.A.toArray(element.parentNode.childNodes), element);
 	}
     /**
-     * @memberof Element
-     * @param {element} element 대상element
-     * @returns {array} 자식 노드를 반환한다.
+     * @memberof Asdf.Element
+     * @param {Element} element 대상element
+     * @returns {Array} 자식 노드를 반환한다.
      * @desc 자식 노드들을 반환한다.
      * @example
      * var p = document.createElement('div');
@@ -3776,6 +3776,7 @@
 	function childNodes(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
+        if(!element.firstChild) return []
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
     function children(element){
@@ -3786,7 +3787,7 @@
         return $_.A.filter(element.children, $_.O.isElement);
     }
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element|elements} contents를 반환한다.
      * @desc contents를 반환한다.
@@ -3809,7 +3810,7 @@
 		return (element.nodeName === 'IFRAME')? (element.contentDocument||(element.contentWindow&&element.contentWindow.document)) : element.childNodes ;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element} element wrapElement
      * @returns {element} wrapElement를 반환한다.
@@ -3830,7 +3831,7 @@
 		return newContent;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element를 반환한다.
      * @desc 대상element를 제거하고 대상 하위 element를 대상 부모 element로 이동시킨 후 대상 element를 반환한다.
@@ -3900,7 +3901,7 @@
         return doc.createTextNode(string);
     }
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 부모Element
      * @param {element} newContent 새Element
      * @returns {element} 부모Element를 반환한다.
@@ -3923,7 +3924,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 부모Element
      * @param {element} newContent 새Element
      * @returns {element} 부모Element를 반환한다.
@@ -3946,7 +3947,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 기준Element
      * @param {element} newContent 새Element
      * @returns {element} 기준Element를 반환한다.
@@ -3967,7 +3968,7 @@
 	}
 
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 기준Element
      * @param {element} newContent 새Element
      * @returns {element} 기준Element를 반환한다.
@@ -3987,7 +3988,7 @@
 		return element;		
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상Element
      * @returns {element} 대상Element를 반환한다.
      * @desc 대상Element를 빈Element로 만든다.
@@ -4004,29 +4005,62 @@
 		element.innerHTML = '';
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     */
 	function remove(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
-		element.parentNode.removeChild(element);
+        if(element.parentNode)
+		    element.parentNode.removeChild(element);
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param element
+     * @returns {Element|undefined}
+     */
     function first(element){
         if(!$_.O.isElement(element))
           throw new TypeError();
         var c = children(element);
         return c&&c[0];
     }
+
+    /**
+     * @memberof Asdf.Element
+     * @param element
+     * @returns {Element|undefined}
+     */
     function last(element){
         if(!$_.O.isElement(element))
             throw new TypeError();
         var c = children(element);
         return c&& c[c.length-1];
     }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     * @param {Number} n
+     * @returns {Element|undefined}
+     */
     function eq(element, n){
         if(!$_.O.isElement(element))
             throw new TypeError();
         var c = children(element);
         return c&& c[n];
     }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     * @param {String} name
+     * @param {String=} value
+     * @returns {null|Element|*}
+     */
 	function attr(element, name, value) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4076,6 +4110,24 @@
 			delete element[name];
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Document} doc
+     * @returns {Window|false}
+     */
+    function getWindow(doc){
+        return $_.O.isWindow(doc)?
+            doc: doc.nodeType===9 ?
+            doc.defaultView || doc.parentWindow : false;
+    }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Node} element
+     * @param {Node} target
+     * @returns {{left: number, top: number, height: number, width: number, right: number, bottom: number}}
+     */
 	function relatedOffset(element, target) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(target))
 			throw new TypeError();
@@ -4089,17 +4141,28 @@
 				bottom: offsetEl.bottom - offsetTar.top
 			};
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Node} element
+     * @returns {{height: number, width: number, top: number, bottom: number, right: number, left: number}}
+     */
 	function offset(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
+        var doc = element.ownerDocument;
+        var docElem = doc.documentElement;
+        var win = getWindow(doc);
 		// IE 경우 document.documentElement.scrollTop 그 외 document.body.scrollTop
 		var width = 0,
 			height = 0,
 			rect = element.getBoundingClientRect(),
-			top = rect.top + (document.body.scrollTop || document.documentElement.scrollTop),
-			bottom = rect.bottom + (document.body.scrollTop || document.documentElement.scrollTop),
-			right = rect.right + (document.body.scrollLeft || document.documentElement.scrollLeft),
-			left = rect.left + (document.body.scrollLeft || document.documentElement.scrollLeft);
+            ot = ( win.pageYOffset || docElem.scrollTop )  - ( docElem.clientTop  || 0 ),
+            ol = ( win.pageXOffset || docElem.scrollLeft ) - ( docElem.clientLeft || 0 ),
+			top = rect.top + ot,
+			bottom = rect.bottom + ot,
+			right = rect.right + ol,
+			left = rect.left + ol;
 		if (rect.height) {
 			height = rect.height;
 			width = rect.width;
@@ -4116,6 +4179,29 @@
 			left : left
 		};
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     * @returns {Element|undefined}
+     */
+    function offsetParent(element){
+        if(!$_.O.isElement(element)) throw new TypeError();
+        var res = element;
+        while(res &&
+            res.nodeName.toUpperCase() !== 'html' &&
+            css(res, 'position') === 'static'){
+            res = parent(res);
+        }
+        return res;
+    }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {HTMLElement}
+     */
 	function addClass(element, name){
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
@@ -4126,6 +4212,13 @@
 		});
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {HTMLElement}
+     */
 	function removeClass(element, name) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4139,6 +4232,13 @@
 		}
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {HTMLElement}
+     */
 	function toggleClass(element, name) {
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
@@ -4151,6 +4251,13 @@
 		});
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {boolean}
+     */
 	function hasClass(element, name) {
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
@@ -4196,10 +4303,18 @@
 	    if (matchesSelector) return matchesSelector.call(element, selector);
 	    var match, parent = element.parentNode, temp = !parent;
 	    if (temp) (parent = tempParent).appendChild(element);
-	    var match =  $_.A.indexOf( find(parent, selector), element);
+	    match =  $_.A.indexOf( find(parent, selector), element);
 	    temp && tempParent.removeChild(element);
-	    return match===-1? false: true;
+	    return match !==-1;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String|Array} name
+     * @param {String=} value
+     * @returns {*}
+     */
 	function css(element, name, value){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4214,7 +4329,7 @@
 			else if (element.currentStyle) {
                 cssStyle = element.currentStyle;
             } else {
-				return TypeError();
+				return new TypeError();
 			}
 
 			if(!name) {
@@ -4233,9 +4348,15 @@
                 });
                 return res;
 			} else 
-				throw TypeError();
+				throw new TypeError();
 		}
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {node} element
+     * @returns {string}
+     */
 	function toHTML(element){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4246,6 +4367,12 @@
 		d.appendChild(element);
 		return d.innerHTML;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Node} element
+     * @returns {boolean}
+     */
 	function isWhitespace(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4347,7 +4474,9 @@
         createText: createText,
         getData: data.getData,
         setData: data.setData,
-        hasData: data.hasData
+        hasData: data.hasData,
+        getWindow: getWindow,
+        offsetParent: offsetParent
 	});
 })(Asdf);(function ($_) {
 	$_.Template = {};

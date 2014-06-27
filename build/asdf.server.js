@@ -196,7 +196,7 @@ module.exports = Asdf;
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name O
+ * @name Asdf.O
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'O');

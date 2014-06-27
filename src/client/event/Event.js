@@ -103,7 +103,7 @@
         function mouseHooks(event){
             var eventDoc, doc, body, button = event.button, fromElement = event.fromElement;
             if( event.pageX == null && event.clientX != null ) {
-                eventDoc = event.target.ownderDocument || document;
+                eventDoc = event.target.ownerDocument || document;
                 doc = eventDoc.documentElement;
                 body = eventDoc.body;
                 event.pageX = event.clientX + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
