@@ -2332,14 +2332,14 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name S
+ * @name Asdf.S
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'S');
 	var ScriptFragment = '<script[^>]*>([\\S\\s]*?)<\/script>';
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} [length=30] 축약할 글자 수
 	 * @param {string} [truncation=...] 축약 시 추가될 문자열 
@@ -2357,7 +2357,7 @@
 		str.slice(0, length - truncation.length) + truncation : str;
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str 앞뒤 공백 문자를 제거한다.
 	 * @desc str 앞 뒤 공백 문자를 제거한다. 
@@ -2371,7 +2371,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str에 태그를 제거한다. 
 	 * @desc str에 태그를 제거한다.  
@@ -2385,9 +2385,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {string} str에 script태그를 제거한다. 
+	 * @returns {string} str에 script태그를 제거한다.
 	 * @desc str에 script태그를 제거한다.  
 	 * @example
 	 * Asdf.S.stripScripts('a <a href="#">link</a><script>alert("hello world!");</script>'); // return 'a <a href="#">link</a>'
@@ -2399,7 +2399,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} html에 출력 가능한 문자로 변경하여 반환한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 화면에 출력 가능하게 변경한다.  
@@ -2413,7 +2413,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str문자를 html 문자로 변경한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 html문자로 변경한다. escapeHTML와 반대.  
@@ -2426,7 +2426,7 @@
 	    return stripTags(str).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} [separator=&] 값들 간의 구분자
 	 * @param {string} [sepKV==] key value 구분자
@@ -2460,9 +2460,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {array} 대상 문자열을 array로 변환한다.
+	 * @returns {Array} 대상 문자열을 array로 변환한다.
 	 * @desc 대상 문자열을 array로 변환한다.  
 	 * @example
 	 * Asdf.S.toArray('abc'); // return ['a','b','c'];
@@ -2473,7 +2473,7 @@
 	    return str.split('');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} 다음 문자열을 반환한다.
 	 * @desc keycode가 다음인 문자열을 반환한다.
@@ -2488,7 +2488,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} count 대상 문자열 횟수
 	 * @returns {string} 대상 문자열을 count 횟수 만큼 반복하여 반환한다.
@@ -2503,7 +2503,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background-color -> backgroundColor.
 	 * @desc -를 없애고 다음 문자를 대문자로 변경한다.
@@ -2519,7 +2519,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background -> Background.
 	 * @desc 첫문자를 대문자로 이후 문자를 소문자로 바꾼다.
@@ -2533,7 +2533,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} backgroundColor -> background_color
 	 * @desc 대문자 앞에 _변경하고 대문자를 소문자로 바꾸어 반환한다.
@@ -2551,7 +2551,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background_color -> background-color
 	 * @desc _를 -로 변경한다.
@@ -2565,7 +2565,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열에 찾는 문자열이 있으면 true를 반환한다.
@@ -2580,7 +2580,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 앞에 찾는 문자열이 있으면 true를 반환한다.
@@ -2595,7 +2595,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 마지막에 찾는 문자열이 있으면 true를 반환한다.
@@ -2611,7 +2611,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈값이면 true를 반환한다.
 	 * @desc 대상 문자열이 빈값이면 true를 반환한다.
@@ -2625,7 +2625,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
 	 * @desc 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
@@ -2638,6 +2638,12 @@
 	    return /^\s*$/.test(str);
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {boolean}
+     * @desc json 여부를 판단한다.
+     */
     function isJSON(str) {
         if($_.O.isNotString(str)) throw new TypeError();
         if(isBlank(str)) return false
@@ -2648,9 +2654,9 @@
     }
 
 	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @memberof Asdf.S
+	 * @param {string} str 대상 문자
+     * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -2664,9 +2670,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 오른쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 오른쪽쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -2680,10 +2686,10 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {regexp} reg 정규 표현식
-	 * @returns {template} template
+	 * @returns {{set:Function, toString:Function}} template
 	 * @desc template 객체를 반환한다. template.set(1, 'abc');... template.toString(); 
 	 * @example
 	 * var t = Asdf.S.template('aa ? bb ? cc ?', /\?/g);
@@ -2774,6 +2780,13 @@
 		};
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} version1
+     * @param {string} version2
+     * @param {Function} compareFn
+     * @returns {number}
+     */
     function compareVersion(version1, version2, compareFn){
         compareFn = compareFn||compare;
         var order = 0;
@@ -2898,6 +2911,11 @@
         return r(tokenTree.token)[0];
     }
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {string}
+     */
     function toRegExp(str){
         return str.replace(/([\\^$()[\]])/g,'\\$1');
     }
@@ -3012,54 +3030,108 @@
         transfer:transfer
 	});
 })(Asdf);(function($_) {
+    /**
+     * @namespace
+     * @name Asdf.N
+     */
 	$_.N = {};
 	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
 	var curry = $_.Core.combine.curry;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
-	/*function sum (){
-		var arg = $_.A.toArray(arguments);
-		arg = $_.A.filter(arg, isNotNaN);
-		return $_.A.reduce(arg, $_.Core.op["+"], 0);
-	}
-	*/
 	function multiply() {
 		var arg = $_.A.toArray(arguments);
 		arg = $_.A.filter(arg, isNotNaN);
 		return $_.A.reduce(arg, $_.Core.op["*"], 1);
 	}
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
-	var isRange = is(function (n,a,b) { return a<=n && n<=b; });
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
+    var isRange = is(function (n,a,b) { return a<=n && n<=b; });
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
 	var isNotRange = not(isRange);
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @returns {boolean}
+     */
 	var isZero = is(function (n) { return n === 0;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @returns {boolean}
+     */
 	var isNotZero = not(isZero);
-	var isSame = is(function (n, a) { return a === b;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
+	var isSame = is(function (a, b) { return a === b;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
 	var isNotSame = not(isSame);
 	var isGreaterThan = is(function (n, a){ return n > a;});
 	var isNotGreaterThan = not(isGreaterThan);
 	var isLessThan = is(function (n, a){ return n < a;});
 	var isNotLessThan = not(isLessThan);
-	function range(start, end, fn) {
-		if(arguments.length == 1){
-			end = arguments[0];
-			start = 0;
-		}
-		if(!($_.O.isNumber(start) && $_.O.isNumber(end))) throw new TypeError("range need two Numbers(start, end)");
-		var termin;
-		if( isLessThan(start, end)) {
-			fn = fn||$_.Core.op.inc;
-			termin = isNotGreaterThan;
-		} else {
-			fn = fn||$_.Core.op.desc;
-			termin = isNotLessThan;
-		}
-		var it = iterate(fn, start);
-		var i = start,res = [];
-		while(termin(i = it(), end)) {
-			res.push(i);
-		}
-		return res;
+
+    /**
+     * @memberof Asdf.N
+     * @param {number=} start
+     * @param {number} end
+     * @param {number=} step
+     * @returns {Array}
+     */
+	function range(start, end, step) {
+        if (arguments.length <= 1) {
+            end = start || 0;
+            start = 0;
+        }
+        step = arguments[2] || 1;
+        if($_.O.isNotNumber(start)||$_.O.isNotNumber(end)||$_.O.isNotNumber(step)) throw new TypeError();
+        if(!Number.isFinite((end - start) / step))
+             throw new TypeError('length is infinite');
+        var i = start, s=start, e=end;
+        if(start>end){
+            s = end;
+            e = start;
+        }
+        var res = [];
+        while(s <= i && i <= e){
+            res.push(i);
+            i+=step;
+        }
+        return res;
 	}
 	$_.O.extend($_.N, {
 		sum: sum,
@@ -3123,15 +3195,15 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name S
+ * @name Asdf.S
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'S');
 
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {node} 대상 문자열을 node로 변경한다.
+	 * @returns {Node} 대상 문자열을 node로 변경한다.
 	 * @desc 대상 문자열을 node로 변경한다.
 	 * @example
 	 * Asdf.S.toElement('<div id='abc'>abc</div> '); // return <div id='abc'>abc</div>;
@@ -3145,9 +3217,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {documentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
+	 * @returns {DocumentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
 	 * @desc 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
 	 * 
 	 */

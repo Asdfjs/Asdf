@@ -2,14 +2,14 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name S
+ * @name Asdf.S
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'S');
 	var ScriptFragment = '<script[^>]*>([\\S\\s]*?)<\/script>';
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} [length=30] 축약할 글자 수
 	 * @param {string} [truncation=...] 축약 시 추가될 문자열 
@@ -27,7 +27,7 @@
 		str.slice(0, length - truncation.length) + truncation : str;
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str 앞뒤 공백 문자를 제거한다.
 	 * @desc str 앞 뒤 공백 문자를 제거한다. 
@@ -41,7 +41,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str에 태그를 제거한다. 
 	 * @desc str에 태그를 제거한다.  
@@ -55,9 +55,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {string} str에 script태그를 제거한다. 
+	 * @returns {string} str에 script태그를 제거한다.
 	 * @desc str에 script태그를 제거한다.  
 	 * @example
 	 * Asdf.S.stripScripts('a <a href="#">link</a><script>alert("hello world!");</script>'); // return 'a <a href="#">link</a>'
@@ -69,7 +69,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} html에 출력 가능한 문자로 변경하여 반환한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 화면에 출력 가능하게 변경한다.  
@@ -83,7 +83,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str문자를 html 문자로 변경한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 html문자로 변경한다. escapeHTML와 반대.  
@@ -96,7 +96,7 @@
 	    return stripTags(str).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} [separator=&] 값들 간의 구분자
 	 * @param {string} [sepKV==] key value 구분자
@@ -130,9 +130,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {array} 대상 문자열을 array로 변환한다.
+	 * @returns {Array} 대상 문자열을 array로 변환한다.
 	 * @desc 대상 문자열을 array로 변환한다.  
 	 * @example
 	 * Asdf.S.toArray('abc'); // return ['a','b','c'];
@@ -143,7 +143,7 @@
 	    return str.split('');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} 다음 문자열을 반환한다.
 	 * @desc keycode가 다음인 문자열을 반환한다.
@@ -158,7 +158,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} count 대상 문자열 횟수
 	 * @returns {string} 대상 문자열을 count 횟수 만큼 반복하여 반환한다.
@@ -173,7 +173,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background-color -> backgroundColor.
 	 * @desc -를 없애고 다음 문자를 대문자로 변경한다.
@@ -189,7 +189,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background -> Background.
 	 * @desc 첫문자를 대문자로 이후 문자를 소문자로 바꾼다.
@@ -203,7 +203,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} backgroundColor -> background_color
 	 * @desc 대문자 앞에 _변경하고 대문자를 소문자로 바꾸어 반환한다.
@@ -221,7 +221,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background_color -> background-color
 	 * @desc _를 -로 변경한다.
@@ -235,7 +235,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열에 찾는 문자열이 있으면 true를 반환한다.
@@ -250,7 +250,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 앞에 찾는 문자열이 있으면 true를 반환한다.
@@ -265,7 +265,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 마지막에 찾는 문자열이 있으면 true를 반환한다.
@@ -281,7 +281,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈값이면 true를 반환한다.
 	 * @desc 대상 문자열이 빈값이면 true를 반환한다.
@@ -295,7 +295,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
 	 * @desc 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
@@ -308,6 +308,12 @@
 	    return /^\s*$/.test(str);
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {boolean}
+     * @desc json 여부를 판단한다.
+     */
     function isJSON(str) {
         if($_.O.isNotString(str)) throw new TypeError();
         if(isBlank(str)) return false
@@ -318,9 +324,9 @@
     }
 
 	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @memberof Asdf.S
+	 * @param {string} str 대상 문자
+     * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -334,9 +340,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 오른쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 오른쪽쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -350,10 +356,10 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {regexp} reg 정규 표현식
-	 * @returns {template} template
+	 * @returns {{set:Function, toString:Function}} template
 	 * @desc template 객체를 반환한다. template.set(1, 'abc');... template.toString(); 
 	 * @example
 	 * var t = Asdf.S.template('aa ? bb ? cc ?', /\?/g);
@@ -444,6 +450,13 @@
 		};
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} version1
+     * @param {string} version2
+     * @param {Function} compareFn
+     * @returns {number}
+     */
     function compareVersion(version1, version2, compareFn){
         compareFn = compareFn||compare;
         var order = 0;
@@ -568,6 +581,11 @@
         return r(tokenTree.token)[0];
     }
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {string}
+     */
     function toRegExp(str){
         return str.replace(/([\\^$()[\]])/g,'\\$1');
     }

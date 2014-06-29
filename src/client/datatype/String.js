@@ -2,15 +2,15 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name S
+ * @name Asdf.S
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'S');
 
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {node} 대상 문자열을 node로 변경한다.
+	 * @returns {Node} 대상 문자열을 node로 변경한다.
 	 * @desc 대상 문자열을 node로 변경한다.
 	 * @example
 	 * Asdf.S.toElement('<div id='abc'>abc</div> '); // return <div id='abc'>abc</div>;
@@ -24,9 +24,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {documentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
+	 * @returns {DocumentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
 	 * @desc 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
 	 * 
 	 */
