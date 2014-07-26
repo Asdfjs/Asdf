@@ -5,8 +5,7 @@
     } else {
         definition(Asdf);
     }
-})
-(function($_) {
+})(function($_) {
 	var hasOwnProperty = Object.prototype.hasOwnProperty;
 	var config = [
 		{

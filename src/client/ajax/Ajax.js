@@ -51,8 +51,7 @@
 			try {
 				transport._complete = true;
 				(options['on' + transport.status()]
-						|| options['on'+ (success(transport.status()) ? 'Success' : 'Failure')] || emptyFunction)
-						(res);
+						|| options['on'+ (success(transport.status()) ? 'Success' : 'Failure')] || emptyFunction)(res);
 			} catch (e) {
 				throw e;
 			}
@@ -99,7 +98,7 @@
 		}, function() {
 			return new ActiveXObject('Microsoft.XMLHTTP');
 		}) || false;
-	};
+	}
 	var responders = (function (){
 			var list = [];
 			function add(responder) {
@@ -192,7 +191,7 @@
 	function getResponse(transport){
 		var res = {};
 		var readyState = transport.readyState();
-		if ((readyState > 2 && !$_.Bom.browser == 'msie') || readyState == 4) {
+		if ((readyState > 2 && $_.Bom.browser !== 'msie') || readyState == 4) {
 			res.status = transport.status();
 			res.statusText = transport.getStatusText();
 			res.responseText = transport.responseText();

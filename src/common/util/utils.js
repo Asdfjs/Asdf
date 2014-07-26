@@ -14,7 +14,7 @@
 				if (JSON && JSON.parse) {
 					return JSON.parse(jsonString);
 				}
-				return (new Function("return " + jsonString))();
+				return (new Function("return " + jsonString))(); // jshint ignore:line
 			}
 		}
 		return null;

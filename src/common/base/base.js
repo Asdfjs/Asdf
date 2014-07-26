@@ -1,6 +1,6 @@
 (function ($_) {
 	$_.Base = {};
-	function subclass() {};
+	function subclass() {}
 	var Class = function(/*parent, protoProps, staticProps*/) {
 		var arg = $_.A.toArray(arguments), parent = null, protoProps, staticProps;
 		if($_.O.isFunction(arg[0]))

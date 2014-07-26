@@ -115,7 +115,7 @@
 		return reduce(match[1].split(separator || '&'),	function(hash, pair) {
 			if ((pair = pair.split(sepKV || '='))[0]) {
 				var key = decodeURIComponent(pair.shift()), value = pair.length > 1 ? pair.join('='): pair[0];
-				if (value != undefined)
+				if (value != null)
 					value = decodeURIComponent(value);
 				if (key in hash) {
 					if (!$_.O.isArray(hash[key])){
@@ -291,7 +291,7 @@
 	 */
 	function isEmpty(str) {
 		if(!$_.O.isString(str)) throw new TypeError();
-	    return str == '';
+	    return str === '';
 	}
 	
 	/**
@@ -423,7 +423,7 @@
 			}
 			else if($_.O.isString(index)){
 				var ins = getIndexs(index);
-				if(ins.lenght == 0) throw new Error("index is wrong");
+				if(ins.length === 0) throw new Error("index is wrong");
 				$_.A.each(ins, function(value) {
 					data[value].text = str;
 				});
@@ -463,7 +463,7 @@
         var v1Subs = trim(String(version1)).split('.');
         var v2Subs = trim(String(version2)).split('.');
         var subCount = Math.max(v1Subs.length, v2Subs.length);
-        for (var subIdx = 0; order == 0 && subIdx < subCount; subIdx++) {
+        for (var subIdx = 0; order === 0 && subIdx < subCount; subIdx++) {
             var v1Sub = v1Subs[subIdx] || '';
             var v2Sub = v2Subs[subIdx] || '';
             var v1CompParser = new RegExp('(\\d*)(\\D*)', 'g');
@@ -471,15 +471,15 @@
             do {
                 var v1Comp = v1CompParser.exec(v1Sub) || ['', '', ''];
                 var v2Comp = v2CompParser.exec(v2Sub) || ['', '', ''];
-                if (v1Comp[0].length == 0 && v2Comp[0].length == 0) {
+                if (v1Comp[0].length === 0 && v2Comp[0].length === 0) {
                     break;
                 }
-                var v1CompNum = v1Comp[1].length == 0 ? 0 : parseInt(v1Comp[1], 10);
-                var v2CompNum = v2Comp[1].length == 0 ? 0 : parseInt(v2Comp[1], 10);
+                var v1CompNum = v1Comp[1].length === 0 ? 0 : parseInt(v1Comp[1], 10);
+                var v2CompNum = v2Comp[1].length === 0 ? 0 : parseInt(v2Comp[1], 10);
                 order = compareFn(v1CompNum, v2CompNum) ||
-                    compareFn(v1Comp[2].length == 0, v2Comp[2].length == 0) ||
+                    compareFn(v1Comp[2].length === 0, v2Comp[2].length === 0) ||
                     compareFn(v1Comp[2], v2Comp[2]);
-            } while (order == 0);
+            } while (order === 0);
         }
 
         return order;
@@ -542,7 +542,7 @@
                 else if(isFunction($_.A.last(m), v)){
                     var fn = m.pop();
                     var parameter = r(v);
-                    function fun(){
+                    var fun = function(){
                         var arg = arguments;
                         for(var i = 0; i < parameter.length; i++) {
                             var v = parameter[i];
@@ -604,7 +604,7 @@
             var pos = stack.pop();
             var res = o.token.splice(pos);
             var a = trim(o.rest.substring(0, end)).split(conf.separator);
-            if(a!='')
+            if(a!=='')
                 $_.A.merge(res, a);
             o.token.push(functionToken(res));
             return {token: o.token, rest: o.rest.substring(end+conf.endToken.length)};

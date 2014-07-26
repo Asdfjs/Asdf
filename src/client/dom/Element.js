@@ -143,7 +143,7 @@
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
-     * @param {string=} value value값
+     * @param {string=} val value값
      * @returns {element|string} value값이 존재하면 element를 반환하고 value값이 존재 하지 않으면 value값을 반환하다.
      * @desc value가 존재 하면 element.value에 해당 value를 넣고 value가 존재하지 않으면 element.valvue 값을 반환한다.
      * @example
@@ -151,15 +151,15 @@
      * Asdf.Element.value(input, 'hi');
      * Asdf.Element.value(input); //return "hi";
      */
-	function value(element, value) {
+	function value(element, val) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
-		return (value==null)? element.value : (element.value = value, element);
+		return (val==null)? element.value : (element.value = val, element);
 	}
     /**
      * @memberof Asdf.Element
-     * @param {element} element 대상element
-     * @param {string=} html html값
+     * @param {HTMLElement} element 대상element
+     * @param {string=} htm html값
      * @returns {element|string} html값이 존재하면 element를 반환하고 html값이 존재 하지 않으면 innerHTML값을 반환하다.
      * @desc html가 존재 하면 element.innerHTML에 해당 html를 넣고 html가 존재하지 않으면 element.innerHTML 값을 반환한다.
      * @example
@@ -167,10 +167,10 @@
      * Asdf.Element.html(div, 'hi'); //return <div>hi</div>
      * Asdf.Element.html(div); //return "hi";
      */
-	function html(element, html) {
+	function html(element, htm) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
-		return (html==null)? element.innerHTML: (element.innerHTML = html, element);
+		return (htm==null)? element.innerHTML: (element.innerHTML = htm, element);
 	}
     /**
      * @memberof Asdf.Element
@@ -828,9 +828,9 @@
 		else if(element.querySelectorAll) {
 			return element.querySelectorAll(selector);
 		}else {
-			var a=element.all, c=[], selector = selector.replace(/\[for\b/gi, '[htmlFor').split(','), i, j,s=document.createStyleSheet();
-			for (i=selector.length; i--;) {
-				s.addRule(selector[i], 'k:v');
+			var a=element.all, c=[], sel = selector.replace(/\[for\b/gi, '[htmlFor').split(','), i, j,s=document.createStyleSheet();
+			for (i=sel.length; i--;) {
+				s.addRule(sel[i], 'k:v');
 				for (j=a.length; j--;) a[j].currentStyle.k && c.push(a[j]);
 				s.removeRule(0);
 			}
@@ -848,9 +848,9 @@
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		if (!element || element.nodeType !== 1) return false
-	    var matchesSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
+	    var mSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
 	                          element.oMatchesSelector || element.matchesSelector;
-	    if (matchesSelector) return matchesSelector.call(element, selector);
+	    if (mSelector) return mSelector.call(element, selector);
 	    var match, parent = element.parentNode, temp = !parent;
 	    if (temp) (parent = tempParent).appendChild(element);
 	    match =  $_.A.indexOf( find(parent, selector), element);

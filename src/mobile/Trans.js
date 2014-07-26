@@ -38,7 +38,7 @@
 	})();
 	var transform = vendorPropName('transform');
 	function transX(element, pointX) {
-		if (pointX == undefined) {
+		if (pointX === undefined) {
 			if ($_.Device.os) {
 				return /([0-9.]+)/.exec($_.css(element, transform))[1];
 			} else {

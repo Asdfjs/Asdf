@@ -88,7 +88,7 @@
         }
         step = arguments[2] || 1;
         if($_.O.isNotNumber(start)||$_.O.isNotNumber(end)||$_.O.isNotNumber(step)) throw new TypeError();
-        if(!Number.isFinite((end - start) / step))
+        if(!isFinite((end - start) / step))
              throw new TypeError('length is infinite');
         var i = start, s=start, e=end;
         if(start>end){
@@ -102,6 +102,15 @@
         }
         return res;
 	}
+
+    /**
+     * @memberof Asdf.N
+     * @param n
+     * @returns {boolean}
+     */
+    function isFinite(n){
+        return Number.POSITIVE_INFINITY !== n && Number.NEGATIVE_INFINITY !==n;
+    }
 	$_.O.extend($_.N, {
 		sum: sum,
 		isNotNaN: isNotNaN,
@@ -117,6 +126,7 @@
 		isLessThan: isLessThan,
 		isNotLessThan: isNotLessThan,
 		isUntil: isLessThan,
-		isNotUntil: isNotLessThan
+		isNotUntil: isNotLessThan,
+        isFinite:isFinite
 	});
 })(Asdf);

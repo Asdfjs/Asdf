@@ -80,7 +80,16 @@ module.exports = function(grunt) {
                     console: true,
                     module: true,
                     document: true
-                }
+                },
+                eqnull:true,
+                sub:true,
+                lastsemic:true,
+                laxcomma:true,
+                supernew:true,
+                laxbreak:true,
+                asi:true,
+                boss:true,
+                expr:true
             }
         },
         watch: {

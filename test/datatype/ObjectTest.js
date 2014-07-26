@@ -52,7 +52,7 @@ test("Asdf.O.isFunction", function() {
 test("Asdf.O.isString", function() {
 	ok(Asdf.O.isString('abc'), 'abc is String');
 	ok(Asdf.O.isString(String('abc')), 'String("abc") is String');
-	ok(Asdf.O.isString(new String('abc')), 'new String("abc") is String');
+	ok(Asdf.O.isString(new String('abc')), 'new String("abc") is String'); // jshint ignore:line
 	ok(!Asdf.O.isString(1), '1 is not String');
 });
 test("Asdf.O.isNumber", function() {

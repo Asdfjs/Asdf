@@ -147,7 +147,7 @@
 	/**
 	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
-	 * @param {function} after 이후 실행 함수
+	 * @param {function} afterfn 이후 실행 함수
 	 * @param {boolean} stop 실행 함수의 결과값여부에 따라 이후 실행 함수를 실행여부를 결정 
 	 * @returns {function} 실행 함수, 이후 실행함수를 실행하는 함수를 반환한다.
 	 * @desc 실행 함수, 이후 실행함수를 실행하는 함수를 반환한다.
@@ -160,12 +160,12 @@
 	 * }
 	 * Asdf.F.after(fn, a)(2); //return 8;
 	 */
-	function after(func, after, stop){
-		if(!$_.O.isFunction(func)||!$_.O.isFunction(after)) throw new TypeError;
+	function after(func, afterfn, stop){
+		if(!$_.O.isFunction(func)||!$_.O.isFunction(afterfn)) throw new TypeError;
 		return function() {
 			var res = func.apply(this, arguments);
 			if(!res && stop) return res;
-			return after.apply(this, $_.A.merge([res], arguments));
+			return afterfn.apply(this, $_.A.merge([res], arguments));
 		};
 	}
 	
@@ -351,7 +351,7 @@
     function sequence() {
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
         return function(){
-            var res = undefined;
+            var res;
             Asdf.A.each(fns, function(f){
                 res = f.apply(this, arguments);
             });
@@ -440,14 +440,14 @@
 
     /**
      * @memberof Asdf.F
-     * @param {Function} async
+     * @param {Function} asyncfn
      * @returns {Function}
      */
 
-	function async(async){
-        if(!$_.O.isFunction(async)) throw new TypeError();
+	function async(asyncfn){
+        if(!$_.O.isFunction(asyncfn)) throw new TypeError();
 		return function(cb) {
-            async.call(this,cb);
+            asyncfn.call(this,cb);
         }
 	}
 
@@ -473,7 +473,7 @@
             var res = [];
 			function r(index, value){
                 res[index] = value;
-				if(l == 0)
+				if(l === 0)
 					return cb.apply(this, res);
 				l--;
 			}
@@ -504,7 +504,7 @@
             if(arguments.length >= (argNum||fn.length))
                 return fn.apply(this, arguments);
             else
-                return r.bind.apply(r,$_.A.merge([this], arguments));
+                return bind.apply(r,$_.A.merge([r,this], arguments));
         }
     }
 
