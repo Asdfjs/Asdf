@@ -19,7 +19,7 @@
     }
     function transfer(arr, fn, context){
         if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotFunction))
-            throw new TypeError()
+            throw new TypeError();
         return function(){
             var res = [];
             var arg = $_.A.toArray(arguments);

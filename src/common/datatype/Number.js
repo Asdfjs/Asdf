@@ -82,6 +82,11 @@
      * @returns {Array}
      */
 	function range(start, end, step) {
+        function integerScale(x){
+            var k = 1;
+            while (x * k % 1) k *= 10;
+            return k;
+        }
         if (arguments.length <= 1) {
             end = start || 0;
             start = 0;
@@ -90,28 +95,67 @@
         if($_.O.isNotNumber(start)||$_.O.isNotNumber(end)||$_.O.isNotNumber(step)) throw new TypeError();
         if(!isFinite((end - start) / step))
              throw new TypeError('length is infinite');
-        var i = start, s=start, e=end;
+        var integerscale = integerScale(Math.abs(step)),i = start*integerscale, s=start, e=end;
         if(start>end){
             s = end;
             e = start;
         }
         var res = [];
-        while(s <= i && i <= e){
-            res.push(i);
-            i+=step;
+        while(s*integerscale <= i && i <= e*integerscale){
+            res.push(i/integerscale);
+            i+=step*integerscale;
         }
         return res;
 	}
 
     /**
      * @memberof Asdf.N
-     * @param n
+     * @param n {number}
      * @returns {boolean}
      */
     function isFinite(n){
         return Number.POSITIVE_INFINITY !== n && Number.NEGATIVE_INFINITY !==n;
     }
-	$_.O.extend($_.N, {
+
+    /**
+     *
+     * @param n {number}
+     * @param a {number}
+     * @param b {number}
+     * @returns {number}
+     */
+    function clamp(n,a,b){
+        if($_.O.isNotNumber(n)||$_.O.isNotNumber(a)||$_.O.isNotNumber(b)) throw new TypeError();
+        var min = a, max = b;
+        if(min>max){
+            min = b;
+            max = a;
+        }
+        return Math.max(min, Math.min(max, n));
+    }
+    function uninterpolate(x, a, b){
+        b = b-(a = +a) ? 1/(b-a):0;
+        return (x-a)*b;
+    }
+    function interpolate(x, a, b){
+        b -= a = +a;
+        return a + b*x;
+    }
+    function linear(x, domain, range){
+        return interpolate(uninterpolate(x,domain[0],domain[1]), range[0], range[1]);
+    }
+
+    function scale(n, domain, range, fn){
+        domain = domain || [0,1];
+        range = range || [0,1];
+        return fn(n, domain, range);
+    }
+    var scaleLinear = $_.F.partial(scale, undefined, undefined, undefined, linear);
+    var scaleLog = $_.F.partial(scale, undefined, undefined, undefined, function(x, domain, range){return linear(Math.log(x)/Math.log(10), [domain[0]/Math.log(10),domain[1]/Math.log(10)], range);});
+    var scalePow = $_.F.partial(scale, undefined, undefined, undefined, function(x, domain, range){return linear(Math.pow(10,x), [Math.pow(10,domain[0]),Math.pow(10,domain[1])], range);});
+    var scaleSqrt = $_.F.partial(scale, undefined, undefined, undefined, function(x, domain, range){return linear(Math.pow(0.5,x), [Math.pow(0.5,domain[0]),Math.pow(0.5,domain[1])], range);});
+
+    $_.O.extend($_.N, {
 		sum: sum,
 		isNotNaN: isNotNaN,
 		range: range,
@@ -127,6 +171,12 @@
 		isNotLessThan: isNotLessThan,
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
-        isFinite:isFinite
+        isFinite:isFinite,
+        clamp:clamp,
+        scale:scale,
+        scaleLinear:scaleLinear,
+        scaleLog:scaleLog,
+        scalePow:scalePow,
+        scaleSqrt:scaleSqrt
 	});
 })(Asdf);
