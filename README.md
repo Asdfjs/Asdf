@@ -46,7 +46,7 @@ Asdf.js는 개발자들끼리 순수 함수를 만들어서 공유하는 장소 
 <http://ko.wikipedia.org/wiki/%ED%95%A9%EC%84%B1%ED%95%A8%EC%88%98>
 
 ##### 합성 기본 예제
-```
+```javascript
 var nativeSlice = Array.prototype.slice;
 
 function curry (fn) {
@@ -88,7 +88,7 @@ f(1,2,3,4) // return 7
 ```
 
 ##### 합성 고급 예제
-```
+```javascript
 function memoizer(fn, memo){
 memo = memo||{};
     return function (key, nouse) {
@@ -118,7 +118,7 @@ mfibo(43);
 
 
 ### Asdf.js 함수 합성 예제
-```
+```javascript
 function compose(f1, f2){
     return function () {
 		return f1.call(this, (f2.apply(this, arguments)));
@@ -136,7 +136,7 @@ var sub = Asdf.F.compose(Asdf.Arg.toArray, partial(Asdf.A.filter, undefined, isN
 ```
 
 ### Asdf.js 개발 예제
-```
+```javascript
 var uniqueAdd = Asdf.F.composeRight(Asdf.A.unique, add);
 
 function add(array, item) {
@@ -149,7 +149,7 @@ uniqueAdd([1,2,3,4],5); //return [1, 2, 3, 4, 5]
 > Asdf.js 기존에 함수를 사용 또는 신규 메소드를 개발하여 위의 방법 처럼 함수 합성을 통해서 빠르고 간단하게 함수 생성이 가능하다.
 
 ### Asdf.js 실제 소스
-```
+```javascript
 ...
     var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
 	var curry = $_.Core.combine.curry;
