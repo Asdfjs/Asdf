@@ -14,6 +14,38 @@
     RGB.prototype.toString = function(){
         return '#'+$_.A.map([this.r,this.g,this.b], function (value) {return $_.S.lpad((value|0).toString(16),"0",2);}).join("")
     };
+    RGB.prototype.toHSL = function(){
+        var t = rgbToHsl(this.r, this.g, this.b);
+        return new HSL(t.h, t.s, t.l);
+    };
+    RGB.prototype.toHSV = function(){
+        var t = rgbToHsv(this.r, this.g, this.b);
+        return new HSV(t.h, t.s, t.v);
+    };
+    function HSL(h,s,l){
+        if($_.O.isNotNumber(h)||$_.O.isNotNumber(s)||$_.O.isNotNumber(l)) throw new TypeError();
+        if(!this instanceof HSL) new HSL(h,s,l);
+        this.h = h;
+        this.s = s;
+        this.l = l;
+    }
+    HSL.prototype.toRGB = function(){
+        var t = hslToRgb(this.h, this.s, this.l);
+        return new RGB(t.r, t.g, t.b);
+    };
+    HSL.prototype.toHSV = $_.F.compose(HSL.prototype.toRGB, function(o){ return RGB.prototype.toHSV.apply(o)});
+    function HSV(h,s,v){
+        if($_.O.isNotNumber(h)||$_.O.isNotNumber(s)||$_.O.isNotNumber(v)) throw new TypeError();
+        if(!this instanceof HSV) new HSV(h,s,v);
+        this.h = h;
+        this.s = s;
+        this.v = v;
+    }
+    HSV.prototype.toRGB = function(){
+        var t = hsvToRgb(this.h, this.s, this.v);
+        return new RGB(t.r, t.g, t.b);
+    };
+    HSV.prototype.toHSL = $_.F.compose(HSV.prototype.toRGB, function(o){ return RGB.prototype.toHSL.apply(o)});
     function rgbToHsl(r, g, b) {
         r /= 255, g /= 255, b /= 255;
         var max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -65,9 +97,7 @@
             b = hue2rgb(p, q, h - 1 / 3);
         }
 
-        return { r:r * 255, g:g * 255, b:b * 255, toString: function () {
-            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
-        } };
+        return {r:r * 255, g:g * 255, b:b * 255};
     }
     function rgbToHsv(r, g, b) {
         r = r / 255, g = g / 255, b = b / 255;
@@ -126,9 +156,7 @@
                 break;
         }
 
-        return { r: r * 255, g: g * 255, b: b * 255, toString: function () {
-            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
-        } };
+        return { r: r * 255, g: g * 255, b: b * 255 };
     }
     var colorName = {
         aliceblue: 15792383,
@@ -292,7 +320,7 @@
             if(m1[1] === 'rgb'){
                 return new RGB(parseNumber(m2[0]),parseNumber(m2[1]),parseNumber(m2[2]));
             }else {
-                return hslToRgb(parseFloat(m2[0]/360), parseFloat(m2[1])/100, parseFloat(m2[2])/100);
+                return new HSL(parseFloat(m2[0]/360), parseFloat(m2[1])/100, parseFloat(m2[2])/100);
             }
 
         }
