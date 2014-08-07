@@ -1,3 +1,4 @@
+module('Asdf.Template');
 test("Asdf.Template.bind", function(){
 	var el = document.createElement('div');
 	var d = document.createElement('div');

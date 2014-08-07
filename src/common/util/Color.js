@@ -22,6 +22,7 @@
         var t = rgbToHsv(this.r, this.g, this.b);
         return new HSV(t.h, t.s, t.v);
     };
+
     function HSL(h,s,l){
         if($_.O.isNotNumber(h)||$_.O.isNotNumber(s)||$_.O.isNotNumber(l)) throw new TypeError();
         if(!this instanceof HSL) new HSL(h,s,l);
@@ -33,7 +34,9 @@
         var t = hslToRgb(this.h, this.s, this.l);
         return new RGB(t.r, t.g, t.b);
     };
-    HSL.prototype.toHSV = $_.F.compose(HSL.prototype.toRGB, function(o){ return RGB.prototype.toHSV.apply(o)});
+    HSL.prototype.toHSV = $_.F.compose(HSL.prototype.toRGB, $_.F.functionize(RGB.prototype.toHSV));
+    HSL.prototype.toString = $_.F.compose(HSL.prototype.toRGB, $_.F.functionize(RGB.prototype.toString));
+
     function HSV(h,s,v){
         if($_.O.isNotNumber(h)||$_.O.isNotNumber(s)||$_.O.isNotNumber(v)) throw new TypeError();
         if(!this instanceof HSV) new HSV(h,s,v);
@@ -45,7 +48,9 @@
         var t = hsvToRgb(this.h, this.s, this.v);
         return new RGB(t.r, t.g, t.b);
     };
-    HSV.prototype.toHSL = $_.F.compose(HSV.prototype.toRGB, function(o){ return RGB.prototype.toHSL.apply(o)});
+    HSV.prototype.toHSL = $_.F.compose(HSV.prototype.toRGB, $_.F.functionize(RGB.prototype.toHSL));
+    HSV.prototype.toString = $_.F.compose(HSV.prototype.toRGB, $_.F.functionize(RGB.prototype.toString));
+
     function rgbToHsl(r, g, b) {
         r /= 255, g /= 255, b /= 255;
         var max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -347,6 +352,9 @@
     }
 
     $_.O.extend($_.Color, {
+        RGB:RGB,
+        HSL:HSL,
+        HSV:HSV,
         rgbToHsl : rgbToHsl,
         hslToRgb : hslToRgb,
         rgbToHsv : rgbToHsv,

@@ -191,6 +191,14 @@
 			return __method.apply(null, a);
 		}
 	}
+
+    function functionize(method){
+        return function(){
+            var a = slice.call(arguments,1);
+            var context = arguments[0];
+            return method.apply(context, a);
+        }
+    }
 	
 	/**
 	 * @memberof Asdf.F
@@ -518,6 +526,7 @@
 		before: before,
 		after:after,
 		methodize: methodize,
+        functionize:functionize,
 		compose:compose,
 		composeRight:composeRight,
 		extract:extract,
