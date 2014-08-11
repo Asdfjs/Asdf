@@ -217,8 +217,7 @@
 	 */
 	function composeRight() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-		var fn = $_.A.reduce(fns, $_.Core.behavior.compose);
-		return fn;
+		return $_.A.reduce(fns, $_.Core.behavior.compose);
 	}
 	
 	/**
@@ -238,8 +237,7 @@
 	 */
 	function compose() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-		var fn = $_.A.reduceRight(fns, $_.Core.behavior.compose);
-		return fn;
+		return $_.A.reduceRight(fns, $_.Core.behavior.compose);
 	}
 	var exisFunction = function (fn) {
 		if($_.O.isNotFunction(fn)){
@@ -474,7 +472,7 @@
      */
 	function when(/*async*/){
 		var asyncs = slice.call(arguments);
-        if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
+        if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw new TypeError();
 		var l = asyncs.length-1;
 		return function(cb){
             if(!$_.O.isFunction(cb)) throw new TypeError();
