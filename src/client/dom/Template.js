@@ -36,18 +36,20 @@
 		// validate
 		if (!valiableNodeType) throw new TypeError();
 		if (!$_.O.isPlainObject(obj)) throw new TypeError();
+        function change(target, key){
+            $_.A.each(targets, function(value) {
+                if($_.O.isString(obj[key])||$_.O.isNumber(obj[key])) {
+                    textBind(value, obj[key]);
+                }
+                else if($_.O.isPlainObject(obj[key])){
+                    attrBind(value, obj[key]);
+                }
+            });
+        }
 		for (key in obj){
 			targets = findElements(element, key);
 			if(targets.length === 0) continue;
-			$_.A.each(targets, function(value) {
-				if($_.O.isString(obj[key])||$_.O.isNumber(obj[key])) {
-					textBind(value, obj[key]);
-				}
-				else if($_.O.isPlainObject(obj[key])){
-					attrBind(value, obj[key]);
-				}
-			});
-			
+            change(target, key);
 		}
 		return element;
 		

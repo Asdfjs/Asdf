@@ -5,8 +5,7 @@
     } else {
         definition(Asdf);
     }
-})
-(function($_) {
+})(function($_) {
 	var arraySlice = Array.prototype.slice, readyRE = /complete|loaded|interactive/, isString = $_.O.isString ;
 	var arrayMap =  $_.A.map, nativeSplice = Array.prototype.splice, extend = $_.O.extend;
 	var root = this, compact = $_.A.compact;
@@ -14,7 +13,7 @@
 		if (this.constructor !== El){
 			return new El();
 		}
-	};
+	}
 	function map(elements, fn){
 		return arrayMap(elements, function(el, i){ return fn.call(el, i, el); });
 	}
@@ -38,7 +37,7 @@
 			if(/toggle|hide|show|remove|parent|next|prev/.test(key)){
 				return $_.Selector($_.A.unique($_.A.filter($_.A.map(self, function(value, i){ return fn.apply(self, [value].concat(args));}), function(value) {return !!value;})));
 			}else if(/html|text|value/.test(key)){
-				return fn.apply(self, [self[0]].concat(args));;
+				return fn.apply(self, [self[0]].concat(args));
 			}
 			return null;
 		});

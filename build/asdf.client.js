@@ -7,7 +7,7 @@
     }
 })(function() {
 	window.Asdf = {};
-});(function($_) {
+});;(function($_) {
 	var core = $_.Core = {};
 	var nativeSlice = Array.prototype.slice, hasOwnProperty = Object.prototype.hasOwnProperty;
 	var breaker = {};
@@ -199,11 +199,11 @@
 	core.combine = combine;
     core.namespace = namespace;
 })(Asdf);
-/**
+;/**
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name O
+ * @name Asdf.O
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'O');
@@ -950,7 +950,7 @@
         equals:equals
 	});
 })(Asdf);
-/**
+;/**
  * @project Asdf.js
  * @author N3735
  */
@@ -1492,7 +1492,7 @@
 	}, true);
 
 })(Asdf);
-/**
+;/**
  * @project Asdf.js
  * @author N3735
  * @namespace
@@ -2328,18 +2328,18 @@
         repeat:repeat,
         rotate: rotate
 	}, true);
-})(Asdf);/**
+})(Asdf);;/**
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name S
+ * @name Asdf.S
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'S');
 	var ScriptFragment = '<script[^>]*>([\\S\\s]*?)<\/script>';
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} [length=30] 축약할 글자 수
 	 * @param {string} [truncation=...] 축약 시 추가될 문자열 
@@ -2357,7 +2357,7 @@
 		str.slice(0, length - truncation.length) + truncation : str;
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str 앞뒤 공백 문자를 제거한다.
 	 * @desc str 앞 뒤 공백 문자를 제거한다. 
@@ -2371,7 +2371,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str에 태그를 제거한다. 
 	 * @desc str에 태그를 제거한다.  
@@ -2385,9 +2385,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {string} str에 script태그를 제거한다. 
+	 * @returns {string} str에 script태그를 제거한다.
 	 * @desc str에 script태그를 제거한다.  
 	 * @example
 	 * Asdf.S.stripScripts('a <a href="#">link</a><script>alert("hello world!");</script>'); // return 'a <a href="#">link</a>'
@@ -2399,7 +2399,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} html에 출력 가능한 문자로 변경하여 반환한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 화면에 출력 가능하게 변경한다.  
@@ -2413,7 +2413,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str문자를 html 문자로 변경한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 html문자로 변경한다. escapeHTML와 반대.  
@@ -2426,7 +2426,7 @@
 	    return stripTags(str).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} [separator=&] 값들 간의 구분자
 	 * @param {string} [sepKV==] key value 구분자
@@ -2460,9 +2460,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {array} 대상 문자열을 array로 변환한다.
+	 * @returns {Array} 대상 문자열을 array로 변환한다.
 	 * @desc 대상 문자열을 array로 변환한다.  
 	 * @example
 	 * Asdf.S.toArray('abc'); // return ['a','b','c'];
@@ -2473,7 +2473,7 @@
 	    return str.split('');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} 다음 문자열을 반환한다.
 	 * @desc keycode가 다음인 문자열을 반환한다.
@@ -2488,7 +2488,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} count 대상 문자열 횟수
 	 * @returns {string} 대상 문자열을 count 횟수 만큼 반복하여 반환한다.
@@ -2503,7 +2503,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background-color -> backgroundColor.
 	 * @desc -를 없애고 다음 문자를 대문자로 변경한다.
@@ -2519,7 +2519,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background -> Background.
 	 * @desc 첫문자를 대문자로 이후 문자를 소문자로 바꾼다.
@@ -2533,7 +2533,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} backgroundColor -> background_color
 	 * @desc 대문자 앞에 _변경하고 대문자를 소문자로 바꾸어 반환한다.
@@ -2551,7 +2551,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background_color -> background-color
 	 * @desc _를 -로 변경한다.
@@ -2565,7 +2565,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열에 찾는 문자열이 있으면 true를 반환한다.
@@ -2580,7 +2580,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 앞에 찾는 문자열이 있으면 true를 반환한다.
@@ -2595,7 +2595,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 마지막에 찾는 문자열이 있으면 true를 반환한다.
@@ -2611,7 +2611,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈값이면 true를 반환한다.
 	 * @desc 대상 문자열이 빈값이면 true를 반환한다.
@@ -2625,7 +2625,7 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
 	 * @desc 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
@@ -2638,6 +2638,12 @@
 	    return /^\s*$/.test(str);
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {boolean}
+     * @desc json 여부를 판단한다.
+     */
     function isJSON(str) {
         if($_.O.isNotString(str)) throw new TypeError();
         if(isBlank(str)) return false
@@ -2648,9 +2654,9 @@
     }
 
 	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @memberof Asdf.S
+	 * @param {string} str 대상 문자
+     * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -2664,9 +2670,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 오른쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 오른쪽쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -2680,10 +2686,10 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {regexp} reg 정규 표현식
-	 * @returns {template} template
+	 * @returns {{set:Function, toString:Function}} template
 	 * @desc template 객체를 반환한다. template.set(1, 'abc');... template.toString(); 
 	 * @example
 	 * var t = Asdf.S.template('aa ? bb ? cc ?', /\?/g);
@@ -2774,6 +2780,13 @@
 		};
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} version1
+     * @param {string} version2
+     * @param {Function} compareFn
+     * @returns {number}
+     */
     function compareVersion(version1, version2, compareFn){
         compareFn = compareFn||compare;
         var order = 0;
@@ -2898,6 +2911,11 @@
         return r(tokenTree.token)[0];
     }
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {string}
+     */
     function toRegExp(str){
         return str.replace(/([\\^$()[\]])/g,'\\$1');
     }
@@ -2975,7 +2993,7 @@
         interpreter:interpreter
 	});
 })(Asdf);
-(function($_) {
+;(function($_) {
 	$_.Arg = {};
 	function toArray(){
 		return $_.A.toArray(arguments);
@@ -3011,55 +3029,109 @@
         relocate:relocate,
         transfer:transfer
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
+    /**
+     * @namespace
+     * @name Asdf.N
+     */
 	$_.N = {};
 	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
 	var curry = $_.Core.combine.curry;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
-	/*function sum (){
-		var arg = $_.A.toArray(arguments);
-		arg = $_.A.filter(arg, isNotNaN);
-		return $_.A.reduce(arg, $_.Core.op["+"], 0);
-	}
-	*/
 	function multiply() {
 		var arg = $_.A.toArray(arguments);
 		arg = $_.A.filter(arg, isNotNaN);
 		return $_.A.reduce(arg, $_.Core.op["*"], 1);
 	}
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
-	var isRange = is(function (n,a,b) { return a<=n && n<=b; });
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
+    var isRange = is(function (n,a,b) { return a<=n && n<=b; });
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
 	var isNotRange = not(isRange);
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @returns {boolean}
+     */
 	var isZero = is(function (n) { return n === 0;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @returns {boolean}
+     */
 	var isNotZero = not(isZero);
-	var isSame = is(function (n, a) { return a === b;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
+	var isSame = is(function (a, b) { return a === b;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
 	var isNotSame = not(isSame);
 	var isGreaterThan = is(function (n, a){ return n > a;});
 	var isNotGreaterThan = not(isGreaterThan);
 	var isLessThan = is(function (n, a){ return n < a;});
 	var isNotLessThan = not(isLessThan);
-	function range(start, end, fn) {
-		if(arguments.length == 1){
-			end = arguments[0];
-			start = 0;
-		}
-		if(!($_.O.isNumber(start) && $_.O.isNumber(end))) throw new TypeError("range need two Numbers(start, end)");
-		var termin;
-		if( isLessThan(start, end)) {
-			fn = fn||$_.Core.op.inc;
-			termin = isNotGreaterThan;
-		} else {
-			fn = fn||$_.Core.op.desc;
-			termin = isNotLessThan;
-		}
-		var it = iterate(fn, start);
-		var i = start,res = [];
-		while(termin(i = it(), end)) {
-			res.push(i);
-		}
-		return res;
+
+    /**
+     * @memberof Asdf.N
+     * @param {number=} start
+     * @param {number} end
+     * @param {number=} step
+     * @returns {Array}
+     */
+	function range(start, end, step) {
+        if (arguments.length <= 1) {
+            end = start || 0;
+            start = 0;
+        }
+        step = arguments[2] || 1;
+        if($_.O.isNotNumber(start)||$_.O.isNotNumber(end)||$_.O.isNotNumber(step)) throw new TypeError();
+        if(!Number.isFinite((end - start) / step))
+             throw new TypeError('length is infinite');
+        var i = start, s=start, e=end;
+        if(start>end){
+            s = end;
+            e = start;
+        }
+        var res = [];
+        while(s <= i && i <= e){
+            res.push(i);
+            i+=step;
+        }
+        return res;
 	}
 	$_.O.extend($_.N, {
 		sum: sum,
@@ -3078,7 +3150,7 @@
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
 	$_.P = {};
 	function mix(fn, sorce) {
 		if(!$_.O.isFunction(fn) || !$_.O.isPlainObject(sorce))
@@ -3096,14 +3168,14 @@
 	$_.O.extend($_.P, {
 		mix:mix
 	});
-})(Asdf);/**
+})(Asdf);;/**
  * Created by kim on 2014-04-20.
  */
 /**
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name O
+ * @name Asdf.O
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'O');
@@ -3119,19 +3191,19 @@
         isXML: isXML,
         isNotXML:isNotXML
     });
-})(Asdf);/**
+})(Asdf);;/**
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name S
+ * @name Asdf.S
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'S');
 
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {node} 대상 문자열을 node로 변경한다.
+	 * @returns {Node} 대상 문자열을 node로 변경한다.
 	 * @desc 대상 문자열을 node로 변경한다.
 	 * @example
 	 * Asdf.S.toElement('<div id='abc'>abc</div> '); // return <div id='abc'>abc</div>;
@@ -3145,9 +3217,9 @@
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {documentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
+	 * @returns {DocumentFragment} 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
 	 * @desc 대상 문자열을 element로 변경 한 후 그 element를 documentFragment에 넣어서 반환한다.
 	 * 
 	 */
@@ -3165,7 +3237,7 @@
 		toElement: toElement
 	});
 })(Asdf);
-(function($_) {
+;(function($_) {
 	$_.Bom = {};
 	var Browser = (function() {
 		var ua = navigator.userAgent;
@@ -3238,7 +3310,7 @@
         documentMode: Browser.documentMode,
 		features:features
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
     $_.Event = {};
     var extend = $_.O.extend, slice = Array.prototype.slice;
     var cache = {};
@@ -3343,7 +3415,7 @@
         function mouseHooks(event){
             var eventDoc, doc, body, button = event.button, fromElement = event.fromElement;
             if( event.pageX == null && event.clientX != null ) {
-                eventDoc = event.target.ownderDocument || document;
+                eventDoc = event.target.ownerDocument || document;
                 doc = eventDoc.documentElement;
                 body = eventDoc.body;
                 event.pageX = event.clientX + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
@@ -3448,10 +3520,10 @@
         once: once,
         emit: emit
     });
-})(Asdf);/**
+})(Asdf);;/**
  * @project Asdf.js
  * @author N3735
- * @namespace Element
+ * @namespace Asdf.Element
  */
 (function($_) {
 	var nativeSlice = Array.prototype.slice, extend = $_.O.extend,
@@ -3475,7 +3547,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {function} fun 실행 함수
      * @param {object=} context 실행 함수 context
@@ -3496,7 +3568,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {boolean} boolean
      * @desc element가 display가 none 여부를 반환한다.
@@ -3508,7 +3580,7 @@
 		return element.style.display !='none';
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element
      * @desc visible(element)가 true면 hide를 실행하고 false면 show를 실행한다.
@@ -3524,7 +3596,7 @@
 	    return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element
      * @desc 대상 element를 style.display를 'none'으로 변경 한다.
@@ -3540,7 +3612,7 @@
 	    return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element
      * @desc 대상 element를 style.display를 ''으로 변경 한다.
@@ -3558,7 +3630,7 @@
 		 return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {string=} value element에 넣을 문자열
      * @returns {element|string} value값이 존재하면 element를 반환하고 value값이 존재 하지 않으면 text값을 반환하다.
@@ -3591,7 +3663,7 @@
 		}
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {string=} value value값
      * @returns {element|string} value값이 존재하면 element를 반환하고 value값이 존재 하지 않으면 value값을 반환하다.
@@ -3607,7 +3679,7 @@
 		return (value==null)? element.value : (element.value = value, element);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {string=} html html값
      * @returns {element|string} html값이 존재하면 element를 반환하고 html값이 존재 하지 않으면 innerHTML값을 반환하다.
@@ -3623,7 +3695,7 @@
 		return (html==null)? element.innerHTML: (element.innerHTML = html, element);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상element parentNode를 반환한다.
      * @desc 대상element parentNode를 반환한다.
@@ -3639,7 +3711,7 @@
 		return recursively(element, 'parentNode');
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element=} until 최종element
      * @returns {array} 대상element에서 최종element까지 모든 조상을 array로 반환한다.
@@ -3659,7 +3731,7 @@
 		 return recursivelyCollect(element, 'parentNode', until);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상element nextSibling 반환한다.
      * @desc 대상element nextSibling 반환한다.
@@ -3677,7 +3749,7 @@
 		return recursively(element, 'nextSibling');
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상element previousSibling 반환한다.
      * @desc 대상element previousSibling 반환한다.
@@ -3695,7 +3767,7 @@
 		return recursively(element, 'previousSibling');
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element=} until 최종element
      * @returns {array} 대상element에서 최종element까지 nextSibling들을 반환한다.
@@ -3716,7 +3788,7 @@
 		return recursivelyCollect(element, 'nextSibling', until);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element=} until 최종element
      * @returns {array} 대상element에서 최종element까지 previousSibling 반환한다.
@@ -3737,7 +3809,7 @@
 		return recursivelyCollect(element, 'previousSibling', until);
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {array} 본인을 제외한 형제 노드들을 반환한다.
      * @desc 본인을 제외한 형제 노드들을 반환한다.
@@ -3757,9 +3829,9 @@
 		return $_.A.without($_.A.toArray(element.parentNode.childNodes), element);
 	}
     /**
-     * @memberof Element
-     * @param {element} element 대상element
-     * @returns {array} 자식 노드를 반환한다.
+     * @memberof Asdf.Element
+     * @param {Element} element 대상element
+     * @returns {Array} 자식 노드를 반환한다.
      * @desc 자식 노드들을 반환한다.
      * @example
      * var p = document.createElement('div');
@@ -3776,6 +3848,7 @@
 	function childNodes(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
+        if(!element.firstChild) return []
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
     function children(element){
@@ -3786,7 +3859,7 @@
         return $_.A.filter(element.children, $_.O.isElement);
     }
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element|elements} contents를 반환한다.
      * @desc contents를 반환한다.
@@ -3809,7 +3882,7 @@
 		return (element.nodeName === 'IFRAME')? (element.contentDocument||(element.contentWindow&&element.contentWindow.document)) : element.childNodes ;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @param {element} element wrapElement
      * @returns {element} wrapElement를 반환한다.
@@ -3830,7 +3903,7 @@
 		return newContent;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상element
      * @returns {element} 대상 element를 반환한다.
      * @desc 대상element를 제거하고 대상 하위 element를 대상 부모 element로 이동시킨 후 대상 element를 반환한다.
@@ -3900,7 +3973,7 @@
         return doc.createTextNode(string);
     }
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 부모Element
      * @param {element} newContent 새Element
      * @returns {element} 부모Element를 반환한다.
@@ -3923,7 +3996,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 부모Element
      * @param {element} newContent 새Element
      * @returns {element} 부모Element를 반환한다.
@@ -3946,7 +4019,7 @@
 		return element;
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 기준Element
      * @param {element} newContent 새Element
      * @returns {element} 기준Element를 반환한다.
@@ -3967,7 +4040,7 @@
 	}
 
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 기준Element
      * @param {element} newContent 새Element
      * @returns {element} 기준Element를 반환한다.
@@ -3987,7 +4060,7 @@
 		return element;		
 	}
     /**
-     * @memberof Element
+     * @memberof Asdf.Element
      * @param {element} element 대상Element
      * @returns {element} 대상Element를 반환한다.
      * @desc 대상Element를 빈Element로 만든다.
@@ -4004,29 +4077,62 @@
 		element.innerHTML = '';
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     */
 	function remove(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
-		element.parentNode.removeChild(element);
+        if(element.parentNode)
+		    element.parentNode.removeChild(element);
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param element
+     * @returns {Element|undefined}
+     */
     function first(element){
         if(!$_.O.isElement(element))
           throw new TypeError();
         var c = children(element);
         return c&&c[0];
     }
+
+    /**
+     * @memberof Asdf.Element
+     * @param element
+     * @returns {Element|undefined}
+     */
     function last(element){
         if(!$_.O.isElement(element))
             throw new TypeError();
         var c = children(element);
         return c&& c[c.length-1];
     }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     * @param {Number} n
+     * @returns {Element|undefined}
+     */
     function eq(element, n){
         if(!$_.O.isElement(element))
             throw new TypeError();
         var c = children(element);
         return c&& c[n];
     }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     * @param {String} name
+     * @param {String=} value
+     * @returns {null|Element|*}
+     */
 	function attr(element, name, value) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4076,6 +4182,24 @@
 			delete element[name];
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Document} doc
+     * @returns {Window|false}
+     */
+    function getWindow(doc){
+        return $_.O.isWindow(doc)?
+            doc: doc.nodeType===9 ?
+            doc.defaultView || doc.parentWindow : false;
+    }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Node} element
+     * @param {Node} target
+     * @returns {{left: number, top: number, height: number, width: number, right: number, bottom: number}}
+     */
 	function relatedOffset(element, target) {
 		if(!$_.O.isNode(element)||!$_.O.isNode(target))
 			throw new TypeError();
@@ -4089,17 +4213,28 @@
 				bottom: offsetEl.bottom - offsetTar.top
 			};
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Node} element
+     * @returns {{height: number, width: number, top: number, bottom: number, right: number, left: number}}
+     */
 	function offset(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
+        var doc = element.ownerDocument;
+        var docElem = doc.documentElement;
+        var win = getWindow(doc);
 		// IE 경우 document.documentElement.scrollTop 그 외 document.body.scrollTop
 		var width = 0,
 			height = 0,
 			rect = element.getBoundingClientRect(),
-			top = rect.top + (document.body.scrollTop || document.documentElement.scrollTop),
-			bottom = rect.bottom + (document.body.scrollTop || document.documentElement.scrollTop),
-			right = rect.right + (document.body.scrollLeft || document.documentElement.scrollLeft),
-			left = rect.left + (document.body.scrollLeft || document.documentElement.scrollLeft);
+            ot = ( win.pageYOffset || docElem.scrollTop )  - ( docElem.clientTop  || 0 ),
+            ol = ( win.pageXOffset || docElem.scrollLeft ) - ( docElem.clientLeft || 0 ),
+			top = rect.top + ot,
+			bottom = rect.bottom + ot,
+			right = rect.right + ol,
+			left = rect.left + ol;
 		if (rect.height) {
 			height = rect.height;
 			width = rect.width;
@@ -4116,6 +4251,29 @@
 			left : left
 		};
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Element} element
+     * @returns {Element|undefined}
+     */
+    function offsetParent(element){
+        if(!$_.O.isElement(element)) throw new TypeError();
+        var res = element;
+        while(res &&
+            res.nodeName.toUpperCase() !== 'html' &&
+            css(res, 'position') === 'static'){
+            res = parent(res);
+        }
+        return res;
+    }
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {HTMLElement}
+     */
 	function addClass(element, name){
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
@@ -4126,6 +4284,13 @@
 		});
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {HTMLElement}
+     */
 	function removeClass(element, name) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4139,6 +4304,13 @@
 		}
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {HTMLElement}
+     */
 	function toggleClass(element, name) {
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
@@ -4151,6 +4323,13 @@
 		});
 		return element;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String} name
+     * @returns {boolean}
+     */
 	function hasClass(element, name) {
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
@@ -4196,10 +4375,18 @@
 	    if (matchesSelector) return matchesSelector.call(element, selector);
 	    var match, parent = element.parentNode, temp = !parent;
 	    if (temp) (parent = tempParent).appendChild(element);
-	    var match =  $_.A.indexOf( find(parent, selector), element);
+	    match =  $_.A.indexOf( find(parent, selector), element);
 	    temp && tempParent.removeChild(element);
-	    return match===-1? false: true;
+	    return match !==-1;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {HTMLElement} element
+     * @param {String|Array} name
+     * @param {String=} value
+     * @returns {*}
+     */
 	function css(element, name, value){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4214,7 +4401,7 @@
 			else if (element.currentStyle) {
                 cssStyle = element.currentStyle;
             } else {
-				return TypeError();
+				return new TypeError();
 			}
 
 			if(!name) {
@@ -4233,9 +4420,15 @@
                 });
                 return res;
 			} else 
-				throw TypeError();
+				throw new TypeError();
 		}
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {node} element
+     * @returns {string}
+     */
 	function toHTML(element){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4246,6 +4439,12 @@
 		d.appendChild(element);
 		return d.innerHTML;
 	}
+
+    /**
+     * @memberof Asdf.Element
+     * @param {Node} element
+     * @returns {boolean}
+     */
 	function isWhitespace(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4347,9 +4546,11 @@
         createText: createText,
         getData: data.getData,
         setData: data.setData,
-        hasData: data.hasData
+        hasData: data.hasData,
+        getWindow: getWindow,
+        offsetParent: offsetParent
 	});
-})(Asdf);(function ($_) {
+})(Asdf);;(function ($_) {
 	$_.Template = {};
 	var attrBind = function(element, attrs) {
 		var hasAttribute =  function (node, attr) {
@@ -4404,7 +4605,194 @@
 		
 	};
 	$_.Template.bind = bind;
-})(Asdf);(function($_) {
+})(Asdf);;/**
+ * Created by kim on 14. 2. 14.
+ */
+(function($_) {
+    $_.Color = {};
+    function rgbToHsl(r, g, b) {
+        r /= 255, g /= 255, b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h, s, l = (max + min) / 2;
+
+        if (max == min) {
+            h = s = 0; // achromatic
+        } else {
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
+            }
+            h /= 6;
+        }
+
+        return { h:h, s:s, l:l };
+    }
+    function hslToRgb(h, s, l) {
+        var r, g, b;
+
+        if (s == 0) {
+            r = g = b = l; // achromatic
+        } else {
+            function hue2rgb(p, q, t) {
+                if (t < 0)
+                    t += 1;
+                if (t > 1)
+                    t -= 1;
+                if (t < 1 / 6)
+                    return p + (q - p) * 6 * t;
+                if (t < 1 / 2)
+                    return q;
+                if (t < 2 / 3)
+                    return p + (q - p) * (2 / 3 - t) * 6;
+                return p;
+            }
+
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+        }
+
+        return { r:r * 255, g:g * 255, b:b * 255, toString: function () {
+            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
+        } };
+    }
+    function rgbToHsv(r, g, b) {
+        r = r / 255, g = g / 255, b = b / 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h, s, v = max;
+
+        var d = max - min;
+        s = max == 0 ? 0 : d / max;
+
+        if (max == min) {
+            h = 0; // achromatic
+        } else {
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
+            }
+            h /= 6;
+        }
+
+        return { h:h, s:s, v:v };
+    }
+    function hsvToRgb(h, s, v) {
+        var r, g, b;
+
+        var i = Math.floor(h * 6);
+        var f = h * 6 - i;
+        var p = v * (1 - s);
+        var q = v * (1 - f * s);
+        var t = v * (1 - (1 - f) * s);
+
+        switch (i % 6) {
+            case 0:
+                r = v, g = t, b = p;
+                break;
+            case 1:
+                r = q, g = v, b = p;
+                break;
+            case 2:
+                r = p, g = v, b = t;
+                break;
+            case 3:
+                r = p, g = q, b = v;
+                break;
+            case 4:
+                r = t, g = p, b = v;
+                break;
+            case 5:
+                r = v, g = p, b = q;
+                break;
+        }
+
+        return { r: r * 255, g: g * 255, b: b * 255, toString: function () {
+            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
+        } };
+    }
+
+    $_.O.extend($_.Color, {
+        rgbToHsl : rgbToHsl,
+        hslToRgb : hslToRgb,
+        rgbToHsv : rgbToHsv,
+        hsvToRgb : hsvToRgb
+    });
+})(Asdf);;(function($_) {
+	$_.JSON = {};
+	if(typeof Date.prototype.toJSON !== 'function'){
+		Date.prototype.toJSON = function (key) {
+			return isFinite(this.valueOf())
+            ? this.getUTCFullYear()     + '-' +
+                f(this.getUTCMonth() + 1) + '-' +
+                f(this.getUTCDate())      + 'T' +
+                f(this.getUTCHours())     + ':' +
+                f(this.getUTCMinutes())   + ':' +
+                f(this.getUTCSeconds())   + 'Z'
+            : null;
+		};
+		String.prototype.toJSON      =
+            Number.prototype.toJSON  =
+            Boolean.prototype.toJSON = function (key) {
+                return this.valueOf();
+            };
+	}
+})(Asdf);;(function($_) {
+    var promise = {}
+	$_.Promise = promise;
+	//state : Uninitialized, unfulfill, fulfilled, rejected
+	var toPromise = function(resolver){
+		var fire = true;
+		function then(done, fail){
+			fire = false;
+			done = done||function(){};
+			fail = fail||function(){};
+			if(!done.length)
+				done = $_.F.wrap(done, function(fn, d,f){
+					try{
+						fn();
+						d();
+					}catch(e){
+						f(e.message);
+					}
+				});
+			var fn = $_.F.wrap(resolver, function(fn, d, f){
+				d = d||function() {};
+				f = f||function() {};
+				return fn($_.F.curry(done,d,f), fail);
+			});
+			return toPromise(fn);
+		}
+		$_.F.defer(function() {
+			if(fire)
+				resolver(function(){}, function(){});
+		});
+		function Promise() {}
+		Promise.prototype.then = then;
+		return new Promise;
+	};
+	
+	$_.O.extend(promise, {
+		toPromise:toPromise
+	});
+})(Asdf);;(function($_) {
     var o = $_.Core.namespace($_, 'Utils');
 	function randomMax8HexChars() {
 		return (((1 + Math.random()) * 0x100000000) | 0).toString(16)
@@ -4448,7 +4836,7 @@
 		parseJson : parseJson,
         time:time
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
     var o = $_.Core.namespace($_, 'Utils');
 	var ready = (function() {
 		var domReadyfn = [];
@@ -4494,7 +4882,7 @@
 	$_.O.extend(o, {
 		ready : ready
 	});
-})(Asdf);(function ($_) {
+})(Asdf);;(function ($_) {
 	$_.Base = {};
 	function subclass() {};
 	var Class = function(/*parent, protoProps, staticProps*/) {
@@ -4555,7 +4943,7 @@
 		Class: Class,
         getDefaultConstructor: getDefaultConstructor
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
     var Callbacks;
 	$_.Callbacks = Callbacks = {};
 	var getCallbacks = function(options) {
@@ -4590,7 +4978,7 @@
 	$_.O.extend(Callbacks, {
 		getCallbacks: getCallbacks
 	});
-})(Asdf);(function ($_) {
+})(Asdf);;(function ($_) {
     var o = $_.Core.namespace($_, 'C');
     function doFilter(name, when, args){
         var self = this;
@@ -4659,7 +5047,7 @@
       Events:  c
     });
 })(Asdf);
-(function($_) {
+;(function($_) {
     var o = $_.Core.namespace($_, 'C');
 	var safeObject = function(obj) {
 		return ($_.O.isArray(obj)||$_.O.isPlainObject(obj))? $_.O.clone(obj):obj;
@@ -4723,7 +5111,7 @@
     $_.O.extend(o, {
         Store:  c
     });
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
     //Asdf.Chain("    asdfasdfasdfasdf").bind(Asdf.S.trim).bind(Asdf.S.capitalize).bind(Asdf.S.truncate, undefined, 5, '...').bind(Asdf.S.lpad, undefined, '0', 10).value();
     /*var promise = Asdf.Chain(
         function(f){console.log('start'); f()},
@@ -4767,7 +5155,7 @@
     Chain.prototype.bind = bind;
     Chain.prototype.value = value;
 
-})(Asdf);(function($_){
+})(Asdf);;(function($_){
     var o = $_.Core.namespace( $_, 'Async');
     function loadImg(src, cb){
         var i = new Image();
@@ -4783,7 +5171,7 @@
         loadImg:loadImg,
         loadImgs:loadImgs
     });
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
 	$_.Ajax = {};
 	var activeRequestCount = 0, emptyFunction = function () {};
 	var Try = {
@@ -4996,7 +5384,7 @@
 		request: request,
 		responders: responders
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
 	var history = $_.History = {};
 	var timer = null;
 	var iframeWin = null;

@@ -2,7 +2,7 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name O
+ * @name Asdf.O
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'O');
@@ -80,14 +80,14 @@
 	/**
 	 * @memberof Asdf.O
 	 * @param {Object} obj 대상 객체
-	 * @param {Object} mixin 출처 객체
+	 * @param {Object} mixinObj 출처 객체
 	 * @returns {Object} 대상객체를 반환한다.
 	 * @desc 해당 메소드를 사용하면 출처 객체에 있는 프로퍼티를 대상 객체로 복사한다.
 	 */
-	function mixin(obj, mixin) {
-		if(!isPlainObject(obj) || !isPlainObject(mixin))
+	function mixin(obj, mixinObj) {
+		if(!isPlainObject(obj) || !isPlainObject(mixinObj))
 			throw new TypeError();
-		each(mixin, function (value, key) {
+		each(mixinObj, function (value, key) {
 			obj[key] = value;
 		});
 		return obj;
@@ -211,7 +211,7 @@
 	 * @returns {boolean} Array 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Array인지 판단한다.
 	 */
-	function isArray(object) {
+	var isArray = function (object) {
 		var hasNativeIsArray = (typeof Array.isArray == 'function') && Array.isArray([]) && !Array.isArray({});
 		if (hasNativeIsArray) {
 			isArray = Array.isArray;
@@ -433,9 +433,9 @@
 				|| object === null) {
 			throw new TypeError("Object.key called on a non-object");
 		}
-		var keys = [];
-		each(object, function (value, key) { keys.push(key); });
-		return keys;
+		var res = [];
+		each(object, function (value, key) { res.push(key); });
+		return res;
 	}
 	
 	/**
@@ -453,9 +453,9 @@
 				|| object === null) {
 			throw new TypeError("Object.values called on a non-object");
 		}
-		var values = [];
-		each(object, function (value, key){ values.push(value); });
-		return values;
+		var res = [];
+		each(object, function (value, key){ res.push(value); });
+		return res;
 	}
 	
 	function getKeysbyType(obj, fn){
@@ -656,10 +656,10 @@
 	 * };
 	 * Asdf.O.type(obj, type1); // return true;
 	 */
-	function type(obj, type){
-		if(isNotPlainObject(type)) throw new TypeError();
+	function type(obj, typeObj){
+		if(isNotPlainObject(typeObj)) throw new TypeError();
 		var res = true;
-		each(type, function(fn, key){
+		each(typeObj, function(fn, key){
 			if(isFunction(fn))
 				if(!fn(obj[key]))
 					res = false;

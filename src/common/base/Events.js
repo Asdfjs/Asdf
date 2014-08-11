@@ -36,7 +36,7 @@
                 return this;
             e.splice(index, 1);
         },
-        emit: function(name, args){
+        emit: function(name/*, args*/){
             var args = Array.prototype.slice.call(arguments, 1);
             if(!$_.O.isString(name))
                 throw new TypeError();

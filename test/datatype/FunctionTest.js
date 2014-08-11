@@ -32,20 +32,20 @@ test("Asdf.F.before", function() {
 	equal(Asdf.F.before(fn, b, true)(true), false, 'stop ok');
 });
 test("Asdf.F.after", function() {
-	function a(res, a){
+	function afterfn(res, a){
 		return res *a;
 	}
 	function fn(a) {
 		return a*a;
 	}
-	equal(Asdf.F.after(fn, a)(2), 8, 'after ok');
-	equal(Asdf.F.after(function(a){return false}, function(res){ return !res}, true)(), false, 'stop ok');
+	equal(Asdf.F.after(fn, afterfn)(2), 8, 'after ok');
+	equal(Asdf.F.after(function(){return false}, function(res){ return !res}, true)(), false, 'stop ok');
 });
 test("Asdf.F.methodize", function() {
 	var obj = {};
 	function fn(obj) {
 		return obj;
-	};
+	}
 	obj.f = Asdf.F.methodize(fn,  obj);
 	equal(obj.f(), obj, 'methodize ok');
 });
@@ -103,7 +103,7 @@ test("Asdf.F.orElse", function(){
 test("Asdf.F.guarder", function(){
     var fibo = Asdf.F.guarded([
         {
-            test: function(n){return n==0},
+            test: function(n){return n===0},
             fn: function(){return 1}
         },
         {

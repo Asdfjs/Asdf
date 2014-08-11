@@ -155,7 +155,7 @@
 	function get(col, n){
 		n == null && (n = 0);
 		return col[n];
-	};
+	}
 	
 	/**
 	 * @memberof A
@@ -385,15 +385,15 @@
 	 * @memberof A
 	 * @func
 	 * @param {Array} arr 대상 객체
-	 * @param {function=} sort 정렬 함수
+	 * @param {function=} sortfn 정렬 함수
 	 * @returns {Array} 대상 객체를 sort함수에 맞춰 정렬 한 후 array 객체를 반환한다.
 	 * @desc 대상 객체를 정렬한다. sort 함수를 생략 시 정렬의 기본 sort를 실행한다.
 	 * @example
 	 * Asdf.A.sort([2,1,3]) //return [1,2,3]
 	 */
-	function sort(arr, sort){
+	function sort(arr, sortfn){
 		if($_.O.isNotArray(arr)) throw new TypeError();
-		return arr.sort(sort);
+		return arr.sort(sortfn);
 	}
 	function desc(a, b) {
 		if(a == null)

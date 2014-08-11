@@ -145,7 +145,8 @@ test("Asdf.Element.childNodes", function(){
     div.appendChild(nc);
 
     var children = Asdf.Element.childNodes(div);
-    throws(function(){Asdf.Element.children('1')}, 'not Element throw Exceptions');
+    throws(function(){Asdf.Element.childNodes('1')}, 'not Element throw Exceptions');
+    deepEqual(Asdf.Element.childNodes(c).length, [].length, '자식 노드가 없는 경우 []를 반환한다.');
     ok(Asdf.A.include(children, pc)&&Asdf.A.include(children, nc)&&Asdf.A.include(children, c)&&Asdf.A.include(children, text), 'childNodes ok');
 });
 test("Asdf.Element.children", function(){
@@ -160,6 +161,7 @@ test("Asdf.Element.children", function(){
 
     var children = Asdf.Element.children(div);
     throws(function(){Asdf.Element.children('1')}, 'not Element throw Exceptions');
+    deepEqual(Asdf.Element.children(c).length, [].length, '자식 노드가 없는 경우 []를 반환한다.');
     ok(Asdf.A.include(children, pc)&&Asdf.A.include(children, nc)&&Asdf.A.include(children, c)&&!Asdf.A.include(children, text), 'children ok');
 });
 test("Asdf.Element.contents", function(){
@@ -283,4 +285,33 @@ test("Asdf.Element.eq", function(){
     Asdf.Element.append(div, c1);
     equal(Asdf.Element.eq(div, 0), c, 'eq ok');
     equal(Asdf.Element.eq(div, 1), c1, 'eq ok');
+});
+test("Asdf.Element.offsetParent", function(){
+    div.innerHTML = '<ul class="level-1">'+
+        '<li class="item-i">I</li>'+
+        '<li class="item-ii" id="bbb" style="position: relative;">II'+
+        '    <ul class="level-2">' +
+        '        <li class="item-a" id="aaa">A</li>' +
+        '        <li class="item-b">B'+
+        '            <ul class="level-3">'+
+        '                <li class="item-1">1</li>'+
+        '                <li class="item-2">2</li>'+
+        '                <li class="item-3">3</li>'+
+        '            </ul>'+
+        '        </li>'+
+        '        <li class="item-c">C</li>'+
+        '    </ul>'+
+        '</li>'+
+        '<li class="item-iii">III</li>' +
+    '</ul>';
+    Asdf.Element.prepend(document.body, div);
+    equal(Asdf.Element.offsetParent(document.getElementById('aaa')), document.getElementById('bbb'), 'offsetParent ok');
+    Asdf.Element.remove(div);
+});
+test("Asdf.Element.offset", function(){
+    div.innerHTML = '<div id="aaa" style="margin-left:10px;margin-top:10px"></div>';
+    Asdf.Element.prepend(document.body, div);
+    equal(Asdf.Element.offset(div.firstChild).left, 18, 'left ok');
+    equal(Asdf.Element.offset(div.firstChild).top, 10, 'top ok');
+    Asdf.Element.remove(div);
 });

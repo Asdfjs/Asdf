@@ -1,6 +1,6 @@
 var Asdf = {};
 module.exports = Asdf;
-(function($_) {
+;(function($_) {
 	var core = $_.Core = {};
 	var nativeSlice = Array.prototype.slice, hasOwnProperty = Object.prototype.hasOwnProperty;
 	var breaker = {};
@@ -192,11 +192,11 @@ module.exports = Asdf;
 	core.combine = combine;
     core.namespace = namespace;
 })(Asdf);
-/**
+;/**
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name O
+ * @name Asdf.O
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'O');
@@ -943,7 +943,7 @@ module.exports = Asdf;
         equals:equals
 	});
 })(Asdf);
-/**
+;/**
  * @project Asdf.js
  * @author N3735
  */
@@ -1485,7 +1485,7 @@ module.exports = Asdf;
 	}, true);
 
 })(Asdf);
-/**
+;/**
  * @project Asdf.js
  * @author N3735
  * @namespace
@@ -2321,18 +2321,18 @@ module.exports = Asdf;
         repeat:repeat,
         rotate: rotate
 	}, true);
-})(Asdf);/**
+})(Asdf);;/**
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name S
+ * @name Asdf.S
  */
 (function($_) {
     var o = $_.Core.namespace($_, 'S');
 	var ScriptFragment = '<script[^>]*>([\\S\\s]*?)<\/script>';
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} [length=30] 축약할 글자 수
 	 * @param {string} [truncation=...] 축약 시 추가될 문자열 
@@ -2350,7 +2350,7 @@ module.exports = Asdf;
 		str.slice(0, length - truncation.length) + truncation : str;
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str 앞뒤 공백 문자를 제거한다.
 	 * @desc str 앞 뒤 공백 문자를 제거한다. 
@@ -2364,7 +2364,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str에 태그를 제거한다. 
 	 * @desc str에 태그를 제거한다.  
@@ -2378,9 +2378,9 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {string} str에 script태그를 제거한다. 
+	 * @returns {string} str에 script태그를 제거한다.
 	 * @desc str에 script태그를 제거한다.  
 	 * @example
 	 * Asdf.S.stripScripts('a <a href="#">link</a><script>alert("hello world!");</script>'); // return 'a <a href="#">link</a>'
@@ -2392,7 +2392,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} html에 출력 가능한 문자로 변경하여 반환한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 화면에 출력 가능하게 변경한다.  
@@ -2406,7 +2406,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} str문자를 html 문자로 변경한다.
 	 * @desc str에 있는 특정 문자를 <, >, &를 html문자로 변경한다. escapeHTML와 반대.  
@@ -2419,7 +2419,7 @@ module.exports = Asdf;
 	    return stripTags(str).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} [separator=&] 값들 간의 구분자
 	 * @param {string} [sepKV==] key value 구분자
@@ -2453,9 +2453,9 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @returns {array} 대상 문자열을 array로 변환한다.
+	 * @returns {Array} 대상 문자열을 array로 변환한다.
 	 * @desc 대상 문자열을 array로 변환한다.  
 	 * @example
 	 * Asdf.S.toArray('abc'); // return ['a','b','c'];
@@ -2466,7 +2466,7 @@ module.exports = Asdf;
 	    return str.split('');
 	}
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} 다음 문자열을 반환한다.
 	 * @desc keycode가 다음인 문자열을 반환한다.
@@ -2481,7 +2481,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {number} count 대상 문자열 횟수
 	 * @returns {string} 대상 문자열을 count 횟수 만큼 반복하여 반환한다.
@@ -2496,7 +2496,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background-color -> backgroundColor.
 	 * @desc -를 없애고 다음 문자를 대문자로 변경한다.
@@ -2512,7 +2512,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background -> Background.
 	 * @desc 첫문자를 대문자로 이후 문자를 소문자로 바꾼다.
@@ -2526,7 +2526,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} backgroundColor -> background_color
 	 * @desc 대문자 앞에 _변경하고 대문자를 소문자로 바꾸어 반환한다.
@@ -2544,7 +2544,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {string} background_color -> background-color
 	 * @desc _를 -로 변경한다.
@@ -2558,7 +2558,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열에 찾는 문자열이 있으면 true를 반환한다.
@@ -2573,7 +2573,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 앞에 찾는 문자열이 있으면 true를 반환한다.
@@ -2588,7 +2588,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {string} pattern 찾는 문자열
 	 * @returns {boolean} 대상 문자열 마지막에 찾는 문자열이 있으면 true를 반환한다.
@@ -2604,7 +2604,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈값이면 true를 반환한다.
 	 * @desc 대상 문자열이 빈값이면 true를 반환한다.
@@ -2618,7 +2618,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @returns {boolean} 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
 	 * @desc 대상 문자열이 빈 값 또는 공백 문자일 경우 true를 반환한다.
@@ -2631,6 +2631,12 @@ module.exports = Asdf;
 	    return /^\s*$/.test(str);
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {boolean}
+     * @desc json 여부를 판단한다.
+     */
     function isJSON(str) {
         if($_.O.isNotString(str)) throw new TypeError();
         if(isBlank(str)) return false
@@ -2641,9 +2647,9 @@ module.exports = Asdf;
     }
 
 	/**
-	 * @memberof S
-	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @memberof Asdf.S
+	 * @param {string} str 대상 문자
+     * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 왼쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -2657,9 +2663,9 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
-	 * @param {string] padStr 추가할 문자열
+	 * @param {string} padStr 추가할 문자열
 	 * @param {number} length 만들 문자열 길이
 	 * @returns {string} 대상 문자열에 오른쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
 	 * @desc 대상 문자열에 오른쪽쪽에 추가 문자열을 넣어 length만큼 길이를 만들어서 반환한다. 
@@ -2673,10 +2679,10 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof S
+	 * @memberof Asdf.S
 	 * @param {string} str 대상 문자열
 	 * @param {regexp} reg 정규 표현식
-	 * @returns {template} template
+	 * @returns {{set:Function, toString:Function}} template
 	 * @desc template 객체를 반환한다. template.set(1, 'abc');... template.toString(); 
 	 * @example
 	 * var t = Asdf.S.template('aa ? bb ? cc ?', /\?/g);
@@ -2767,6 +2773,13 @@ module.exports = Asdf;
 		};
 	}
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} version1
+     * @param {string} version2
+     * @param {Function} compareFn
+     * @returns {number}
+     */
     function compareVersion(version1, version2, compareFn){
         compareFn = compareFn||compare;
         var order = 0;
@@ -2891,6 +2904,11 @@ module.exports = Asdf;
         return r(tokenTree.token)[0];
     }
 
+    /**
+     * @memberof Asdf.S
+     * @param {string} str
+     * @returns {string}
+     */
     function toRegExp(str){
         return str.replace(/([\\^$()[\]])/g,'\\$1');
     }
@@ -2968,7 +2986,7 @@ module.exports = Asdf;
         interpreter:interpreter
 	});
 })(Asdf);
-(function($_) {
+;(function($_) {
 	$_.Arg = {};
 	function toArray(){
 		return $_.A.toArray(arguments);
@@ -3004,55 +3022,109 @@ module.exports = Asdf;
         relocate:relocate,
         transfer:transfer
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
+    /**
+     * @namespace
+     * @name Asdf.N
+     */
 	$_.N = {};
 	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
 	var curry = $_.Core.combine.curry;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
-	/*function sum (){
-		var arg = $_.A.toArray(arguments);
-		arg = $_.A.filter(arg, isNotNaN);
-		return $_.A.reduce(arg, $_.Core.op["+"], 0);
-	}
-	*/
 	function multiply() {
 		var arg = $_.A.toArray(arguments);
 		arg = $_.A.filter(arg, isNotNaN);
 		return $_.A.reduce(arg, $_.Core.op["*"], 1);
 	}
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
-	var isRange = is(function (n,a,b) { return a<=n && n<=b; });
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
+    var isRange = is(function (n,a,b) { return a<=n && n<=b; });
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
 	var isNotRange = not(isRange);
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @returns {boolean}
+     */
 	var isZero = is(function (n) { return n === 0;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} n
+     * @returns {boolean}
+     */
 	var isNotZero = not(isZero);
-	var isSame = is(function (n, a) { return a === b;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
+	var isSame = is(function (a, b) { return a === b;});
+
+    /**
+     * @memberof Asdf.N
+     * @function
+     * @param {number} a
+     * @param {number} b
+     * @returns {boolean}
+     */
 	var isNotSame = not(isSame);
 	var isGreaterThan = is(function (n, a){ return n > a;});
 	var isNotGreaterThan = not(isGreaterThan);
 	var isLessThan = is(function (n, a){ return n < a;});
 	var isNotLessThan = not(isLessThan);
-	function range(start, end, fn) {
-		if(arguments.length == 1){
-			end = arguments[0];
-			start = 0;
-		}
-		if(!($_.O.isNumber(start) && $_.O.isNumber(end))) throw new TypeError("range need two Numbers(start, end)");
-		var termin;
-		if( isLessThan(start, end)) {
-			fn = fn||$_.Core.op.inc;
-			termin = isNotGreaterThan;
-		} else {
-			fn = fn||$_.Core.op.desc;
-			termin = isNotLessThan;
-		}
-		var it = iterate(fn, start);
-		var i = start,res = [];
-		while(termin(i = it(), end)) {
-			res.push(i);
-		}
-		return res;
+
+    /**
+     * @memberof Asdf.N
+     * @param {number=} start
+     * @param {number} end
+     * @param {number=} step
+     * @returns {Array}
+     */
+	function range(start, end, step) {
+        if (arguments.length <= 1) {
+            end = start || 0;
+            start = 0;
+        }
+        step = arguments[2] || 1;
+        if($_.O.isNotNumber(start)||$_.O.isNotNumber(end)||$_.O.isNotNumber(step)) throw new TypeError();
+        if(!Number.isFinite((end - start) / step))
+             throw new TypeError('length is infinite');
+        var i = start, s=start, e=end;
+        if(start>end){
+            s = end;
+            e = start;
+        }
+        var res = [];
+        while(s <= i && i <= e){
+            res.push(i);
+            i+=step;
+        }
+        return res;
 	}
 	$_.O.extend($_.N, {
 		sum: sum,
@@ -3071,7 +3143,7 @@ module.exports = Asdf;
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
 	$_.P = {};
 	function mix(fn, sorce) {
 		if(!$_.O.isFunction(fn) || !$_.O.isPlainObject(sorce))
@@ -3089,7 +3161,194 @@ module.exports = Asdf;
 	$_.O.extend($_.P, {
 		mix:mix
 	});
-})(Asdf);(function($_) {
+})(Asdf);;/**
+ * Created by kim on 14. 2. 14.
+ */
+(function($_) {
+    $_.Color = {};
+    function rgbToHsl(r, g, b) {
+        r /= 255, g /= 255, b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h, s, l = (max + min) / 2;
+
+        if (max == min) {
+            h = s = 0; // achromatic
+        } else {
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
+            }
+            h /= 6;
+        }
+
+        return { h:h, s:s, l:l };
+    }
+    function hslToRgb(h, s, l) {
+        var r, g, b;
+
+        if (s == 0) {
+            r = g = b = l; // achromatic
+        } else {
+            function hue2rgb(p, q, t) {
+                if (t < 0)
+                    t += 1;
+                if (t > 1)
+                    t -= 1;
+                if (t < 1 / 6)
+                    return p + (q - p) * 6 * t;
+                if (t < 1 / 2)
+                    return q;
+                if (t < 2 / 3)
+                    return p + (q - p) * (2 / 3 - t) * 6;
+                return p;
+            }
+
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+        }
+
+        return { r:r * 255, g:g * 255, b:b * 255, toString: function () {
+            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
+        } };
+    }
+    function rgbToHsv(r, g, b) {
+        r = r / 255, g = g / 255, b = b / 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h, s, v = max;
+
+        var d = max - min;
+        s = max == 0 ? 0 : d / max;
+
+        if (max == min) {
+            h = 0; // achromatic
+        } else {
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
+            }
+            h /= 6;
+        }
+
+        return { h:h, s:s, v:v };
+    }
+    function hsvToRgb(h, s, v) {
+        var r, g, b;
+
+        var i = Math.floor(h * 6);
+        var f = h * 6 - i;
+        var p = v * (1 - s);
+        var q = v * (1 - f * s);
+        var t = v * (1 - (1 - f) * s);
+
+        switch (i % 6) {
+            case 0:
+                r = v, g = t, b = p;
+                break;
+            case 1:
+                r = q, g = v, b = p;
+                break;
+            case 2:
+                r = p, g = v, b = t;
+                break;
+            case 3:
+                r = p, g = q, b = v;
+                break;
+            case 4:
+                r = t, g = p, b = v;
+                break;
+            case 5:
+                r = v, g = p, b = q;
+                break;
+        }
+
+        return { r: r * 255, g: g * 255, b: b * 255, toString: function () {
+            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
+        } };
+    }
+
+    $_.O.extend($_.Color, {
+        rgbToHsl : rgbToHsl,
+        hslToRgb : hslToRgb,
+        rgbToHsv : rgbToHsv,
+        hsvToRgb : hsvToRgb
+    });
+})(Asdf);;(function($_) {
+	$_.JSON = {};
+	if(typeof Date.prototype.toJSON !== 'function'){
+		Date.prototype.toJSON = function (key) {
+			return isFinite(this.valueOf())
+            ? this.getUTCFullYear()     + '-' +
+                f(this.getUTCMonth() + 1) + '-' +
+                f(this.getUTCDate())      + 'T' +
+                f(this.getUTCHours())     + ':' +
+                f(this.getUTCMinutes())   + ':' +
+                f(this.getUTCSeconds())   + 'Z'
+            : null;
+		};
+		String.prototype.toJSON      =
+            Number.prototype.toJSON  =
+            Boolean.prototype.toJSON = function (key) {
+                return this.valueOf();
+            };
+	}
+})(Asdf);;(function($_) {
+    var promise = {}
+	$_.Promise = promise;
+	//state : Uninitialized, unfulfill, fulfilled, rejected
+	var toPromise = function(resolver){
+		var fire = true;
+		function then(done, fail){
+			fire = false;
+			done = done||function(){};
+			fail = fail||function(){};
+			if(!done.length)
+				done = $_.F.wrap(done, function(fn, d,f){
+					try{
+						fn();
+						d();
+					}catch(e){
+						f(e.message);
+					}
+				});
+			var fn = $_.F.wrap(resolver, function(fn, d, f){
+				d = d||function() {};
+				f = f||function() {};
+				return fn($_.F.curry(done,d,f), fail);
+			});
+			return toPromise(fn);
+		}
+		$_.F.defer(function() {
+			if(fire)
+				resolver(function(){}, function(){});
+		});
+		function Promise() {}
+		Promise.prototype.then = then;
+		return new Promise;
+	};
+	
+	$_.O.extend(promise, {
+		toPromise:toPromise
+	});
+})(Asdf);;(function($_) {
     var o = $_.Core.namespace($_, 'Utils');
 	function randomMax8HexChars() {
 		return (((1 + Math.random()) * 0x100000000) | 0).toString(16)
@@ -3133,7 +3392,7 @@ module.exports = Asdf;
 		parseJson : parseJson,
         time:time
 	});
-})(Asdf);(function ($_) {
+})(Asdf);;(function ($_) {
 	$_.Base = {};
 	function subclass() {};
 	var Class = function(/*parent, protoProps, staticProps*/) {
@@ -3194,7 +3453,7 @@ module.exports = Asdf;
 		Class: Class,
         getDefaultConstructor: getDefaultConstructor
 	});
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
     var Callbacks;
 	$_.Callbacks = Callbacks = {};
 	var getCallbacks = function(options) {
@@ -3229,7 +3488,7 @@ module.exports = Asdf;
 	$_.O.extend(Callbacks, {
 		getCallbacks: getCallbacks
 	});
-})(Asdf);(function ($_) {
+})(Asdf);;(function ($_) {
     var o = $_.Core.namespace($_, 'C');
     function doFilter(name, when, args){
         var self = this;
@@ -3298,7 +3557,7 @@ module.exports = Asdf;
       Events:  c
     });
 })(Asdf);
-(function($_) {
+;(function($_) {
     var o = $_.Core.namespace($_, 'C');
 	var safeObject = function(obj) {
 		return ($_.O.isArray(obj)||$_.O.isPlainObject(obj))? $_.O.clone(obj):obj;
@@ -3362,7 +3621,7 @@ module.exports = Asdf;
     $_.O.extend(o, {
         Store:  c
     });
-})(Asdf);(function($_) {
+})(Asdf);;(function($_) {
     //Asdf.Chain("    asdfasdfasdfasdf").bind(Asdf.S.trim).bind(Asdf.S.capitalize).bind(Asdf.S.truncate, undefined, 5, '...').bind(Asdf.S.lpad, undefined, '0', 10).value();
     /*var promise = Asdf.Chain(
         function(f){console.log('start'); f()},
