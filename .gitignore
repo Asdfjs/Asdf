@@ -6,3 +6,6 @@
 .idea/scopes/scope_settings.xml
 .idea/vcs.xml
 .idea/workspace.xml
+node_modules/
+.idea/Asdfjs.iml
+.idea/libraries/Asdfjs_node_modules.xml
