@@ -22,19 +22,19 @@
         var scale = Asdf.F.partial(Asdf.N.scaleLinear, undefined, [0,1],[10,440]);
         var move1 = Asdf.F.periodize(function(res,pocess){
             el1.style.left = scale(pocess)+'px';
-        }, 40, 1000);
+        }, 40, 1);
         var move2 = Asdf.F.periodize(function(res,pocess){
             el2.style.left = scale(Asdf.Ease.backInOut(pocess))+'px';
-        }, 40, 1000);
+        }, 40, 1);
         var move3 = Asdf.F.periodize(function(res,pocess){
             el3.style.left = scale(Asdf.Ease.bounceInOut(pocess))+'px';
-        }, 40, 1000);
+        }, 40, 1);
         var move4 = Asdf.F.periodize(function(res,pocess){
             el4.style.left = scale(Asdf.Ease.circInOut(pocess))+'px';
-        }, 40, 1000);
+        }, 40, 1);
         var move5 = Asdf.F.periodize(function(res,pocess){
             el5.style.left = scale(Asdf.Ease.elasticInOut(pocess))+'px';
-        }, 40, 1000);
+        }, 40, 1);
         move1(function(){console.log('done')});
         move2(function(){console.log('done')});
         move3(function(){console.log('done')});
