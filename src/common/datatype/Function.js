@@ -514,6 +514,118 @@
         }
     }
 
+    var _now = Date.now || function() { return new Date().getTime(); };
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {number} wait
+     * @param {Object=} options
+     * @returns {Function}
+     */
+    function throttle(func, wait, options) {
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
+        var context, args, result;
+        var timeout = null;
+        var previous = 0;
+        options || (options = {});
+        var later = function() {
+            previous = options.leading === false ? 0 : _now();
+            timeout = null;
+            result = func.apply(context, args);
+            context = args = null;
+        };
+        return function() {
+            var now = _now();
+            if (!previous && options.leading === false) previous = now;
+            var remaining = wait - (now - previous);
+            context = this;
+            args = arguments;
+            if (remaining <= 0) {
+                clearTimeout(timeout);
+                timeout = null;
+                previous = now;
+                result = func.apply(context, args);
+                context = args = null;
+            } else if (!timeout && options.trailing !== false) {
+                timeout = setTimeout(later, remaining);
+            }
+            return result;
+        };
+    }
+
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {nubmer} wait
+     * @param {boolean=} immediate
+     * @returns {Function}
+     */
+    function debounce(func, wait, immediate){
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
+        var timeout, args, context, timestamp, result;
+        var later = function() {
+            var last = _now() - timestamp;
+            if (last < wait) {
+                timeout = setTimeout(later, wait - last);
+            } else {
+                timeout = null;
+                if (!immediate) {
+                    result = func.apply(context, args);
+                    context = args = null;
+                }
+            }
+        };
+        return function() {
+            context = this;
+            args = arguments;
+            timestamp = _now();
+            var callNow = immediate && !timeout;
+            if (!timeout) {
+                timeout = setTimeout(later, wait);
+            }
+            if (callNow) {
+                result = func.apply(context, args);
+                context = args = null;
+            }
+            return result;
+        }
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @returns {Function}
+     */
+    function once(func){
+        if(!$_.O.isFunction(func)) throw new TypeError();
+        var ran = false, memo;
+        return function() {
+            if (ran) return memo;
+            ran = true;
+            memo = func.apply(this, arguments);
+            func = null;
+            return memo;
+        };
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {Function} hasher
+     * @returns {Function}
+     */
+    function memoize(func, hasher){
+        if(!$_.O.isFunction(func)) throw new TypeError();
+        var memo = {};
+        hasher || (hasher = identity);
+        return function() {
+            var key = hasher.apply(this, arguments);
+            return Asdf.O.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+        };
+    }
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -543,7 +655,11 @@
 		toFunction:toFunction,
 		async:async,
 		when:when,
-        curried:curried
+        curried:curried,
+        debounce:debounce,
+        throttle:throttle,
+        once:once,
+        memoize:memoize
 	}, true);
 
 })(Asdf);
