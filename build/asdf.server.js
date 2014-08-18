@@ -1470,6 +1470,7 @@ module.exports = Asdf;
      */
     function throttle(func, wait, options) {
         if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
+        wait = wait*1000;
         var context, args, result;
         var timeout = null;
         var previous = 0;
@@ -1510,6 +1511,7 @@ module.exports = Asdf;
     function debounce(func, wait, immediate){
         if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
         var timeout, args, context, timestamp, result;
+        wait = wait*1000;
         var later = function() {
             var last = _now() - timestamp;
             if (last < wait) {
@@ -1540,7 +1542,9 @@ module.exports = Asdf;
 
     function periodize(func, frequency, wait){
         if(!$_.O.isFunction(func)||!$_.O.isNumber(frequency)||!$_.O.isNumber(wait)) throw new TypeError();
+        wait = wait*1000;
         return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
             var timeout, interval, timestamp, res;
             var self = this;
             var pfn = function(){
@@ -1556,8 +1560,8 @@ module.exports = Asdf;
             };
             timestamp = _now();
             timeout = setTimeout(pfn, wait);
-            interval = setInterval(pfn, 1/frequency);
-            res = func.call(self, res, 0);
+            interval = setInterval(pfn, 1/frequency*1000);
+            res = func.call(self, undefined, 0);
             return interval;
         }
     }

@@ -192,7 +192,7 @@ test("Asdf.F.curried", function(){
 
 asyncTest("Asdf.F.debounce", function(){
     var i = 0;
-    var fn = Asdf.F.debounce(function(){i++},100);
+    var fn = Asdf.F.debounce(function(){i++},0.1);
     var timer = setInterval(fn, 60);
     Asdf.F.delay(function(){
         clearInterval(timer);
@@ -205,7 +205,7 @@ asyncTest("Asdf.F.debounce", function(){
 
 asyncTest("Asdf.F.debounce", function(){
     var i = 0;
-    var fn = Asdf.F.throttle(function(){i++},100);
+    var fn = Asdf.F.throttle(function(){i++},0.1);
     var timer = setInterval(fn, 60);
     Asdf.F.delay(function(){
         clearInterval(timer);
