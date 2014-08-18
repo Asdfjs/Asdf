@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head lang="kr">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="../build/asdf.client-min.js"></script>
+</head>
+<body>
+    <div style="width:500px;height:500px;border:1px solid #000000">
+        <div id='move1' style="position:relative;top:10px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div id='move2' style="position:relative;top:60px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div id='move3' style="position:relative;top:110px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div id='move4' style="position:relative;top:160px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div id='move5' style="position:relative;top:210px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+    </div>
+    <script>
+        var el1 = document.getElementById('move1');
+        var el2 = document.getElementById('move2');
+        var el3 = document.getElementById('move3');
+        var el4 = document.getElementById('move4');
+        var el5 = document.getElementById('move5');
+        var scale = Asdf.F.partial(Asdf.N.scaleLinear, undefined, [0,1],[10,440]);
+        var move1 = Asdf.F.periodize(function(res,pocess){
+            el1.style.left = scale(pocess)+'px';
+        }, 40, 1000);
+        var move2 = Asdf.F.periodize(function(res,pocess){
+            el2.style.left = scale(Asdf.Ease.backInOut(pocess))+'px';
+        }, 40, 1000);
+        var move3 = Asdf.F.periodize(function(res,pocess){
+            el3.style.left = scale(Asdf.Ease.bounceInOut(pocess))+'px';
+        }, 40, 1000);
+        var move4 = Asdf.F.periodize(function(res,pocess){
+            el4.style.left = scale(Asdf.Ease.circInOut(pocess))+'px';
+        }, 40, 1000);
+        var move5 = Asdf.F.periodize(function(res,pocess){
+            el5.style.left = scale(Asdf.Ease.elasticInOut(pocess))+'px';
+        }, 40, 1000);
+        move1(function(){console.log('done')});
+        move2(function(){console.log('done')});
+        move3(function(){console.log('done')});
+        move4(function(){console.log('done')});
+        move5(function(){console.log('done')});
+
+    </script>
+</body>
+</html>

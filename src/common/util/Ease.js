@@ -106,7 +106,7 @@
     }
 
     function bounceIn(t) {
-        return 1-Ease.bounceOut(1-t);
+        return 1-bounceOut(1-t);
     }
 
     function bounceOut(t) {
@@ -160,6 +160,42 @@
     var elasticInOut = getElasticInOut(1,0.3*1.5);
 
     $_.O.extend($_.Ease, {
-
+        linear: linear,
+        get:get,
+        getPowIn:getPowIn,
+        getPowOut:getPowOut,
+        getPowInOut:getPowInOut,
+        quadIn:quadIn,
+        quadOut:quadOut,
+        quadInOut:quadInOut,
+        cubicIn:cubicIn,
+        cubicOut:cubicOut,
+        cubicInOut:cubicInOut,
+        quartIn:quartIn,
+        quartOut:quartOut,
+        quintIn:quintIn,
+        quintOut:quintOut,
+        quintInOut:quintInOut,
+        sineIn:sineIn,
+        sineOut:sineOut,
+        sineInOut:sineInOut,
+        getBackIn:getBackIn,
+        getBackInOut:getBackInOut,
+        getBackOut:getBackOut,
+        backIn:backIn,
+        backOut:backOut,
+        backInOut:backInOut,
+        circIn:circIn,
+        circOut:circOut,
+        circInOut:circInOut,
+        bounceIn:bounceIn,
+        bounceOut:bounceOut,
+        bounceInOut:bounceInOut,
+        getElasticIn:getElasticIn,
+        getElasticOut:getElasticOut,
+        getElasticInOut:getElasticInOut,
+        elasticIn:elasticIn,
+        elasticOut:elasticOut,
+        elasticInOut:elasticInOut
     });
 })(Asdf);

@@ -593,6 +593,31 @@
         }
     }
 
+    function periodize(func, frequency, wait){
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(frequency)||!$_.O.isNumber(wait)) throw new TypeError();
+        return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
+            var timeout, interval, timestamp, res;
+            var self = this;
+            var pfn = function(){
+                var last = _now() - timestamp;
+                res = func.call(self, res, Math.min(last/wait,1));
+                if(last >= wait){
+                    if(interval) {
+                        cb.apply(self, res);
+                    }
+                    clearTimeout(timeout);
+                    clearInterval(interval)
+                }
+            };
+            timestamp = _now();
+            timeout = setTimeout(pfn, wait);
+            interval = setInterval(pfn, 1/frequency);
+            res = func.call(self, res, 0);
+            return interval;
+        }
+    }
+
     /**
      * @memberof Asdf.F
      * @param {Function} func
@@ -659,7 +684,8 @@
         debounce:debounce,
         throttle:throttle,
         once:once,
-        memoize:memoize
+        memoize:memoize,
+        periodize:periodize
 	}, true);
 
 })(Asdf);
