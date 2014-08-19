@@ -12,7 +12,7 @@
 
     }
     RGB.prototype.toString = function(){
-        return '#'+$_.A.map([this.r,this.g,this.b], function (value) {return $_.S.lpad((value|0).toString(16),"0",2);}).join("")
+        return '#'+$_.A.map([this.r,this.g,this.b], function (value) {return $_.S.lpad(Math.min(255,(value|0)).toString(16),"0",2);}).join("")
     };
     RGB.prototype.toHSL = function(){
         var t = rgbToHsl(this.r, this.g, this.b);
