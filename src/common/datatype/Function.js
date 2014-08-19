@@ -358,8 +358,9 @@
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
         return function(){
             var res;
+            var args = arguments;
             Asdf.A.each(fns, function(f){
-                res = f.apply(this, arguments);
+                res = f.apply(this, args);
             });
             return res;
         }

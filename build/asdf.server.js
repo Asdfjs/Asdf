@@ -1303,8 +1303,9 @@ module.exports = Asdf;
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
         return function(){
             var res;
+            var args = arguments;
             Asdf.A.each(fns, function(f){
-                res = f.apply(this, arguments);
+                res = f.apply(this, args);
             });
             return res;
         }
@@ -3701,6 +3702,8 @@ module.exports = Asdf;
         return new RGB(r,g,b);
     }
 
+    var colorNameList = $_.O.keys(colorName);
+
     $_.O.extend($_.Color, {
         RGB:RGB,
         HSL:HSL,
@@ -3709,7 +3712,8 @@ module.exports = Asdf;
         hslToRgb : hslToRgb,
         rgbToHsv : rgbToHsv,
         hsvToRgb : hsvToRgb,
-        parse:parse
+        parse:parse,
+        colorNameList:colorNameList
     });
 })(Asdf);;(function($_) {
     $_.Ease = {};

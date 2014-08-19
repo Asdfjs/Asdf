@@ -351,6 +351,8 @@
         return new RGB(r,g,b);
     }
 
+    var colorNameList = $_.O.keys(colorName);
+
     $_.O.extend($_.Color, {
         RGB:RGB,
         HSL:HSL,
@@ -359,6 +361,7 @@
         hslToRgb : hslToRgb,
         rgbToHsv : rgbToHsv,
         hsvToRgb : hsvToRgb,
-        parse:parse
+        parse:parse,
+        colorNameList:colorNameList
     });
 })(Asdf);
