@@ -133,27 +133,7 @@
         }
         return Math.max(min, Math.min(max, n));
     }
-    function uninterpolate(x, a, b){
-        b = b-(a = +a) ? 1/(b-a):0;
-        return (x-a)*b;
-    }
-    function interpolate(x, a, b){
-        b -= a = +a;
-        return a + b*x;
-    }
-    function linear(x, domain, range){
-        return interpolate(uninterpolate(x,domain[0],domain[1]), range[0], range[1]);
-    }
 
-    function scale(n, domain, range, fn){
-        domain = domain || [0,1];
-        range = range || [0,1];
-        return fn(n, domain, range);
-    }
-    var scaleLinear = $_.F.partial(scale, undefined, undefined, undefined, linear);
-    var scaleLog = $_.F.partial(scale, undefined, undefined, undefined, function(x, domain, range){return linear(Math.log(x)/Math.log(10), [domain[0]/Math.log(10),domain[1]/Math.log(10)], range);});
-    var scalePow = $_.F.partial(scale, undefined, undefined, undefined, function(x, domain, range){return linear(Math.pow(10,x), [Math.pow(10,domain[0]),Math.pow(10,domain[1])], range);});
-    var scaleSqrt = $_.F.partial(scale, undefined, undefined, undefined, function(x, domain, range){return linear(Math.pow(0.5,x), [Math.pow(0.5,domain[0]),Math.pow(0.5,domain[1])], range);});
 
     $_.O.extend($_.N, {
 		sum: sum,
@@ -172,11 +152,6 @@
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
         isFinite:isFinite,
-        clamp:clamp,
-        scale:scale,
-        scaleLinear:scaleLinear,
-        scaleLog:scaleLog,
-        scalePow:scalePow,
-        scaleSqrt:scaleSqrt
+        clamp:clamp
 	});
 })(Asdf);

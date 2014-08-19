@@ -100,7 +100,7 @@ test("Asdf.F.orElse", function(){
 	}
 	equal(Asdf.F.orElse(fn, elseFn)(1), 2, 'orElse ok');
 });
-test("Asdf.F.guarder", function(){
+test("Asdf.F.guarded", function(){
     var fibo = Asdf.F.guarded([
         {
             test: function(n){return n===0},
