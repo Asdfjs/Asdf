@@ -3257,6 +3257,7 @@ module.exports = Asdf;
      * @param {number} end
      * @param {number=} step
      * @returns {Array}
+     * @desc half-open interval
      */
 	function range(start, end, step) {
         function integerScale(x){
@@ -3278,7 +3279,7 @@ module.exports = Asdf;
             e = start;
         }
         var res = [];
-        while(s*integerscale <= i && i <= e*integerscale){
+        while(s*integerscale <= i && i < e*integerscale){
             res.push(i/integerscale);
             i+=step*integerscale;
         }
