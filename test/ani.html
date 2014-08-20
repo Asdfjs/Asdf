@@ -29,7 +29,7 @@
 
     <script>
         var elmoves = Asdf.Element.children(document.getElementById('move'));
-        var scale = Asdf.F.curry(Asdf.Scale.scaleLinear, [0,1],[10,440]);
+        var scale = Asdf.F.curry(Asdf.Scale.linear, [0,1],[10,440]);
         var move = ['linear', 'backInOut', 'bounceInOut', 'cubicInOut', 'elasticInOut', 'quintInOut', 'sineInOut'];
         var movefns = Asdf.A.map(elmoves, function(el){
             var m = move[(Math.random()*move.length)|0];
@@ -43,7 +43,7 @@
         var color = Asdf.Color.colorNameList;
         var colorfns = Asdf.A.map(elcolor, function(el){
             var c1 = color[(Math.random()*color.length)|0];
-            var scale = Asdf.F.curry(Asdf.Scale.scaleLinear, [0,1],[Asdf.Color.parse('white'), Asdf.Color.parse(c1)]);
+            var scale = Asdf.F.curry(Asdf.Scale.linear, [0,1],[Asdf.Color.parse('white'), Asdf.Color.parse(c1)]);
             return Asdf.F.periodize(function(res,process){
                 el.style.backgroundColor = scale(process).toString();
             }, 40, 0.8);

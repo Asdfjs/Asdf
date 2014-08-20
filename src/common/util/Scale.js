@@ -41,7 +41,7 @@
 
     function interpolate(x,a,b){
         var inter = Asdf.F.overload(interpolateObject, function(x,a,b){
-            return $_.O.isObject(a) && $_.O.isObject(b);
+            return $_.O.isPlainObject(a) && $_.O.isPlainObject(b);
         });
         inter = Asdf.F.overload(interpolateArray, function(x,a,b){
             return $_.O.isArray(a) && $_.O.isArray(b);
@@ -55,24 +55,24 @@
         return inter(x,a,b);
     }
 
-    function linear(x, domain, range){
+    function _linear(x, domain, range){
         return interpolate(uninterpolate(x,domain[0],domain[1]), range[0], range[1]);
     }
 
-    function scale(fn, domain, range, n){
+    function get(fn, domain, range, n){
         domain = domain || [0,1];
         range = range || [0,1];
         return fn(n, domain, range);
     }
-    var scaleLinear = $_.F.partial(scale, linear, undefined, undefined, undefined );
-    var scaleLog = $_.F.partial(scale, function(x, domain, range){return linear(Math.log(x)/Math.log(10), [domain[0]/Math.log(10),domain[1]/Math.log(10)], range);}, undefined, undefined, undefined);
-    var scalePow = $_.F.partial(scale, function(x, domain, range){return linear(Math.pow(10,x), [Math.pow(10,domain[0]),Math.pow(10,domain[1])], range);}, undefined, undefined, undefined);
-    var scaleSqrt = $_.F.partial(scale, function(x, domain, range){return linear(Math.pow(0.5,x), [Math.pow(0.5,domain[0]),Math.pow(0.5,domain[1])], range);}, undefined, undefined, undefined);
+    var linear = $_.F.partial(get, _linear, undefined, undefined, undefined );
+    var log = $_.F.partial(get, function(x, domain, range){return _linear(Math.log(x)/Math.log(10), [domain[0]/Math.log(10),domain[1]/Math.log(10)], range);}, undefined, undefined, undefined);
+    var pow = $_.F.partial(get, function(x, domain, range){return _linear(Math.pow(10,x), [Math.pow(10,domain[0]),Math.pow(10,domain[1])], range);}, undefined, undefined, undefined);
+    var sqrt = $_.F.partial(get, function(x, domain, range){return _linear(Math.pow(0.5,x), [Math.pow(0.5,domain[0]),Math.pow(0.5,domain[1])], range);}, undefined, undefined, undefined);
     $_.O.extend($_.Scale, {
-        scale:scale,
-        scaleLinear:scaleLinear,
-        scaleLog:scaleLog,
-        scalePow:scalePow,
-        scaleSqrt:scaleSqrt
+        get:get,
+        linear:linear,
+        log:log,
+        pow:pow,
+        sqrt:sqrt
     });
 })(Asdf);
