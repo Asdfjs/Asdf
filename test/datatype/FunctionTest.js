@@ -232,3 +232,11 @@ test("Asdf.F.memoize", function(){
     equal(fn(1), 1, '두번째 연산 ok');
     equal(i, 1, '연산은 한번만 실행되었음');
 });
+
+test("Asdf.F.annotate", function(){
+    var  fn = function(a,b){return a/b};
+    var f = Asdf.F.annotate(fn, {a:1, b:1});
+    equal(f({a:4,b:2}), 2, '4/2는 2');
+    equal(f({b:2,a:4}), 2, '4/2는 2');
+    equal(f({a:2}),2, '2/1(default) 는 2');
+});

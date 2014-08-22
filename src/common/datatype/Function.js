@@ -655,6 +655,29 @@
         };
     }
 
+    /**
+     * @memberof Asdf.F
+     * @param {Function} fn
+     * @param {object} defaults
+     * @returns {Function}
+     */
+    var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_ARG_SPLIT = /,/;
+    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    function annotate(fn, defaults){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
+        var argNames = $_.A.map(fnText.match(FN_ARGS)[1].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return function(obj){
+            var arg = $_.A.map(argNames, function(v){
+                return obj[v]||defaults[v];
+            });
+            return fn.apply(this, arg);
+        }
+    }
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -689,7 +712,8 @@
         throttle:throttle,
         once:once,
         memoize:memoize,
-        periodize:periodize
+        periodize:periodize,
+        annotate:annotate
 	}, true);
 
 })(Asdf);
