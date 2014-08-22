@@ -15,14 +15,14 @@ test("Asdf.S.template", function(){
 	var obj = {AA: 'bbb', BB:'ccc', CC: 'ddd'};
 	t2.set(obj);
 	equal(t2.toString(), 'aa bbb bb ccc cc ddd', 'object template');
-	var t3 = Asdf.S.template('aa <?AA?> bb <?BB?> cc <?CC?>', /\<\?([\s\S]+?)\?\>/g);
+	var t3 = Asdf.S.template('aa <?AA?> bb <?BB?> cc <?CC?>', /<\?([\s\S]+?)\?>/g);
 	t3.set(1, 'bbb');
 	t3.set(2, 'ccc');
 	t3.set(3, 'ddd');
 	equal(t3.toString(), 'aa bbb bb ccc cc ddd', '1number template');
 	var t4 = Asdf.S.template('aa {{AA}} bb {{AA}} cc {{AA}}');
-	var obj = {AA: 'bbb'};
-	t4.set(obj);
+	var obj1 = {AA: 'bbb'};
+	t4.set(obj1);
 	equal(t4.toString(), 'aa bbb bb bbb cc bbb', '같은 키가 있을때');
 });
 test("Asdf.S.isBlank", function() {
@@ -69,4 +69,12 @@ test("Asdf.S.lpad", function(){
 });
 test("Asdf.S.rpad", function(){
 	equal(Asdf.S.rpad('1', '0', 4), '1000', 'rpad ok');
+});
+test("Asdf.S.isJSON", function(){
+    ok(Asdf.S.isJSON('{"a":1}', 'json ok'));
+    ok(!Asdf.S.isJSON('aa'), 'aa string is not json');
+});
+test("Asdf.S.interpreter", function(){
+    var f = Asdf.S.interpreter('capitalize(truncate (times(%a0, 20),8))');
+    equal(f('ab'), 'Ababa...', 'interpreter ok');
 });

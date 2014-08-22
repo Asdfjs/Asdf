@@ -1310,8 +1310,9 @@
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
         return function(){
             var res;
+            var args = arguments;
             Asdf.A.each(fns, function(f){
-                res = f.apply(this, arguments);
+                res = f.apply(this, args);
             });
             return res;
         }
@@ -1606,6 +1607,29 @@
         };
     }
 
+    /**
+     * @memberof Asdf.F
+     * @param {Function} fn
+     * @param {object} defaults
+     * @returns {Function}
+     */
+    var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_ARG_SPLIT = /,/;
+    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    function annotate(fn, defaults){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
+        var argNames = $_.A.map(fnText.match(FN_ARGS)[1].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return function(obj){
+            var arg = $_.A.map(argNames, function(v){
+                return obj[v]||defaults[v];
+            });
+            return fn.apply(this, arg);
+        }
+    }
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -1640,7 +1664,8 @@
         throttle:throttle,
         once:once,
         memoize:memoize,
-        periodize:periodize
+        periodize:periodize,
+        annotate:annotate
 	}, true);
 
 })(Asdf);
@@ -3263,6 +3288,7 @@
      * @param {number} end
      * @param {number=} step
      * @returns {Array}
+     * @desc half-open interval
      */
 	function range(start, end, step) {
         function integerScale(x){
@@ -3284,7 +3310,7 @@
             e = start;
         }
         var res = [];
-        while(s*integerscale <= i && i <= e*integerscale){
+        while(s*integerscale <= i && i < e*integerscale){
             res.push(i/integerscale);
             i+=step*integerscale;
         }
@@ -4808,7 +4834,7 @@
 
     }
     RGB.prototype.toString = function(){
-        return '#'+$_.A.map([this.r,this.g,this.b], function (value) {return $_.S.lpad((value|0).toString(16),"0",2);}).join("")
+        return '#'+$_.A.map([this.r,this.g,this.b], function (value) {return $_.S.lpad(Math.min(255,(value|0)).toString(16),"0",2);}).join("")
     };
     RGB.prototype.toHSL = function(){
         var t = rgbToHsl(this.r, this.g, this.b);
@@ -5147,6 +5173,8 @@
         return new RGB(r,g,b);
     }
 
+    var colorNameList = $_.O.keys(colorName);
+
     $_.O.extend($_.Color, {
         RGB:RGB,
         HSL:HSL,
@@ -5155,7 +5183,8 @@
         hslToRgb : hslToRgb,
         rgbToHsv : rgbToHsv,
         hsvToRgb : hsvToRgb,
-        parse:parse
+        parse:parse,
+        colorNameList:colorNameList
     });
 })(Asdf);;(function($_) {
     $_.Ease = {};
@@ -5457,7 +5486,7 @@
 
     function interpolate(x,a,b){
         var inter = Asdf.F.overload(interpolateObject, function(x,a,b){
-            return $_.O.isObject(a) && $_.O.isObject(b);
+            return $_.O.isPlainObject(a) && $_.O.isPlainObject(b);
         });
         inter = Asdf.F.overload(interpolateArray, function(x,a,b){
             return $_.O.isArray(a) && $_.O.isArray(b);
@@ -5471,25 +5500,25 @@
         return inter(x,a,b);
     }
 
-    function linear(x, domain, range){
+    function _linear(x, domain, range){
         return interpolate(uninterpolate(x,domain[0],domain[1]), range[0], range[1]);
     }
 
-    function scale(fn, domain, range, n){
+    function get(fn, domain, range, n){
         domain = domain || [0,1];
         range = range || [0,1];
         return fn(n, domain, range);
     }
-    var scaleLinear = $_.F.partial(scale, linear, undefined, undefined, undefined );
-    var scaleLog = $_.F.partial(scale, function(x, domain, range){return linear(Math.log(x)/Math.log(10), [domain[0]/Math.log(10),domain[1]/Math.log(10)], range);}, undefined, undefined, undefined);
-    var scalePow = $_.F.partial(scale, function(x, domain, range){return linear(Math.pow(10,x), [Math.pow(10,domain[0]),Math.pow(10,domain[1])], range);}, undefined, undefined, undefined);
-    var scaleSqrt = $_.F.partial(scale, function(x, domain, range){return linear(Math.pow(0.5,x), [Math.pow(0.5,domain[0]),Math.pow(0.5,domain[1])], range);}, undefined, undefined, undefined);
+    var linear = $_.F.partial(get, _linear, undefined, undefined, undefined );
+    var log = $_.F.partial(get, function(x, domain, range){return _linear(Math.log(x)/Math.log(10), [domain[0]/Math.log(10),domain[1]/Math.log(10)], range);}, undefined, undefined, undefined);
+    var pow = $_.F.partial(get, function(x, domain, range){return _linear(Math.pow(10,x), [Math.pow(10,domain[0]),Math.pow(10,domain[1])], range);}, undefined, undefined, undefined);
+    var sqrt = $_.F.partial(get, function(x, domain, range){return _linear(Math.pow(0.5,x), [Math.pow(0.5,domain[0]),Math.pow(0.5,domain[1])], range);}, undefined, undefined, undefined);
     $_.O.extend($_.Scale, {
-        scale:scale,
-        scaleLinear:scaleLinear,
-        scaleLog:scaleLog,
-        scalePow:scalePow,
-        scaleSqrt:scaleSqrt
+        get:get,
+        linear:linear,
+        log:log,
+        pow:pow,
+        sqrt:sqrt
     });
 })(Asdf);;(function($_) {
     var o = $_.Core.namespace($_, 'Utils');

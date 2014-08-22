@@ -32,20 +32,20 @@ test("Asdf.F.before", function() {
 	equal(Asdf.F.before(fn, b, true)(true), false, 'stop ok');
 });
 test("Asdf.F.after", function() {
-	function a(res, a){
+	function afterfn(res, a){
 		return res *a;
 	}
 	function fn(a) {
 		return a*a;
 	}
-	equal(Asdf.F.after(fn, a)(2), 8, 'after ok');
-	equal(Asdf.F.after(function(a){return false}, function(res){ return !res}, true)(), false, 'stop ok');
+	equal(Asdf.F.after(fn, afterfn)(2), 8, 'after ok');
+	equal(Asdf.F.after(function(){return false}, function(res){ return !res}, true)(), false, 'stop ok');
 });
 test("Asdf.F.methodize", function() {
 	var obj = {};
 	function fn(obj) {
 		return obj;
-	};
+	}
 	obj.f = Asdf.F.methodize(fn,  obj);
 	equal(obj.f(), obj, 'methodize ok');
 });
@@ -88,6 +88,8 @@ test("Asdf.F.partial", function(){
 		return a/b;
 	}
 	equal(Asdf.F.partial(f, undefined, 2)(4), 2, 'partial');
+    equal(Asdf.F.partial(f, 4)(2), 2, 'partial');
+    equal(Asdf.F.partial(f, 4, 2)(), 2, 'partial');
 });
 test("Asdf.F.orElse", function(){
 	function fn(i){
@@ -98,10 +100,10 @@ test("Asdf.F.orElse", function(){
 	}
 	equal(Asdf.F.orElse(fn, elseFn)(1), 2, 'orElse ok');
 });
-test("Asdf.F.guarder", function(){
+test("Asdf.F.guarded", function(){
     var fibo = Asdf.F.guarded([
         {
-            test: function(n){return n==0},
+            test: function(n){return n===0},
             fn: function(){return 1}
         },
         {
@@ -119,4 +121,122 @@ test("Asdf.F.guarder", function(){
 test("Asdf.F.sequence", function(){
     var f = Asdf.F.sequence(function(){return 1;}, function(){return 2});
     equal(f(), 2, 'sequence ok');
+});
+test("Asdf.F.overload", function(){
+    var add = Asdf.F.overload(function(a,b){return a.length+b.length}, function(a,b){ return Asdf.O.isArray(a) && Asdf.O.isArray(b)});
+    add = Asdf.F.overload(function(a,b){return a+b}, function(a,b){ return Asdf.O.isNumber(a) && Asdf.O.isNumber(b)}, add);
+    equal(add(1,2), 3, 'ok');
+    equal(add([],[]), 0, 'ok');
+    throws(function(){add(1,[])}, 'throws');
+});
+test("Asdf.F.errorHandler", function(){
+    function f(){
+        throw new Error();
+    }
+    var ef = Asdf.F.errorHandler(f, function(){return true;});
+    equal(ef(), true, 'errorHandler');
+});
+test("Asdf.F.trys", function(){
+    function f1(b){
+       if(b)
+           throw new Error();
+       return 'aaa';
+    }
+    function f2(b){
+        if(b)
+            throw new Error();
+        return 'bbb';
+    }
+    function f3(b){
+        return 'ccc';
+    }
+
+    var f = Asdf.F.trys(f1, f2, f3);
+
+    equal(f(true), 'ccc', 'error test');
+    equal(f(false), 'aaa', 'error test');
+
+});
+asyncTest("Asdf.F.asyncThen", function(){
+    var b = false;
+    var f = Asdf.F.asyncThen(function(){}, function(){
+        b=true;
+        ok(b, 'asyncThen ok');
+        start();
+    }, function(f){
+        setTimeout(f, 200);
+    });
+    f();
+});
+asyncTest("Asdf.F.when", function(){
+    Asdf.F.when(
+        function(cb){setTimeout(function(){cb(1)}, 50)},
+        function(cb){setTimeout(function(){cb(2)}, 25)},
+        function(cb){setTimeout(function(){cb(3)}, 70)},
+        function(cb){setTimeout(function(){cb(4)}, 10)}
+    )(function(){
+        deepEqual(Asdf.A.toArray(arguments), [1,2,3,4], 'Asdf.F.when ok')
+        start();
+    })
+});
+
+test("Asdf.F.curried", function(){
+    function add3(a,b,c){return a+b+c}
+    var f = Asdf.F.curried(add3);
+    equal(f(1,2,3), 6, 'curry ok');
+    equal(f(1)(2)(3), 6, 'curry ok');
+    var f1 = Asdf.F.curried(add3, 4);
+    equal(f1(1,2,3,4), 6, 'argNum ok');
+    equal(f1(1)(2)(3)(4), 6, 'argNum ok');
+});
+
+asyncTest("Asdf.F.debounce", function(){
+    var i = 0;
+    var fn = Asdf.F.debounce(function(){i++},0.1);
+    var timer = setInterval(fn, 60);
+    Asdf.F.delay(function(){
+        clearInterval(timer);
+        Asdf.F.delay(function(){
+            equal(i, 1, 'Asdf.F.debounce ok');
+            start();
+        },0.3);
+    },0.3);
+});
+
+asyncTest("Asdf.F.debounce", function(){
+    var i = 0;
+    var fn = Asdf.F.throttle(function(){i++},0.1);
+    var timer = setInterval(fn, 60);
+    Asdf.F.delay(function(){
+        clearInterval(timer);
+        equal(i, 3, 'Asdf.F.debounce ok');
+        start();
+    },0.35);
+});
+
+test("Asdf.F.once", function(){
+    var i = 0;
+    var fn = Asdf.F.once(function(){return i++;});
+    equal(fn(), 0, '첫번째 결과값은 0');
+    equal(fn(), 0, '두번째 결과값은 0');
+    equal(i, 1, 'i값은 1');
+});
+
+test("Asdf.F.memoize", function(){
+    var i = 0;
+    var fn = Asdf.F.memoize(function(a){
+        i++;
+        return a;
+    });
+    equal(fn(1), 1, '첫번째 연산 ok');
+    equal(fn(1), 1, '두번째 연산 ok');
+    equal(i, 1, '연산은 한번만 실행되었음');
+});
+
+test("Asdf.F.annotate", function(){
+    var  fn = function(a,b){return a/b};
+    var f = Asdf.F.annotate(fn, {a:1, b:1});
+    equal(f({a:4,b:2}), 2, '4/2는 2');
+    equal(f({b:2,a:4}), 2, '4/2는 2');
+    equal(f({a:2}),2, '2/1(default) 는 2');
 });

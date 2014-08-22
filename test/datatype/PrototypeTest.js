@@ -7,4 +7,10 @@ test("Asdf.P.mix", function(){
 	Asdf.P.mix(fn, obj2);
 	var o = new fn();
 	equal(o.a(2), 8, 'ok');
+    var e = Asdf.Base.getDefaultConstructor();
+    Asdf.P.mix(e, Asdf.C.Events.mixin);
+    var a = e();
+    var b = e();
+    a.on('aa', function(){});
+    notEqual(a._events, b._events, 'array is not Equals both instances');
 });

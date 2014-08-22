@@ -6,61 +6,49 @@
     <script src="../javascripts/asdf.client-min.js"></script>
 </head>
 <body>
-    <div style="position:relative;width:500px;height:500px;border:1px solid #000000">
-        <div id='move1' style="position:relative;top:10px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
-        <div id='move2' style="position:relative;top:20px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
-        <div id='move3' style="position:relative;top:30px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
-        <div id='move4' style="position:relative;top:40px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
-        <div id='move5' style="position:relative;top:50px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
-        <div id='move6' style="position:relative;top:60px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
-        <div id='move7' style="position:relative;top:70px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+    <div id = 'move' style="position:relative;width:500px;height:500px;border:1px solid #000000">
+        <div style="position:relative;top:10px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:20px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:30px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:40px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:50px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:60px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:70px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
     </div>
+    <button onclick="moverun(function(){console.log('done')})">실행</button>
+    <div id = 'color' style="position:relative;width:70px;height:500px;border:1px solid #000000">
+        <div style="position:relative;top:10px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:20px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:30px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:40px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:50px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:60px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+        <div style="position:relative;top:70px;left:10px;width:50px;height:50px;border:1px solid #000000"></div>
+    </div>
+    <button onclick="colorrun(function(){console.log('done')})">실행</button>
+
     <script>
-        var el1 = document.getElementById('move1');
-        var el2 = document.getElementById('move2');
-        var el3 = document.getElementById('move3');
-        var el4 = document.getElementById('move4');
-        var el5 = document.getElementById('move5');
-        var el6 = document.getElementById('move6');
-        var el7 = document.getElementById('move7');
-        var scale = Asdf.F.curry(Asdf.Scale.scaleLinear, [0,1],[10,440]);
-        var bluetored = Asdf.F.curry(Asdf.Scale.scaleLinear, [0,1],[Asdf.Color.parse('blue'), Asdf.Color.parse('red')]);
-        var bluetored = Asdf.F.curry(Asdf.Scale.scaleLinear, [0,1],[Asdf.Color.parse('blue'), Asdf.Color.parse('red')]);
-        var move1 = Asdf.F.periodize(function(res,process){
-            el1.style.left = scale(process)+'px';
-            el1.style.backgroundColor = bluetored(process).toString();
-        }, 40, 0.8);
-        var move2 = Asdf.F.periodize(function(res,process){
-            el2.style.left = scale(Asdf.Ease.backInOut(process))+'px';
-            el2.style.backgroundColor = bluetored(Asdf.Ease.backInOut(process)).toString();
-        }, 40, 0.8);
-        var move3 = Asdf.F.periodize(function(res,process){
-            el3.style.left = scale(Asdf.Ease.bounceInOut(process))+'px';
-            el3.style.backgroundColor = bluetored(Asdf.Ease.bounceInOut(process)).toString();
-        }, 40, 0.8);
-        var move4 = Asdf.F.periodize(function(res,process){
-            el4.style.left = scale(Asdf.Ease.cubicInOut(process))+'px';
-            el4.style.backgroundColor = bluetored(Asdf.Ease.cubicInOut(process)).toString();
-        }, 40, 0.8);
-        var move5 = Asdf.F.periodize(function(res,process){
-            el5.style.left = scale(Asdf.Ease.elasticInOut(process))+'px';
-            el5.style.backgroundColor = bluetored(Asdf.Ease.elasticInOut(process)).toString();
-        }, 40, 0.8);
-        var move6 = Asdf.F.periodize(function(res,process){
-            el6.style.left = scale(Asdf.Ease.quintInOut(process))+'px';
-            el6.style.backgroundColor = bluetored(Asdf.Ease.quintInOut(process)).toString();
-        }, 40, 0.8);
-        var move7 = Asdf.F.periodize(function(res,process){
-            el7.style.left = scale(Asdf.Ease.sineInOut(process))+'px';
-            el7.style.backgroundColor = bluetored(Asdf.Ease.sineInOut(process)).toString();
-        }, 40, 0.8);
-        move1(function(){console.log('done')});
-        move2(function(){console.log('done')});
-        move3(function(){console.log('done')});
-        move4(function(){console.log('done')});
-        move5(function(){console.log('done')});
-        move6(function(){console.log('done')});
-        move7(function(){console.log('done')});
+        var elmoves = Asdf.Element.children(document.getElementById('move'));
+        var scale = Asdf.F.curry(Asdf.Scale.linear, [0,1],[10,440]);
+        var move = ['linear', 'backInOut', 'bounceInOut', 'cubicInOut', 'elasticInOut', 'quintInOut', 'sineInOut'];
+        var movefns = Asdf.A.map(elmoves, function(el){
+            var m = move[(Math.random()*move.length)|0];
+            return Asdf.F.periodize(function(res,process){
+                el.style.left = scale(Asdf.Ease[m](process))+'px';
+            }, 40, 0.8);
+        });
+        var moverun = Asdf.F.sequence.apply(null, movefns);
+
+        var elcolor = Asdf.Element.children(document.getElementById('color'));
+        var color = Asdf.Color.colorNameList;
+        var colorfns = Asdf.A.map(elcolor, function(el){
+            var c1 = color[(Math.random()*color.length)|0];
+            var scale = Asdf.F.curry(Asdf.Scale.linear, [0,1],[Asdf.Color.parse('white'), Asdf.Color.parse(c1)]);
+            return Asdf.F.periodize(function(res,process){
+                el.style.backgroundColor = scale(process).toString();
+            }, 40, 0.8);
+        });
+        var colorrun = Asdf.F.sequence.apply(null, colorfns);
     </script>
 </body>
 </html>

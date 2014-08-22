@@ -52,7 +52,7 @@ test("Asdf.O.isFunction", function() {
 test("Asdf.O.isString", function() {
 	ok(Asdf.O.isString('abc'), 'abc is String');
 	ok(Asdf.O.isString(String('abc')), 'String("abc") is String');
-	ok(Asdf.O.isString(new String('abc')), 'new String("abc") is String');
+	ok(Asdf.O.isString(new String('abc')), 'new String("abc") is String'); // jshint ignore:line
 	ok(!Asdf.O.isString(1), '1 is not String');
 });
 test("Asdf.O.isNumber", function() {
@@ -133,6 +133,11 @@ test("Asdf.O.get", function() {
 	equal(Asdf.O.get(obj, 'a'), 'aa','값이 있을 경우');
 	equal(Asdf.O.get(obj, 'c'), null,'값이 없을 경우');
 });
+test("Asdf.O.remove", function(){
+    var obj = {a:'aa', b:'bb'};
+    Asdf.O.remove(obj, 'a');
+    ok(!Asdf.O.has(obj, 'a'), 'property 삭제');
+});
 test("Asdf.O.getOrElse", function() {
 	var obj = {a:'aa', b:'bb'};
 	equal(Asdf.O.getOrElse(obj, 'a', 'cc'), 'aa','값이 있을 경우');
@@ -153,4 +158,13 @@ test("Asdf.O.type", function() {
 	};
 	ok(Asdf.O.type(obj, type1), '덕타입 테스트');
 	ok(!Asdf.O.type(obj, type2), '덕타입 실패 테스트');
+});
+
+test("Asdf.O.equals", function(){
+    ok(Asdf.O.equals('aa', 'aa'), 'string ok');
+    ok(Asdf.O.equals(1,1), 'number ok');
+    ok(Asdf.O.equals([1,2],[1,2]), 'array ok');
+    ok(Asdf.O.equals([1,[2,3]],[1,[2,3]]), 'deep Array ok');
+    ok(Asdf.O.equals({a:1, b:2}, {a:1, b:2}), 'object ok');
+    ok(Asdf.O.equals({a:1, b:2, c:[1,2], d:{aa:'a',bb:'b'}}, {a:1, b:2, c:[1,2], d:{aa:'a',bb:'b'}}), 'complex ok');
 });
