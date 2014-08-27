@@ -1954,7 +1954,7 @@ module.exports = Asdf;
 	 * @returns {Array} collection 객체에 method를 실행한 결과를 array Type으로 반환한다.
 	 * @desc 각각의 collection객체 안을 순환하면서 method를 실행하고 그 결과를 반환한다.  
 	 * @example
-	 * Asdf.A.invode([[3,1,2],['c','b','a']], 'sort') //return [[1,2,3],['a','b','c']];
+	 * Asdf.A.invoke([[3,1,2],['c','b','a']], 'sort') //return [[1,2,3],['a','b','c']];
 	 */
 	function invoke(col, method) {
 		if (col == null || $_.O.isNotCollection(col))
@@ -2089,17 +2089,18 @@ module.exports = Asdf;
 	 * @memberof A
 	 * @func
 	 * @param {Array} arr 대상 객체
-	 * @param {string} key key값
-	 * @param {function=} sort 정렬 함수
+	 * @param {string|function} key key값
+	 * @param {function=} order 정렬 함수
 	 * @returns {Array} 특정 key값으로 정렬한 후 결과 값을 반환한다.
 	 * @desc arr안에 객체를 key 값을 기준으로 정렬한다. sort함수가 없는 경우 오름차순으로 정렬한다.
 	 * @example
 	 * Asdf.A.sortBy([[3,1],[4],[2,6,3]], 'length') //return [[4],[3,1],[2,6,3]]
 	 */
 	function sortBy(arr, key, order) {
-		if($_.O.isNotArray(arr)||$_.O.isNotString(key)) throw new TypeError();
+		if($_.O.isNotArray(arr)||($_.O.isNotString(key)&&$_.O.isNotFunction(key))) throw new TypeError();
 		order = order || asc;
-		return sort(arr, function(a, b){return order(a[key], b[key]);});
+		return sort(arr, function(a, b){return order(($_.O.isFunction(key) ? key : $_.O.isFunction(a[key])? a[key]: function() {return a[key];}).call(a)
+            , ($_.O.isFunction(key) ? key : $_.O.isFunction(b[key])? b[key]: function() {return b[key];}).call(b));});
 	}
 	
 	/**
@@ -2113,29 +2114,42 @@ module.exports = Asdf;
 	 * @example
 	 * Asdf.A.groupBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); }); //return {1:[1.3],2:[2.1,2,4]}
 	 */
-	function groupBy(col,key) {
+	function groupBy(col,key, context) {
 		if (col == null || $_.O.isNotCollection(col))
 			throw new TypeError();
 		if (!($_.O.isString(key)||$_.O.isFunction(key)))
 			throw new TypeError();
 		var result = {};
 		each(col, function(value, index, list) {
-			var k = ($_.O.isFunction(key))? key(value):value[key];
+			var k = ($_.O.isFunction(key))? key.call(context,value):value[key];
 			(result[k] || (result[k] = [])).push(value);
 		});
 		return result;
 	}
 	
-	function sortedIndex(array, obj, iterator) {
+	function bisectLeft(array, obj, iterator) {
 		iterator || (iterator = $_.F.identity);
 		var low = 0, high = array.length;
+        var value =  iterator(obj);
 		while (low < high) {
-			var mid = (low + high) >> 1;
-			iterator(array[mid]) < iterator(obj) ? low = mid + 1
+			var mid = (low + high) >>> 1;
+			iterator(array[mid]) < value ? low = mid + 1
 					: high = mid;
 		}
 		return low;
 	}
+
+    function bisectRight(array, obj, iterator) {
+        iterator || (iterator = $_.F.identity);
+        var low = 0, high = array.length;
+        var value =  iterator(obj);
+        while (low < high) {
+            var mid = (low + high) >>> 1;
+            iterator(array[mid]) > value ? high = mid
+                : low = mid+1;
+        }
+        return low;
+    }
 	
 	/**
 	 * @memberof A
@@ -2371,7 +2385,6 @@ module.exports = Asdf;
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
-	 * @param {boolean} isSorted 정렬 여부
 	 * @returns {Number} array에서 item값을 찾아 그 위치를 반환한다.
 	 * @desc array에서 item 위치를 뒤부터 찾아서 그 위치를 반환한다. 만약 없을 경우 -1을 반환한다.
 	 * @example
@@ -2459,6 +2472,7 @@ module.exports = Asdf;
 		reduce: reduce,
 		reduceRight: reduceRight,
 		first: first,
+        get: get,
 		last: last,
 		filter: filter,
 		reject: reject,
@@ -2474,7 +2488,8 @@ module.exports = Asdf;
 		sortBy: sortBy,
 		sort: sort,
 		groupBy: groupBy,
-		sortedIndex: sortedIndex,
+        bisectLeft: bisectLeft,
+        bisectRight:bisectRight,
 		toArray: toArray,
 		size: size,
 		clear: clear,
@@ -3205,16 +3220,11 @@ module.exports = Asdf;
      * @name Asdf.N
      */
 	$_.N = {};
-	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
+	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose;
 	var curry = $_.Core.combine.curry;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
-	function multiply() {
-		var arg = $_.A.toArray(arguments);
-		arg = $_.A.filter(arg, isNotNaN);
-		return $_.A.reduce(arg, $_.Core.op["*"], 1);
-	}
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
 
     /**

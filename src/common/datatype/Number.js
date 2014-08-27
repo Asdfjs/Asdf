@@ -4,16 +4,11 @@
      * @name Asdf.N
      */
 	$_.N = {};
-	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
+	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose;
 	var curry = $_.Core.combine.curry;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
-	function multiply() {
-		var arg = $_.A.toArray(arguments);
-		arg = $_.A.filter(arg, isNotNaN);
-		return $_.A.reduce(arg, $_.Core.op["*"], 1);
-	}
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
 
     /**
