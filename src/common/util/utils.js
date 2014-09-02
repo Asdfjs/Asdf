@@ -100,6 +100,7 @@
         var args = [];
         var returns = [];
         var stacks = [];
+        var errors = [];
         var count = 0;
         var fndef = $_.F.getDef(fn);
         var isDir = console.dir;
@@ -124,15 +125,24 @@
             log('}');
             groupEnd();
         }
-        var res = function res() {
-            var stack = trace().slice(2);
+        var res = function spy() {
+            var stack = trace().slice(1);
+            var error
             var arg = Array.prototype.slice.call(arguments, 0);
             var time = Date.now();
             time = Date.now()- time;
             groupStart(desc + 'function ' + fndef.name + '('+ fndef.arguments.join(',') +')'+'{');
             print('arguments : ', arg);
             print('stack: ', stack);
-            var value = fn.apply(this, arg);
+            try{
+                var value = fn.apply(this, arg);
+            }catch(e){
+                error = e;
+                print('error', error);
+            }
+            finally{
+                errors.push(error);
+            }
             print('return: ', value);
             log('duration: ' + time + 'ms');
             log('}');
@@ -155,7 +165,9 @@
         res.stack = function(){
             return $_.O.clone(stacks);
         };
-
+        res.error = function(){
+            return $_.O.clone(errors);
+        };
         return res;
     }
 
