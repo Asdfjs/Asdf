@@ -371,7 +371,7 @@
         return function(key){
             var arg = slice.call(arguments, 1);
             var fn;
-            if(fn = get(obj, key)){
+            if(fn = $_.O.get(obj, key)){
                 if(Asdf.O.isFunction(fn)){
                     return fn.apply(this, arg);
                 }
@@ -661,13 +661,13 @@
      * @param {object} defaults
      * @returns {Function}
      */
-    var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_DEF = /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)/m;
     var FN_ARG_SPLIT = /,/;
     var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
     function annotate(fn, defaults){
         if(!$_.O.isFunction(fn)) throw new TypeError();
         var fnText = fn.toString().replace(STRIP_COMMENTS, '');
-        var argNames = $_.A.map(fnText.match(FN_ARGS)[1].split(FN_ARG_SPLIT), function(arg){
+        var argNames = $_.A.map(fnText.match(FN_DEF)[2].split(FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return function(obj){
@@ -675,6 +675,19 @@
                 return obj[v]||defaults[v];
             });
             return fn.apply(this, arg);
+        }
+    }
+
+    function getDef(fn){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
+        var m = fnText.match(FN_DEF);
+        var argNames = $_.A.map(m[2].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return {
+            name: m[1],
+            arguments: argNames
         }
     }
 
@@ -713,7 +726,8 @@
         once:once,
         memoize:memoize,
         periodize:periodize,
-        annotate:annotate
+        annotate:annotate,
+        getDef:getDef
 	}, true);
 
 })(Asdf);
