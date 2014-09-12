@@ -5698,15 +5698,16 @@
         }
         var res = function spy() {
             var stack = trace().slice(1);
-            var error
+            var error;
+            var timer = getTimer();
             var arg = Array.prototype.slice.call(arguments, 0);
-            var time = Date.now();
-            time = Date.now()- time;
             groupStart(desc + 'function ' + fndef.name + '('+ fndef.arguments.join(',') +')'+'{');
             print('arguments : ', arg);
             print('stack: ', stack);
             try{
+                var time = timer();
                 var value = fn.apply(this, arg);
+                time = timer()- time;
             }catch(e){
                 error = e;
                 print('error', error);
