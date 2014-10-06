@@ -1668,6 +1668,17 @@
         }
     }
 
+    function converge(after){
+        var fns = slice.call(arguments,1);
+        return function(){
+            var args = arguments;
+            var self = this;
+            return after.apply(self, Asdf.A.map(fns, function(fn){
+                return fn.apply(self, args);
+            }));
+        }
+    }
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -1704,7 +1715,8 @@
         memoize:memoize,
         periodize:periodize,
         annotate:annotate,
-        getDef:getDef
+        getDef:getDef,
+        converge:converge
 	}, true);
 
 })(Asdf);
