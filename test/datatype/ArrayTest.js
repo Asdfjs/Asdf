@@ -107,3 +107,17 @@ test("Asdf.A.bisectLeft", function(){
 test("Asdf.A.bisectRight", function(){
     equal(Asdf.A.bisectRight([10, 20, 30, 40, 50], 30),3, 'bisectRight ok');
 });
+test("Asdf.A.ap", function(){
+    deepEqual(Asdf.A.ap([function(n){return n+3}, function(n){return n*2}], [1,2,3]), [4, 5, 6, 2, 4, 6], 'ap ok');
+});
+test("Asdf.A.take", function(){
+    deepEqual(Asdf.A.take([1,2,3],2),[1,2], 'take ok');
+});
+test("Asdf.A.contains", function(){
+    ok(Asdf.A.contains([1,2,3], 1), 'contains ok');
+    ok(Asdf.A.contains([1,2,3], function(n){return n==1}), 'contains fn ok')
+    ok(!Asdf.A.contains([1,2,3], function(n){return n==4}), 'contains fn ok')
+});
+test("Asdf.A.xprod", function(){
+    deepEqual(Asdf.A.xprod([1,2],[3,4]), [[1,3],[1,4],[2,3],[2,4]], 'Asdf.A.xprod ok');
+})

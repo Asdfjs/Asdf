@@ -247,3 +247,6 @@ test("Asdf.F.converge", function(){
     var multiply = function(a, b) { return a * b; };
     equal(Asdf.F.converge(multiply, add, subtract)(1, 2), -3, 'converge ok');
 });
+test("Asdf.F.zip", function(){
+   deepEqual(Asdf.F.zip(function(a,b){return a+b},[1,2,3],[1,3,4]), [2,5,7], 'zip ok');
+});

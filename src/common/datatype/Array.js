@@ -692,6 +692,24 @@
 	    for (var i = 0; i < length; i++) results[i] = pluck(args, "" + i);
 	    return results;
 	}
+
+    function xprod(){
+        var args = slice.call(arguments);
+        var self = this;
+        var res = [];
+        var a1 = args.shift();
+        for(var j = 0; j < a1.length; j++){
+            if(args.length == 0){
+                res.push([a1[j]]);
+            }else {
+                var t = map(xprod.apply(self,args), function(v){
+                    return prepend(v,a1[j]);
+                });
+                merge(res,t);
+            }
+        }
+        return res;
+    }
 	
 	/**
 	 * @memberof A
@@ -766,8 +784,17 @@
 		return fn.apply(context, array);
 	}
 
-    function contains(array, item){
-        return indexOf(array, item) >= 0;
+    function contains(array, item, context){
+        return Asdf.O.isFunction(item)?_containsWith(array,item, context):indexOf(array, item) >= 0;
+    }
+
+    function _containsWith(array, fn,context){
+        for(var i =0; i < array.length; i++){
+            if(fn.call(context, array[i], i, array)){
+                return true;
+            }
+        }
+        return false;
     }
 
     function concat(array){
@@ -800,6 +827,42 @@
             arrayProto.push.apply(array, array.splice(0, -n));
         }
         return array;
+    }
+
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function prepend(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.unshift(item);
+        return array;
+    }
+
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function append(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.push(item);
+        return array;
+    }
+
+    function ap(fns, values){
+        if(Asdf.O.isNotArray(fns)||Asdf.O.isNotArray(values)) throw new TypeError();
+        fns = filter(fns, $_.O.isFunction);
+        return reduce(fns, function(acc, fn){
+            return merge(acc, map(values, fn));
+        }, []);
+    }
+
+    function take(array, n){
+        return slice.call(array, 0, Math.min(n, array.length));
     }
 
 	$_.O.extend($_.A, {
@@ -847,6 +910,11 @@
         concat: concat,
         count: count,
         repeat:repeat,
-        rotate: rotate
+        rotate: rotate,
+        prepend:prepend,
+        append:append,
+        ap:ap,
+        take:take,
+        xprod:xprod
 	}, true);
 })(Asdf);

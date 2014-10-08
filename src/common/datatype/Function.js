@@ -691,8 +691,9 @@
         }
     }
 
-    function converge(after){
-        var fns = slice.call(arguments,1);
+    function converge(after /*fns*/){
+        if(!$_.O.isFunction(after)) throw new TypeError();
+        var fns = $_.A.filter(slice.call(arguments,1), $_.O.isFunction);
         return function(){
             var args = arguments;
             var self = this;
@@ -700,6 +701,15 @@
                 return fn.apply(self, args);
             }));
         }
+    }
+
+    function zip(fn /*arrays*/){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var arrays = slice.call(arguments,1);
+        var length = Asdf.A.max(Asdf.A.pluck(arrays, 'length'));
+        var results = new Array(length);
+        for (var i = 0; i < length; i++) results[i] = fn.apply(this,Asdf.A.pluck(arrays, "" + i));
+        return results;
     }
 
 	$_.O.extend($_.F, {
@@ -739,7 +749,8 @@
         periodize:periodize,
         annotate:annotate,
         getDef:getDef,
-        converge:converge
+        converge:converge,
+        zip:zip
 	}, true);
 
 })(Asdf);

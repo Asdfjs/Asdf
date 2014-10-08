@@ -613,12 +613,17 @@
 		return obj;
 	}
 
-	function getOrElse(obj, key, defult){
-		if(isNotObject(obj)) throw new TypeError();
-		if(has(obj, key))
-			return obj[key];
-		return defult;
-	}
+    function getOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        var k = key.split('.');
+        return Asdf.A.reduce(k, function(acc, a){
+            if(acc == defult) return defult;
+            if(has(acc, a)){
+                return acc[a];
+            }
+            return defult;
+        }, obj);
+    }
 
     /**
      * @memberof Asdf.O
@@ -630,6 +635,7 @@
 	var get = partial(getOrElse, undefined, undefined, undefined);
 
 	function has(obj,str){
+        if(Asdf.O.isNotObject(obj)) return false;
 		return str in obj;
 	}
 

@@ -807,12 +807,17 @@ module.exports = Asdf;
 		return obj;
 	}
 
-	function getOrElse(obj, key, defult){
-		if(isNotObject(obj)) throw new TypeError();
-		if(has(obj, key))
-			return obj[key];
-		return defult;
-	}
+    function getOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        var k = key.split('.');
+        return Asdf.A.reduce(k, function(acc, a){
+            if(acc == defult) return defult;
+            if(has(acc, a)){
+                return acc[a];
+            }
+            return defult;
+        }, obj);
+    }
 
     /**
      * @memberof Asdf.O
@@ -824,6 +829,7 @@ module.exports = Asdf;
 	var get = partial(getOrElse, undefined, undefined, undefined);
 
 	function has(obj,str){
+        if(Asdf.O.isNotObject(obj)) return false;
 		return str in obj;
 	}
 
@@ -1661,8 +1667,9 @@ module.exports = Asdf;
         }
     }
 
-    function converge(after){
-        var fns = slice.call(arguments,1);
+    function converge(after /*fns*/){
+        if(!$_.O.isFunction(after)) throw new TypeError();
+        var fns = $_.A.filter(slice.call(arguments,1), $_.O.isFunction);
         return function(){
             var args = arguments;
             var self = this;
@@ -1670,6 +1677,15 @@ module.exports = Asdf;
                 return fn.apply(self, args);
             }));
         }
+    }
+
+    function zip(fn /*arrays*/){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var arrays = slice.call(arguments,1);
+        var length = Asdf.A.max(Asdf.A.pluck(arrays, 'length'));
+        var results = new Array(length);
+        for (var i = 0; i < length; i++) results[i] = fn.apply(this,Asdf.A.pluck(arrays, "" + i));
+        return results;
     }
 
 	$_.O.extend($_.F, {
@@ -1709,7 +1725,8 @@ module.exports = Asdf;
         periodize:periodize,
         annotate:annotate,
         getDef:getDef,
-        converge:converge
+        converge:converge,
+        zip:zip
 	}, true);
 
 })(Asdf);
@@ -2407,6 +2424,24 @@ module.exports = Asdf;
 	    for (var i = 0; i < length; i++) results[i] = pluck(args, "" + i);
 	    return results;
 	}
+
+    function xprod(){
+        var args = slice.call(arguments);
+        var self = this;
+        var res = [];
+        var a1 = args.shift();
+        for(var j = 0; j < a1.length; j++){
+            if(args.length == 0){
+                res.push([a1[j]]);
+            }else {
+                var t = map(xprod.apply(self,args), function(v){
+                    return prepend(v,a1[j]);
+                });
+                merge(res,t);
+            }
+        }
+        return res;
+    }
 	
 	/**
 	 * @memberof A
@@ -2481,8 +2516,17 @@ module.exports = Asdf;
 		return fn.apply(context, array);
 	}
 
-    function contains(array, item){
-        return indexOf(array, item) >= 0;
+    function contains(array, item, context){
+        return Asdf.O.isFunction(item)?_containsWith(array,item, context):indexOf(array, item) >= 0;
+    }
+
+    function _containsWith(array, fn,context){
+        for(var i =0; i < array.length; i++){
+            if(fn.call(context, array[i], i, array)){
+                return true;
+            }
+        }
+        return false;
     }
 
     function concat(array){
@@ -2515,6 +2559,42 @@ module.exports = Asdf;
             arrayProto.push.apply(array, array.splice(0, -n));
         }
         return array;
+    }
+
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function prepend(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.unshift(item);
+        return array;
+    }
+
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function append(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.push(item);
+        return array;
+    }
+
+    function ap(fns, values){
+        if(Asdf.O.isNotArray(fns)||Asdf.O.isNotArray(values)) throw new TypeError();
+        fns = filter(fns, $_.O.isFunction);
+        return reduce(fns, function(acc, fn){
+            return merge(acc, map(values, fn));
+        }, []);
+    }
+
+    function take(array, n){
+        return slice.call(array, 0, Math.min(n, array.length));
     }
 
 	$_.O.extend($_.A, {
@@ -2562,7 +2642,12 @@ module.exports = Asdf;
         concat: concat,
         count: count,
         repeat:repeat,
-        rotate: rotate
+        rotate: rotate,
+        prepend:prepend,
+        append:append,
+        ap:ap,
+        take:take,
+        xprod:xprod
 	}, true);
 })(Asdf);;/**
  * @project Asdf.js
@@ -3409,8 +3494,10 @@ module.exports = Asdf;
 		isSame : isSame,
 		isNotSame: isNotSame,
 		isGreaterThan: isGreaterThan,
+        gt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThan),2),
 		isNotGreaterThan: isNotGreaterThan,
 		isLessThan: isLessThan,
+        lt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThan),2),
 		isNotLessThan: isNotLessThan,
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
@@ -4167,7 +4254,7 @@ module.exports = Asdf;
     function time(fn){
         var timer = getTimer();
         var startTime = timer();
-        var res = fn(Array.prototype.slice.call(arguments, 1));
+        var res = fn.apply(this,Array.prototype.slice.call(arguments, 1));
         var endTime = timer();
         if(endTime == startTime)
             endTime = timer();
