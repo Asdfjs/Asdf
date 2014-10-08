@@ -323,6 +323,12 @@
 	 */
 	var isNotNumber = not(isNumber);
 
+    function isBoolean(obj){
+        return nativeToString.call(obj) === objectType.BOOLEAN_CLASS
+    }
+
+    var isNotBoolean = not(isBoolean);
+
 	/**
 	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
@@ -348,7 +354,7 @@
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Regexp인지 판단한다.
 	 */
-	function isRegexp(object) {
+	function isRegExp(object) {
 		return nativeToString.call(object) === objectType.REGEXP_CLASS;
 	}
 	
@@ -359,7 +365,7 @@
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Regexp아닌지 판단한다.
 	 */
-	var isNotRegexp = not(isRegexp);
+	var isNotRegExp = not(isRegExp);
 	
 	/**
 	 * @memberof Asdf.O
@@ -607,12 +613,17 @@
 		return obj;
 	}
 
-	function getOrElse(obj, key, defult){
-		if(isNotObject(obj)) throw new TypeError();
-		if(has(obj, key))
-			return obj[key];
-		return defult;
-	}
+    function getOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        var k = key.split('.');
+        return Asdf.A.reduce(k, function(acc, a){
+            if(acc == defult) return defult;
+            if(has(acc, a)){
+                return acc[a];
+            }
+            return defult;
+        }, obj);
+    }
 
     /**
      * @memberof Asdf.O
@@ -624,6 +635,7 @@
 	var get = partial(getOrElse, undefined, undefined, undefined);
 
 	function has(obj,str){
+        if(Asdf.O.isNotObject(obj)) return false;
 		return str in obj;
 	}
 
@@ -675,10 +687,20 @@
      * @returns {Boolean}
      */
     function equals(obj, obj2){
-        if(obj == null|| obj2 == null) return false;
-        if(obj===obj2) return true;
+        if (obj === obj2) return obj !== 0 || 1 / obj === 1 / obj2;
+        if(obj == null|| obj2 == null) return obj === obj2;
         if(obj.equals)
            return obj.equals(obj2);
+        var className = nativeToString.call(obj);
+        if(className !== nativeToString.call(obj2)) return false;
+        if(isRegExp(obj) || isString(obj))
+            return ''  + obj === '' + obj2;
+        if(isNumber(obj)){
+            if (+obj !== +obj) return +obj2 !== +obj2;
+            return +obj === 0 ? 1 / +obj === 1 / obj2 : +obj === +obj2;
+        }
+        if(isDate(obj)||isBoolean(obj))
+            return +obj === +obj2;
         if(!(isPlainObject(obj)||isArray(obj))|| obj.constructor !== obj2.constructor) return false;
         var k1 = keys(obj);
         var k2 = keys(obj2);
@@ -689,6 +711,12 @@
             if(!res) return false;
         }
         return true;
+    }
+
+    function tap(obj, fn){
+        if(isNotObject(obj) || isNotFunction(fn)) throw new TypeError();
+            fn(obj);
+        return obj;
     }
 
 	extend(o, {
@@ -727,10 +755,12 @@
 		isNotString: isNotString,
 		isNumber : isNumber,
 		isNotNumber: isNotNumber,
+        isBoolean:isBoolean,
+        isNotBoolean:isNotBoolean,
 		isDate : isDate,
 		isNotDate: isNotDate,
-		isRegexp: isRegexp,
-		isNotRegexp: isNotRegexp,
+        isRegExp: isRegExp,
+		isNotRegExp: isNotRegExp,
 		isUndefined : isUndefined,
 		isNotUndefined: isNotUndefined,
 		isNull : isNull,
@@ -746,6 +776,7 @@
         has:has,
 		set: set,
 		type:type,
-        equals:equals
+        equals:equals,
+        tap:tap
 	});
 })(Asdf);

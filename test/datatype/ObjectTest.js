@@ -63,9 +63,9 @@ test("Asdf.O.isNumber", function() {
 test("Asdf.O.isDate", function(){
 	ok(Asdf.O.isDate(new Date()), 'new Date() is Date');
 });
-test("Asdf.O.isRegexp", function() {
-	ok(Asdf.O.isRegexp(/1/), '/1/ is Regexp');
-	ok(Asdf.O.isRegexp(new RegExp(1), 'new RegExp is Regexp'));
+test("Asdf.O.isRegExp", function() {
+	ok(Asdf.O.isRegExp(/1/), '/1/ is Regexp');
+	ok(Asdf.O.isRegExp(new RegExp(1), 'new RegExp is Regexp'));
 });
 test("Asdf.O.isNull", function() {
 	ok(Asdf.O.isNull(null), 'null is null');
@@ -132,6 +132,8 @@ test("Asdf.O.get", function() {
 	var obj = {a:'aa', b:'bb'};
 	equal(Asdf.O.get(obj, 'a'), 'aa','값이 있을 경우');
 	equal(Asdf.O.get(obj, 'c'), null,'값이 없을 경우');
+    equal(Asdf.O.get({a:{b:1}},'a.b.c', 'aa'),'aa', '.으로 구분될 경우');
+    equal(Asdf.O.get({a:{b:1}},'a.b', 'aa'),'1', '.으로 구분될 경우');
 });
 test("Asdf.O.remove", function(){
     var obj = {a:'aa', b:'bb'};
@@ -167,4 +169,12 @@ test("Asdf.O.equals", function(){
     ok(Asdf.O.equals([1,[2,3]],[1,[2,3]]), 'deep Array ok');
     ok(Asdf.O.equals({a:1, b:2}, {a:1, b:2}), 'object ok');
     ok(Asdf.O.equals({a:1, b:2, c:[1,2], d:{aa:'a',bb:'b'}}, {a:1, b:2, c:[1,2], d:{aa:'a',bb:'b'}}), 'complex ok');
+    ok(Asdf.O.equals(/aa/, /aa/), 'regexp ok');
+    ok(Asdf.O.equals(new Date(),new Date() ), 'date ok');
+    ok(Asdf.O.equals(true, true), 'boolean ok');
+});
+test("Asdf.O.tap", function(){
+    Asdf.O.tap({a:1}, function(o){
+        deepEqual(o, {a:1}, 'tap ok')
+    });
 });

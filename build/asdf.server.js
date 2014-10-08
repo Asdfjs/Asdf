@@ -274,14 +274,14 @@ module.exports = Asdf;
 	/**
 	 * @memberof Asdf.O
 	 * @param {Object} obj 대상 객체
-	 * @param {Object} mixin 출처 객체
+	 * @param {Object} mixinObj 출처 객체
 	 * @returns {Object} 대상객체를 반환한다.
 	 * @desc 해당 메소드를 사용하면 출처 객체에 있는 프로퍼티를 대상 객체로 복사한다.
 	 */
-	function mixin(obj, mixin) {
-		if(!isPlainObject(obj) || !isPlainObject(mixin))
+	function mixin(obj, mixinObj) {
+		if(!isPlainObject(obj) || !isPlainObject(mixinObj))
 			throw new TypeError();
-		each(mixin, function (value, key) {
+		each(mixinObj, function (value, key) {
 			obj[key] = value;
 		});
 		return obj;
@@ -405,7 +405,7 @@ module.exports = Asdf;
 	 * @returns {boolean} Array 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Array인지 판단한다.
 	 */
-	function isArray(object) {
+	var isArray = function (object) {
 		var hasNativeIsArray = (typeof Array.isArray == 'function') && Array.isArray([]) && !Array.isArray({});
 		if (hasNativeIsArray) {
 			isArray = Array.isArray;
@@ -517,6 +517,12 @@ module.exports = Asdf;
 	 */
 	var isNotNumber = not(isNumber);
 
+    function isBoolean(obj){
+        return nativeToString.call(obj) === objectType.BOOLEAN_CLASS
+    }
+
+    var isNotBoolean = not(isBoolean);
+
 	/**
 	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
@@ -542,7 +548,7 @@ module.exports = Asdf;
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Regexp인지 판단한다.
 	 */
-	function isRegexp(object) {
+	function isRegExp(object) {
 		return nativeToString.call(object) === objectType.REGEXP_CLASS;
 	}
 	
@@ -553,7 +559,7 @@ module.exports = Asdf;
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Regexp아닌지 판단한다.
 	 */
-	var isNotRegexp = not(isRegexp);
+	var isNotRegExp = not(isRegExp);
 	
 	/**
 	 * @memberof Asdf.O
@@ -627,9 +633,9 @@ module.exports = Asdf;
 				|| object === null) {
 			throw new TypeError("Object.key called on a non-object");
 		}
-		var keys = [];
-		each(object, function (value, key) { keys.push(key); });
-		return keys;
+		var res = [];
+		each(object, function (value, key) { res.push(key); });
+		return res;
 	}
 	
 	/**
@@ -647,9 +653,9 @@ module.exports = Asdf;
 				|| object === null) {
 			throw new TypeError("Object.values called on a non-object");
 		}
-		var values = [];
-		each(object, function (value, key){ values.push(value); });
-		return values;
+		var res = [];
+		each(object, function (value, key){ res.push(value); });
+		return res;
 	}
 	
 	function getKeysbyType(obj, fn){
@@ -801,12 +807,17 @@ module.exports = Asdf;
 		return obj;
 	}
 
-	function getOrElse(obj, key, defult){
-		if(isNotObject(obj)) throw new TypeError();
-		if(has(obj, key))
-			return obj[key];
-		return defult;
-	}
+    function getOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        var k = key.split('.');
+        return Asdf.A.reduce(k, function(acc, a){
+            if(acc == defult) return defult;
+            if(has(acc, a)){
+                return acc[a];
+            }
+            return defult;
+        }, obj);
+    }
 
     /**
      * @memberof Asdf.O
@@ -818,6 +829,7 @@ module.exports = Asdf;
 	var get = partial(getOrElse, undefined, undefined, undefined);
 
 	function has(obj,str){
+        if(Asdf.O.isNotObject(obj)) return false;
 		return str in obj;
 	}
 
@@ -850,10 +862,10 @@ module.exports = Asdf;
 	 * };
 	 * Asdf.O.type(obj, type1); // return true;
 	 */
-	function type(obj, type){
-		if(isNotPlainObject(type)) throw new TypeError();
+	function type(obj, typeObj){
+		if(isNotPlainObject(typeObj)) throw new TypeError();
 		var res = true;
-		each(type, function(fn, key){
+		each(typeObj, function(fn, key){
 			if(isFunction(fn))
 				if(!fn(obj[key]))
 					res = false;
@@ -869,10 +881,20 @@ module.exports = Asdf;
      * @returns {Boolean}
      */
     function equals(obj, obj2){
-        if(obj == null|| obj2 == null) return false;
-        if(obj===obj2) return true;
+        if (obj === obj2) return obj !== 0 || 1 / obj === 1 / obj2;
+        if(obj == null|| obj2 == null) return obj === obj2;
         if(obj.equals)
            return obj.equals(obj2);
+        var className = nativeToString.call(obj);
+        if(className !== nativeToString.call(obj2)) return false;
+        if(isRegExp(obj) || isString(obj))
+            return ''  + obj === '' + obj2;
+        if(isNumber(obj)){
+            if (+obj !== +obj) return +obj2 !== +obj2;
+            return +obj === 0 ? 1 / +obj === 1 / obj2 : +obj === +obj2;
+        }
+        if(isDate(obj)||isBoolean(obj))
+            return +obj === +obj2;
         if(!(isPlainObject(obj)||isArray(obj))|| obj.constructor !== obj2.constructor) return false;
         var k1 = keys(obj);
         var k2 = keys(obj2);
@@ -883,6 +905,12 @@ module.exports = Asdf;
             if(!res) return false;
         }
         return true;
+    }
+
+    function tap(obj, fn){
+        if(isNotObject(obj) || isNotFunction(fn)) throw new TypeError();
+            fn(obj);
+        return obj;
     }
 
 	extend(o, {
@@ -921,10 +949,12 @@ module.exports = Asdf;
 		isNotString: isNotString,
 		isNumber : isNumber,
 		isNotNumber: isNotNumber,
+        isBoolean:isBoolean,
+        isNotBoolean:isNotBoolean,
 		isDate : isDate,
 		isNotDate: isNotDate,
-		isRegexp: isRegexp,
-		isNotRegexp: isNotRegexp,
+        isRegExp: isRegExp,
+		isNotRegExp: isNotRegExp,
 		isUndefined : isUndefined,
 		isNotUndefined: isNotUndefined,
 		isNull : isNull,
@@ -940,7 +970,8 @@ module.exports = Asdf;
         has:has,
 		set: set,
 		type:type,
-        equals:equals
+        equals:equals,
+        tap:tap
 	});
 })(Asdf);
 ;/**
@@ -1092,7 +1123,7 @@ module.exports = Asdf;
 	/**
 	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
-	 * @param {function} after 이후 실행 함수
+	 * @param {function} afterfn 이후 실행 함수
 	 * @param {boolean} stop 실행 함수의 결과값여부에 따라 이후 실행 함수를 실행여부를 결정 
 	 * @returns {function} 실행 함수, 이후 실행함수를 실행하는 함수를 반환한다.
 	 * @desc 실행 함수, 이후 실행함수를 실행하는 함수를 반환한다.
@@ -1105,12 +1136,12 @@ module.exports = Asdf;
 	 * }
 	 * Asdf.F.after(fn, a)(2); //return 8;
 	 */
-	function after(func, after, stop){
-		if(!$_.O.isFunction(func)||!$_.O.isFunction(after)) throw new TypeError;
+	function after(func, afterfn, stop){
+		if(!$_.O.isFunction(func)||!$_.O.isFunction(afterfn)) throw new TypeError;
 		return function() {
 			var res = func.apply(this, arguments);
 			if(!res && stop) return res;
-			return after.apply(this, $_.A.merge([res], arguments));
+			return afterfn.apply(this, $_.A.merge([res], arguments));
 		};
 	}
 	
@@ -1136,6 +1167,14 @@ module.exports = Asdf;
 			return __method.apply(null, a);
 		}
 	}
+
+    function functionize(method){
+        return function(){
+            var a = slice.call(arguments,1);
+            var context = arguments[0];
+            return method.apply(context, a);
+        }
+    }
 	
 	/**
 	 * @memberof Asdf.F
@@ -1154,8 +1193,7 @@ module.exports = Asdf;
 	 */
 	function composeRight() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-		var fn = $_.A.reduce(fns, $_.Core.behavior.compose);
-		return fn;
+		return $_.A.reduce(fns, $_.Core.behavior.compose);
 	}
 	
 	/**
@@ -1175,8 +1213,7 @@ module.exports = Asdf;
 	 */
 	function compose() {
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-		var fn = $_.A.reduceRight(fns, $_.Core.behavior.compose);
-		return fn;
+		return $_.A.reduceRight(fns, $_.Core.behavior.compose);
 	}
 	var exisFunction = function (fn) {
 		if($_.O.isNotFunction(fn)){
@@ -1296,9 +1333,10 @@ module.exports = Asdf;
     function sequence() {
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
         return function(){
-            var res = undefined;
+            var res;
+            var args = arguments;
             Asdf.A.each(fns, function(f){
-                res = f.apply(this, arguments);
+                res = f.apply(this, args);
             });
             return res;
         }
@@ -1309,7 +1347,7 @@ module.exports = Asdf;
         return function(key){
             var arg = slice.call(arguments, 1);
             var fn;
-            if(fn = get(obj, key)){
+            if(fn = $_.O.get(obj, key)){
                 if(Asdf.O.isFunction(fn)){
                     return fn.apply(this, arg);
                 }
@@ -1385,14 +1423,14 @@ module.exports = Asdf;
 
     /**
      * @memberof Asdf.F
-     * @param {Function} async
+     * @param {Function} asyncfn
      * @returns {Function}
      */
 
-	function async(async){
-        if(!$_.O.isFunction(async)) throw new TypeError();
+	function async(asyncfn){
+        if(!$_.O.isFunction(asyncfn)) throw new TypeError();
 		return function(cb) {
-            async.call(this,cb);
+            asyncfn.call(this,cb);
         }
 	}
 
@@ -1411,14 +1449,14 @@ module.exports = Asdf;
      */
 	function when(/*async*/){
 		var asyncs = slice.call(arguments);
-        if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw TypeError();
+        if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw new TypeError();
 		var l = asyncs.length-1;
 		return function(cb){
             if(!$_.O.isFunction(cb)) throw new TypeError();
             var res = [];
 			function r(index, value){
                 res[index] = value;
-				if(l == 0)
+				if(l === 0)
 					return cb.apply(this, res);
 				l--;
 			}
@@ -1449,8 +1487,205 @@ module.exports = Asdf;
             if(arguments.length >= (argNum||fn.length))
                 return fn.apply(this, arguments);
             else
-                return r.bind.apply(r,$_.A.merge([this], arguments));
+                return bind.apply(r,$_.A.merge([r,this], arguments));
         }
+    }
+
+    var _now = Date.now || function() { return new Date().getTime(); };
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {number} wait
+     * @param {Object=} options
+     * @returns {Function}
+     */
+    function throttle(func, wait, options) {
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
+        wait = wait*1000;
+        var context, args, result;
+        var timeout = null;
+        var previous = 0;
+        options || (options = {});
+        var later = function() {
+            previous = options.leading === false ? 0 : _now();
+            timeout = null;
+            result = func.apply(context, args);
+            context = args = null;
+        };
+        return function() {
+            var now = _now();
+            if (!previous && options.leading === false) previous = now;
+            var remaining = wait - (now - previous);
+            context = this;
+            args = arguments;
+            if (remaining <= 0) {
+                clearTimeout(timeout);
+                timeout = null;
+                previous = now;
+                result = func.apply(context, args);
+                context = args = null;
+            } else if (!timeout && options.trailing !== false) {
+                timeout = setTimeout(later, remaining);
+            }
+            return result;
+        };
+    }
+
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {nubmer} wait
+     * @param {boolean=} immediate
+     * @returns {Function}
+     */
+    function debounce(func, wait, immediate){
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
+        var timeout, args, context, timestamp, result;
+        wait = wait*1000;
+        var later = function() {
+            var last = _now() - timestamp;
+            if (last < wait) {
+                timeout = setTimeout(later, wait - last);
+            } else {
+                timeout = null;
+                if (!immediate) {
+                    result = func.apply(context, args);
+                    context = args = null;
+                }
+            }
+        };
+        return function() {
+            context = this;
+            args = arguments;
+            timestamp = _now();
+            var callNow = immediate && !timeout;
+            if (!timeout) {
+                timeout = setTimeout(later, wait);
+            }
+            if (callNow) {
+                result = func.apply(context, args);
+                context = args = null;
+            }
+            return result;
+        }
+    }
+
+    function periodize(func, frequency, wait){
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(frequency)||!$_.O.isNumber(wait)) throw new TypeError();
+        wait = wait*1000;
+        return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
+            var timeout, interval, timestamp, res;
+            var self = this;
+            var pfn = function(){
+                var last = _now() - timestamp;
+                res = func.call(self, res, Math.min(last/wait,1));
+                if(last >= wait){
+                    if(interval) {
+                        cb.apply(self, res);
+                    }
+                    clearTimeout(timeout);
+                    clearInterval(interval)
+                }
+            };
+            timestamp = _now();
+            timeout = setTimeout(pfn, wait);
+            interval = setInterval(pfn, 1/frequency*1000);
+            res = func.call(self, undefined, 0);
+            return interval;
+        }
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @returns {Function}
+     */
+    function once(func){
+        if(!$_.O.isFunction(func)) throw new TypeError();
+        var ran = false, memo;
+        return function() {
+            if (ran) return memo;
+            ran = true;
+            memo = func.apply(this, arguments);
+            func = null;
+            return memo;
+        };
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {Function} hasher
+     * @returns {Function}
+     */
+    function memoize(func, hasher){
+        if(!$_.O.isFunction(func)) throw new TypeError();
+        var memo = {};
+        hasher || (hasher = identity);
+        return function() {
+            var key = hasher.apply(this, arguments);
+            return Asdf.O.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+        };
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} fn
+     * @param {object} defaults
+     * @returns {Function}
+     */
+    var FN_DEF = /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)/m;
+    var FN_ARG_SPLIT = /,/;
+    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    function annotate(fn, defaults){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
+        var argNames = $_.A.map(fnText.match(FN_DEF)[2].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return function(obj){
+            var arg = $_.A.map(argNames, function(v){
+                return obj[v]||defaults[v];
+            });
+            return fn.apply(this, arg);
+        }
+    }
+
+    function getDef(fn){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
+        var m = fnText.match(FN_DEF);
+        var argNames = $_.A.map(m[2].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return {
+            name: m[1],
+            arguments: argNames
+        }
+    }
+
+    function converge(after /*fns*/){
+        if(!$_.O.isFunction(after)) throw new TypeError();
+        var fns = $_.A.filter(slice.call(arguments,1), $_.O.isFunction);
+        return function(){
+            var args = arguments;
+            var self = this;
+            return after.apply(self, Asdf.A.map(fns, function(fn){
+                return fn.apply(self, args);
+            }));
+        }
+    }
+
+    function zip(fn /*arrays*/){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var arrays = slice.call(arguments,1);
+        var length = Asdf.A.max(Asdf.A.pluck(arrays, 'length'));
+        var results = new Array(length);
+        for (var i = 0; i < length; i++) results[i] = fn.apply(this,Asdf.A.pluck(arrays, "" + i));
+        return results;
     }
 
 	$_.O.extend($_.F, {
@@ -1463,6 +1698,7 @@ module.exports = Asdf;
 		before: before,
 		after:after,
 		methodize: methodize,
+        functionize:functionize,
 		compose:compose,
 		composeRight:composeRight,
 		extract:extract,
@@ -1481,7 +1717,16 @@ module.exports = Asdf;
 		toFunction:toFunction,
 		async:async,
 		when:when,
-        curried:curried
+        curried:curried,
+        debounce:debounce,
+        throttle:throttle,
+        once:once,
+        memoize:memoize,
+        periodize:periodize,
+        annotate:annotate,
+        getDef:getDef,
+        converge:converge,
+        zip:zip
 	}, true);
 
 })(Asdf);
@@ -1642,7 +1887,7 @@ module.exports = Asdf;
 	function get(col, n){
 		n == null && (n = 0);
 		return col[n];
-	};
+	}
 	
 	/**
 	 * @memberof A
@@ -1777,7 +2022,7 @@ module.exports = Asdf;
 	 * @returns {Array} collection 객체에 method를 실행한 결과를 array Type으로 반환한다.
 	 * @desc 각각의 collection객체 안을 순환하면서 method를 실행하고 그 결과를 반환한다.  
 	 * @example
-	 * Asdf.A.invode([[3,1,2],['c','b','a']], 'sort') //return [[1,2,3],['a','b','c']];
+	 * Asdf.A.invoke([[3,1,2],['c','b','a']], 'sort') //return [[1,2,3],['a','b','c']];
 	 */
 	function invoke(col, method) {
 		if (col == null || $_.O.isNotCollection(col))
@@ -1872,15 +2117,15 @@ module.exports = Asdf;
 	 * @memberof A
 	 * @func
 	 * @param {Array} arr 대상 객체
-	 * @param {function=} sort 정렬 함수
+	 * @param {function=} sortfn 정렬 함수
 	 * @returns {Array} 대상 객체를 sort함수에 맞춰 정렬 한 후 array 객체를 반환한다.
 	 * @desc 대상 객체를 정렬한다. sort 함수를 생략 시 정렬의 기본 sort를 실행한다.
 	 * @example
 	 * Asdf.A.sort([2,1,3]) //return [1,2,3]
 	 */
-	function sort(arr, sort){
+	function sort(arr, sortfn){
 		if($_.O.isNotArray(arr)) throw new TypeError();
-		return arr.sort(sort);
+		return arr.sort(sortfn);
 	}
 	function desc(a, b) {
 		if(a == null)
@@ -1912,17 +2157,18 @@ module.exports = Asdf;
 	 * @memberof A
 	 * @func
 	 * @param {Array} arr 대상 객체
-	 * @param {string} key key값
-	 * @param {function=} sort 정렬 함수
+	 * @param {string|function} key key값
+	 * @param {function=} order 정렬 함수
 	 * @returns {Array} 특정 key값으로 정렬한 후 결과 값을 반환한다.
 	 * @desc arr안에 객체를 key 값을 기준으로 정렬한다. sort함수가 없는 경우 오름차순으로 정렬한다.
 	 * @example
 	 * Asdf.A.sortBy([[3,1],[4],[2,6,3]], 'length') //return [[4],[3,1],[2,6,3]]
 	 */
 	function sortBy(arr, key, order) {
-		if($_.O.isNotArray(arr)||$_.O.isNotString(key)) throw new TypeError();
+		if($_.O.isNotArray(arr)||($_.O.isNotString(key)&&$_.O.isNotFunction(key))) throw new TypeError();
 		order = order || asc;
-		return sort(arr, function(a, b){return order(a[key], b[key]);});
+		return sort(arr, function(a, b){return order(($_.O.isFunction(key) ? key : $_.O.isFunction(a[key])? a[key]: function() {return a[key];}).call(a)
+            , ($_.O.isFunction(key) ? key : $_.O.isFunction(b[key])? b[key]: function() {return b[key];}).call(b));});
 	}
 	
 	/**
@@ -1936,29 +2182,42 @@ module.exports = Asdf;
 	 * @example
 	 * Asdf.A.groupBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); }); //return {1:[1.3],2:[2.1,2,4]}
 	 */
-	function groupBy(col,key) {
+	function groupBy(col,key, context) {
 		if (col == null || $_.O.isNotCollection(col))
 			throw new TypeError();
 		if (!($_.O.isString(key)||$_.O.isFunction(key)))
 			throw new TypeError();
 		var result = {};
 		each(col, function(value, index, list) {
-			var k = ($_.O.isFunction(key))? key(value):value[key];
+			var k = ($_.O.isFunction(key))? key.call(context,value):value[key];
 			(result[k] || (result[k] = [])).push(value);
 		});
 		return result;
 	}
 	
-	function sortedIndex(array, obj, iterator) {
+	function bisectLeft(array, obj, iterator) {
 		iterator || (iterator = $_.F.identity);
 		var low = 0, high = array.length;
+        var value =  iterator(obj);
 		while (low < high) {
-			var mid = (low + high) >> 1;
-			iterator(array[mid]) < iterator(obj) ? low = mid + 1
+			var mid = (low + high) >>> 1;
+			iterator(array[mid]) < value ? low = mid + 1
 					: high = mid;
 		}
 		return low;
 	}
+
+    function bisectRight(array, obj, iterator) {
+        iterator || (iterator = $_.F.identity);
+        var low = 0, high = array.length;
+        var value =  iterator(obj);
+        while (low < high) {
+            var mid = (low + high) >>> 1;
+            iterator(array[mid]) > value ? high = mid
+                : low = mid+1;
+        }
+        return low;
+    }
 	
 	/**
 	 * @memberof A
@@ -2165,6 +2424,24 @@ module.exports = Asdf;
 	    for (var i = 0; i < length; i++) results[i] = pluck(args, "" + i);
 	    return results;
 	}
+
+    function xprod(){
+        var args = slice.call(arguments);
+        var self = this;
+        var res = [];
+        var a1 = args.shift();
+        for(var j = 0; j < a1.length; j++){
+            if(args.length == 0){
+                res.push([a1[j]]);
+            }else {
+                var t = map(xprod.apply(self,args), function(v){
+                    return prepend(v,a1[j]);
+                });
+                merge(res,t);
+            }
+        }
+        return res;
+    }
 	
 	/**
 	 * @memberof A
@@ -2194,7 +2471,6 @@ module.exports = Asdf;
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
-	 * @param {boolean} isSorted 정렬 여부
 	 * @returns {Number} array에서 item값을 찾아 그 위치를 반환한다.
 	 * @desc array에서 item 위치를 뒤부터 찾아서 그 위치를 반환한다. 만약 없을 경우 -1을 반환한다.
 	 * @example
@@ -2240,8 +2516,17 @@ module.exports = Asdf;
 		return fn.apply(context, array);
 	}
 
-    function contains(array, item){
-        return indexOf(array, item) >= 0;
+    function contains(array, item, context){
+        return Asdf.O.isFunction(item)?_containsWith(array,item, context):indexOf(array, item) >= 0;
+    }
+
+    function _containsWith(array, fn,context){
+        for(var i =0; i < array.length; i++){
+            if(fn.call(context, array[i], i, array)){
+                return true;
+            }
+        }
+        return false;
     }
 
     function concat(array){
@@ -2276,12 +2561,49 @@ module.exports = Asdf;
         return array;
     }
 
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function prepend(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.unshift(item);
+        return array;
+    }
+
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function append(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.push(item);
+        return array;
+    }
+
+    function ap(fns, values){
+        if(Asdf.O.isNotArray(fns)||Asdf.O.isNotArray(values)) throw new TypeError();
+        fns = filter(fns, $_.O.isFunction);
+        return reduce(fns, function(acc, fn){
+            return merge(acc, map(values, fn));
+        }, []);
+    }
+
+    function take(array, n){
+        return slice.call(array, 0, Math.min(n, array.length));
+    }
+
 	$_.O.extend($_.A, {
 		each: each,
 		map: map,
 		reduce: reduce,
 		reduceRight: reduceRight,
 		first: first,
+        get: get,
 		last: last,
 		filter: filter,
 		reject: reject,
@@ -2297,7 +2619,8 @@ module.exports = Asdf;
 		sortBy: sortBy,
 		sort: sort,
 		groupBy: groupBy,
-		sortedIndex: sortedIndex,
+        bisectLeft: bisectLeft,
+        bisectRight:bisectRight,
 		toArray: toArray,
 		size: size,
 		clear: clear,
@@ -2319,7 +2642,12 @@ module.exports = Asdf;
         concat: concat,
         count: count,
         repeat:repeat,
-        rotate: rotate
+        rotate: rotate,
+        prepend:prepend,
+        append:append,
+        ap:ap,
+        take:take,
+        xprod:xprod
 	}, true);
 })(Asdf);;/**
  * @project Asdf.js
@@ -2438,7 +2766,7 @@ module.exports = Asdf;
 		return reduce(match[1].split(separator || '&'),	function(hash, pair) {
 			if ((pair = pair.split(sepKV || '='))[0]) {
 				var key = decodeURIComponent(pair.shift()), value = pair.length > 1 ? pair.join('='): pair[0];
-				if (value != undefined)
+				if (value != null)
 					value = decodeURIComponent(value);
 				if (key in hash) {
 					if (!$_.O.isArray(hash[key])){
@@ -2614,7 +2942,7 @@ module.exports = Asdf;
 	 */
 	function isEmpty(str) {
 		if(!$_.O.isString(str)) throw new TypeError();
-	    return str == '';
+	    return str === '';
 	}
 	
 	/**
@@ -2746,7 +3074,7 @@ module.exports = Asdf;
 			}
 			else if($_.O.isString(index)){
 				var ins = getIndexs(index);
-				if(ins.lenght == 0) throw new Error("index is wrong");
+				if(ins.length === 0) throw new Error("index is wrong");
 				$_.A.each(ins, function(value) {
 					data[value].text = str;
 				});
@@ -2786,7 +3114,7 @@ module.exports = Asdf;
         var v1Subs = trim(String(version1)).split('.');
         var v2Subs = trim(String(version2)).split('.');
         var subCount = Math.max(v1Subs.length, v2Subs.length);
-        for (var subIdx = 0; order == 0 && subIdx < subCount; subIdx++) {
+        for (var subIdx = 0; order === 0 && subIdx < subCount; subIdx++) {
             var v1Sub = v1Subs[subIdx] || '';
             var v2Sub = v2Subs[subIdx] || '';
             var v1CompParser = new RegExp('(\\d*)(\\D*)', 'g');
@@ -2794,15 +3122,15 @@ module.exports = Asdf;
             do {
                 var v1Comp = v1CompParser.exec(v1Sub) || ['', '', ''];
                 var v2Comp = v2CompParser.exec(v2Sub) || ['', '', ''];
-                if (v1Comp[0].length == 0 && v2Comp[0].length == 0) {
+                if (v1Comp[0].length === 0 && v2Comp[0].length === 0) {
                     break;
                 }
-                var v1CompNum = v1Comp[1].length == 0 ? 0 : parseInt(v1Comp[1], 10);
-                var v2CompNum = v2Comp[1].length == 0 ? 0 : parseInt(v2Comp[1], 10);
+                var v1CompNum = v1Comp[1].length === 0 ? 0 : parseInt(v1Comp[1], 10);
+                var v2CompNum = v2Comp[1].length === 0 ? 0 : parseInt(v2Comp[1], 10);
                 order = compareFn(v1CompNum, v2CompNum) ||
-                    compareFn(v1Comp[2].length == 0, v2Comp[2].length == 0) ||
+                    compareFn(v1Comp[2].length === 0, v2Comp[2].length === 0) ||
                     compareFn(v1Comp[2], v2Comp[2]);
-            } while (order == 0);
+            } while (order === 0);
         }
 
         return order;
@@ -2865,7 +3193,7 @@ module.exports = Asdf;
                 else if(isFunction($_.A.last(m), v)){
                     var fn = m.pop();
                     var parameter = r(v);
-                    function fun(){
+                    var fun = function(){
                         var arg = arguments;
                         for(var i = 0; i < parameter.length; i++) {
                             var v = parameter[i];
@@ -2927,7 +3255,7 @@ module.exports = Asdf;
             var pos = stack.pop();
             var res = o.token.splice(pos);
             var a = trim(o.rest.substring(0, end)).split(conf.separator);
-            if(a!='')
+            if(a!=='')
                 $_.A.merge(res, a);
             o.token.push(functionToken(res));
             return {token: o.token, rest: o.rest.substring(end+conf.endToken.length)};
@@ -3007,7 +3335,7 @@ module.exports = Asdf;
     }
     function transfer(arr, fn, context){
         if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotFunction))
-            throw new TypeError()
+            throw new TypeError();
         return function(){
             var res = [];
             var arg = $_.A.toArray(arguments);
@@ -3028,16 +3356,11 @@ module.exports = Asdf;
      * @name Asdf.N
      */
 	$_.N = {};
-	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
+	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose;
 	var curry = $_.Core.combine.curry;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
-	function multiply() {
-		var arg = $_.A.toArray(arguments);
-		arg = $_.A.filter(arg, isNotNaN);
-		return $_.A.reduce(arg, $_.Core.op["*"], 1);
-	}
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
 
     /**
@@ -3104,29 +3427,63 @@ module.exports = Asdf;
      * @param {number} end
      * @param {number=} step
      * @returns {Array}
+     * @desc half-open interval
      */
 	function range(start, end, step) {
+        function integerScale(x){
+            var k = 1;
+            while (x * k % 1) k *= 10;
+            return k;
+        }
         if (arguments.length <= 1) {
             end = start || 0;
             start = 0;
         }
         step = arguments[2] || 1;
         if($_.O.isNotNumber(start)||$_.O.isNotNumber(end)||$_.O.isNotNumber(step)) throw new TypeError();
-        if(!Number.isFinite((end - start) / step))
+        if(!isFinite((end - start) / step))
              throw new TypeError('length is infinite');
-        var i = start, s=start, e=end;
+        var integerscale = integerScale(Math.abs(step)),i = start*integerscale, s=start, e=end;
         if(start>end){
             s = end;
             e = start;
         }
         var res = [];
-        while(s <= i && i <= e){
-            res.push(i);
-            i+=step;
+        while(s*integerscale <= i && i < e*integerscale){
+            res.push(i/integerscale);
+            i+=step*integerscale;
         }
         return res;
 	}
-	$_.O.extend($_.N, {
+
+    /**
+     * @memberof Asdf.N
+     * @param n {number}
+     * @returns {boolean}
+     */
+    function isFinite(n){
+        return Number.POSITIVE_INFINITY !== n && Number.NEGATIVE_INFINITY !==n;
+    }
+
+    /**
+     *
+     * @param n {number}
+     * @param a {number}
+     * @param b {number}
+     * @returns {number}
+     */
+    function clamp(n,a,b){
+        if($_.O.isNotNumber(n)||$_.O.isNotNumber(a)||$_.O.isNotNumber(b)) throw new TypeError();
+        var min = a, max = b;
+        if(min>max){
+            min = b;
+            max = a;
+        }
+        return Math.max(min, Math.min(max, n));
+    }
+
+
+    $_.O.extend($_.N, {
 		sum: sum,
 		isNotNaN: isNotNaN,
 		range: range,
@@ -3137,11 +3494,15 @@ module.exports = Asdf;
 		isSame : isSame,
 		isNotSame: isNotSame,
 		isGreaterThan: isGreaterThan,
+        gt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThan),2),
 		isNotGreaterThan: isNotGreaterThan,
 		isLessThan: isLessThan,
+        lt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThan),2),
 		isNotLessThan: isNotLessThan,
 		isUntil: isLessThan,
-		isNotUntil: isNotLessThan
+		isNotUntil: isNotLessThan,
+        isFinite:isFinite,
+        clamp:clamp
 	});
 })(Asdf);;(function($_) {
 	$_.P = {};
@@ -3166,6 +3527,54 @@ module.exports = Asdf;
  */
 (function($_) {
     $_.Color = {};
+    function RGB(r,g,b){
+        if($_.O.isNotNumber(r)||$_.O.isNotNumber(g)||$_.O.isNotNumber(b)) throw new TypeError();
+        if(!this instanceof RGB) new RGB(r,g,b);
+        this.r = r;
+        this.g = g;
+        this.b = b;
+
+    }
+    RGB.prototype.toString = function(){
+        return '#'+$_.A.map([this.r,this.g,this.b], function (value) {return $_.S.lpad(Math.min(255,(value|0)).toString(16),"0",2);}).join("")
+    };
+    RGB.prototype.toHSL = function(){
+        var t = rgbToHsl(this.r, this.g, this.b);
+        return new HSL(t.h, t.s, t.l);
+    };
+    RGB.prototype.toHSV = function(){
+        var t = rgbToHsv(this.r, this.g, this.b);
+        return new HSV(t.h, t.s, t.v);
+    };
+
+    function HSL(h,s,l){
+        if($_.O.isNotNumber(h)||$_.O.isNotNumber(s)||$_.O.isNotNumber(l)) throw new TypeError();
+        if(!this instanceof HSL) new HSL(h,s,l);
+        this.h = h;
+        this.s = s;
+        this.l = l;
+    }
+    HSL.prototype.toRGB = function(){
+        var t = hslToRgb(this.h, this.s, this.l);
+        return new RGB(t.r, t.g, t.b);
+    };
+    HSL.prototype.toHSV = $_.F.compose(HSL.prototype.toRGB, $_.F.functionize(RGB.prototype.toHSV));
+    HSL.prototype.toString = $_.F.compose(HSL.prototype.toRGB, $_.F.functionize(RGB.prototype.toString));
+
+    function HSV(h,s,v){
+        if($_.O.isNotNumber(h)||$_.O.isNotNumber(s)||$_.O.isNotNumber(v)) throw new TypeError();
+        if(!this instanceof HSV) new HSV(h,s,v);
+        this.h = h;
+        this.s = s;
+        this.v = v;
+    }
+    HSV.prototype.toRGB = function(){
+        var t = hsvToRgb(this.h, this.s, this.v);
+        return new RGB(t.r, t.g, t.b);
+    };
+    HSV.prototype.toHSL = $_.F.compose(HSV.prototype.toRGB, $_.F.functionize(RGB.prototype.toHSL));
+    HSV.prototype.toString = $_.F.compose(HSV.prototype.toRGB, $_.F.functionize(RGB.prototype.toString));
+
     function rgbToHsl(r, g, b) {
         r /= 255, g /= 255, b /= 255;
         var max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -3194,24 +3603,22 @@ module.exports = Asdf;
     }
     function hslToRgb(h, s, l) {
         var r, g, b;
-
-        if (s == 0) {
+        function hue2rgb(p, q, t) {
+            if (t < 0)
+                t += 1;
+            if (t > 1)
+                t -= 1;
+            if (t < 1 / 6)
+                return p + (q - p) * 6 * t;
+            if (t < 1 / 2)
+                return q;
+            if (t < 2 / 3)
+                return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        }
+        if (s === 0) {
             r = g = b = l; // achromatic
         } else {
-            function hue2rgb(p, q, t) {
-                if (t < 0)
-                    t += 1;
-                if (t > 1)
-                    t -= 1;
-                if (t < 1 / 6)
-                    return p + (q - p) * 6 * t;
-                if (t < 1 / 2)
-                    return q;
-                if (t < 2 / 3)
-                    return p + (q - p) * (2 / 3 - t) * 6;
-                return p;
-            }
-
             var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
             var p = 2 * l - q;
             r = hue2rgb(p, q, h + 1 / 3);
@@ -3219,9 +3626,7 @@ module.exports = Asdf;
             b = hue2rgb(p, q, h - 1 / 3);
         }
 
-        return { r:r * 255, g:g * 255, b:b * 255, toString: function () {
-            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
-        } };
+        return {r:r * 255, g:g * 255, b:b * 255};
     }
     function rgbToHsv(r, g, b) {
         r = r / 255, g = g / 255, b = b / 255;
@@ -3229,7 +3634,7 @@ module.exports = Asdf;
         var h, s, v = max;
 
         var d = max - min;
-        s = max == 0 ? 0 : d / max;
+        s = max === 0 ? 0 : d / max;
 
         if (max == min) {
             h = 0; // achromatic
@@ -3280,16 +3685,408 @@ module.exports = Asdf;
                 break;
         }
 
-        return { r: r * 255, g: g * 255, b: b * 255, toString: function () {
-            return $_.A.map([r,g,b], function (value) {return $_.S.lpad((value*255|0).toString(16),"0",2);}).join("");
-        } };
+        return { r: r * 255, g: g * 255, b: b * 255 };
+    }
+    var colorName = {
+        aliceblue: 15792383,
+        antiquewhite: 16444375,
+        aqua: 65535,
+        aquamarine: 8388564,
+        azure: 15794175,
+        beige: 16119260,
+        bisque: 16770244,
+        black: 0,
+        blanchedalmond: 16772045,
+        blue: 255,
+        blueviolet: 9055202,
+        brown: 10824234,
+        burlywood: 14596231,
+        cadetblue: 6266528,
+        chartreuse: 8388352,
+        chocolate: 13789470,
+        coral: 16744272,
+        cornflowerblue: 6591981,
+        cornsilk: 16775388,
+        crimson: 14423100,
+        cyan: 65535,
+        darkblue: 139,
+        darkcyan: 35723,
+        darkgoldenrod: 12092939,
+        darkgray: 11119017,
+        darkgreen: 25600,
+        darkgrey: 11119017,
+        darkkhaki: 12433259,
+        darkmagenta: 9109643,
+        darkolivegreen: 5597999,
+        darkorange: 16747520,
+        darkorchid: 10040012,
+        darkred: 9109504,
+        darksalmon: 15308410,
+        darkseagreen: 9419919,
+        darkslateblue: 4734347,
+        darkslategray: 3100495,
+        darkslategrey: 3100495,
+        darkturquoise: 52945,
+        darkviolet: 9699539,
+        deeppink: 16716947,
+        deepskyblue: 49151,
+        dimgray: 6908265,
+        dimgrey: 6908265,
+        dodgerblue: 2003199,
+        firebrick: 11674146,
+        floralwhite: 16775920,
+        forestgreen: 2263842,
+        fuchsia: 16711935,
+        gainsboro: 14474460,
+        ghostwhite: 16316671,
+        gold: 16766720,
+        goldenrod: 14329120,
+        gray: 8421504,
+        green: 32768,
+        greenyellow: 11403055,
+        grey: 8421504,
+        honeydew: 15794160,
+        hotpink: 16738740,
+        indianred: 13458524,
+        indigo: 4915330,
+        ivory: 16777200,
+        khaki: 15787660,
+        lavender: 15132410,
+        lavenderblush: 16773365,
+        lawngreen: 8190976,
+        lemonchiffon: 16775885,
+        lightblue: 11393254,
+        lightcoral: 15761536,
+        lightcyan: 14745599,
+        lightgoldenrodyellow: 16448210,
+        lightgray: 13882323,
+        lightgreen: 9498256,
+        lightgrey: 13882323,
+        lightpink: 16758465,
+        lightsalmon: 16752762,
+        lightseagreen: 2142890,
+        lightskyblue: 8900346,
+        lightslategray: 7833753,
+        lightslategrey: 7833753,
+        lightsteelblue: 11584734,
+        lightyellow: 16777184,
+        lime: 65280,
+        limegreen: 3329330,
+        linen: 16445670,
+        magenta: 16711935,
+        maroon: 8388608,
+        mediumaquamarine: 6737322,
+        mediumblue: 205,
+        mediumorchid: 12211667,
+        mediumpurple: 9662683,
+        mediumseagreen: 3978097,
+        mediumslateblue: 8087790,
+        mediumspringgreen: 64154,
+        mediumturquoise: 4772300,
+        mediumvioletred: 13047173,
+        midnightblue: 1644912,
+        mintcream: 16121850,
+        mistyrose: 16770273,
+        moccasin: 16770229,
+        navajowhite: 16768685,
+        navy: 128,
+        oldlace: 16643558,
+        olive: 8421376,
+        olivedrab: 7048739,
+        orange: 16753920,
+        orangered: 16729344,
+        orchid: 14315734,
+        palegoldenrod: 15657130,
+        palegreen: 10025880,
+        paleturquoise: 11529966,
+        palevioletred: 14381203,
+        papayawhip: 16773077,
+        peachpuff: 16767673,
+        peru: 13468991,
+        pink: 16761035,
+        plum: 14524637,
+        powderblue: 11591910,
+        purple: 8388736,
+        red: 16711680,
+        rosybrown: 12357519,
+        royalblue: 4286945,
+        saddlebrown: 9127187,
+        salmon: 16416882,
+        sandybrown: 16032864,
+        seagreen: 3050327,
+        seashell: 16774638,
+        sienna: 10506797,
+        silver: 12632256,
+        skyblue: 8900331,
+        slateblue: 6970061,
+        slategray: 7372944,
+        slategrey: 7372944,
+        snow: 16775930,
+        springgreen: 65407,
+        steelblue: 4620980,
+        tan: 13808780,
+        teal: 32896,
+        thistle: 14204888,
+        tomato: 16737095,
+        turquoise: 4251856,
+        violet: 15631086,
+        wheat: 16113331,
+        white: 16777215,
+        whitesmoke: 16119285,
+        yellow: 16776960,
+        yellowgreen: 10145074
+    };
+
+    function parse(format){
+        var m1 = /([a-z]+)\((.*)\)/i.exec(format);
+        function parseNumber(c){
+            var f = parseFloat(c);
+            return c.charAt(c.length - 1) === "%" ? Math.round(f * 2.55) : f;
+        }
+        var r, g, b;
+        if(m1){
+            var m2 = m1[2].split(',');
+            if(m1[1] === 'rgb'){
+                return new RGB(parseNumber(m2[0]),parseNumber(m2[1]),parseNumber(m2[2]));
+            }else {
+                return new HSL(parseFloat(m2[0]/360), parseFloat(m2[1])/100, parseFloat(m2[2])/100);
+            }
+
+        }
+        var color;
+        if(colorName[format]){
+            color = colorName[format];
+        }else if((format.length === 4||format.length === 7)&&format.charAt(0) === '#' && !isNaN(color = parseInt(format.substring(1), 16))){
+            if(format.length === 4){
+                r = (color & 3840) >> 4;
+                r = r >> 4 | r;
+                g = color & 240;
+                g = g >> 4 | g;
+                b = color & 15;
+                b = b << 4 | b;
+                return new RGB(r,g,b);
+            }
+        }else {
+            throw new TypeError();
+        }
+        r = (color & 16711680) >> 16;
+        g = (color & 65280) >> 8;
+        b = color & 255;
+        return new RGB(r,g,b);
     }
 
+    var colorNameList = $_.O.keys(colorName);
+
     $_.O.extend($_.Color, {
+        RGB:RGB,
+        HSL:HSL,
+        HSV:HSV,
         rgbToHsl : rgbToHsl,
         hslToRgb : hslToRgb,
         rgbToHsv : rgbToHsv,
-        hsvToRgb : hsvToRgb
+        hsvToRgb : hsvToRgb,
+        parse:parse,
+        colorNameList:colorNameList
+    });
+})(Asdf);;(function($_) {
+    $_.Ease = {};
+
+    function linear(t) { return t; }
+
+    function get(amount) {
+        if (amount < -1) { amount = -1; }
+        if (amount > 1) { amount = 1; }
+        return function(t) {
+            if (amount==0) { return t; }
+            if (amount<0) { return t*(t*-amount+1+amount); }
+            return t*((2-t)*amount+(1-amount));
+        }
+    }
+
+    function getPowIn(pow) {
+        return function(t) {
+            return Math.pow(t,pow);
+        }
+    }
+
+    function getPowOut(pow) {
+        return function(t) {
+            return 1-Math.pow(1-t,pow);
+        }
+    }
+
+    function getPowInOut(pow) {
+        return function(t) {
+            if ((t*=2)<1) return 0.5*Math.pow(t,pow);
+            return 1-0.5*Math.abs(Math.pow(2-t,pow));
+        }
+    }
+
+    var quadIn = getPowIn(2);
+
+    var quadOut = getPowOut(2);
+
+    var quadInOut = getPowInOut(2);
+
+    var cubicIn = getPowIn(3);
+
+    var cubicOut = getPowOut(3);
+
+    var cubicInOut = getPowInOut(3);
+
+    var quartIn = getPowIn(4);
+
+    var quartOut = getPowOut(4);
+
+    var quintIn = getPowIn(5);
+
+    var quintOut = getPowOut(5);
+
+    var quintInOut = getPowInOut(5);
+
+    function sineIn(t) {
+        return 1-Math.cos(t*Math.PI/2);
+    }
+
+    function sineOut(t) {
+        return Math.sin(t*Math.PI/2);
+    }
+
+    function sineInOut(t) {
+        return -0.5*(Math.cos(Math.PI*t) - 1)
+    }
+
+    function getBackIn(amount) {
+        return function(t) {
+            return t*t*((amount+1)*t-amount);
+        }
+    }
+
+    function getBackInOut(amount) {
+        amount*=1.525;
+        return function(t) {
+            if ((t*=2)<1) return 0.5*(t*t*((amount+1)*t-amount));
+            return 0.5*((t-=2)*t*((amount+1)*t+amount)+2);
+        }
+    }
+
+    function getBackOut(amount) {
+        return function(t) {
+            return (--t*t*((amount+1)*t + amount) + 1);
+        }
+    }
+
+    var backIn = getBackIn(1.7);
+
+    var backOut = getBackOut(1.7);
+
+    var backInOut = getBackInOut(1.7);
+
+    function circIn(t) {
+        return -(Math.sqrt(1-t*t)- 1);
+    }
+
+    function circOut(t) {
+        return Math.sqrt(1-(--t)*t);
+    }
+
+    function circInOut(t) {
+        if ((t*=2) < 1) return -0.5*(Math.sqrt(1-t*t)-1);
+        return 0.5*(Math.sqrt(1-(t-=2)*t)+1);
+    }
+
+    function bounceIn(t) {
+        return 1-bounceOut(1-t);
+    }
+
+    function bounceOut(t) {
+        if (t < 1/2.75) {
+            return (7.5625*t*t);
+        } else if (t < 2/2.75) {
+            return (7.5625*(t-=1.5/2.75)*t+0.75);
+        } else if (t < 2.5/2.75) {
+            return (7.5625*(t-=2.25/2.75)*t+0.9375);
+        } else {
+            return (7.5625*(t-=2.625/2.75)*t +0.984375);
+        }
+    }
+
+    function bounceInOut(t) {
+        if (t<0.5) return bounceIn (t*2) * .5;
+        return bounceOut(t*2-1)*0.5+0.5;
+    }
+
+    function getElasticIn(amplitude,period) {
+        var pi2 = Math.PI*2;
+        return function(t) {
+            if (t==0 || t==1) return t;
+            var s = period/pi2*Math.asin(1/amplitude);
+            return -(amplitude*Math.pow(2,10*(t-=1))*Math.sin((t-s)*pi2/period));
+        }
+    }
+
+    function getElasticOut(amplitude,period) {
+        var pi2 = Math.PI*2;
+        return function(t) {
+            if (t==0 || t==1) return t;
+            var s = period/pi2 * Math.asin(1/amplitude);
+            return (amplitude*Math.pow(2,-10*t)*Math.sin((t-s)*pi2/period )+1);
+        }
+    }
+
+    function getElasticInOut(amplitude,period) {
+        var pi2 = Math.PI*2;
+        return function(t) {
+            var s = period/pi2 * Math.asin(1/amplitude);
+            if ((t*=2)<1) return -0.5*(amplitude*Math.pow(2,10*(t-=1))*Math.sin( (t-s)*pi2/period ));
+            return amplitude*Math.pow(2,-10*(t-=1))*Math.sin((t-s)*pi2/period)*0.5+1;
+        }
+    }
+
+    var elasticIn = getElasticIn(1,0.3);
+
+    var elasticOut = getElasticOut(1,0.3);
+
+    var elasticInOut = getElasticInOut(1,0.3*1.5);
+
+    $_.O.extend($_.Ease, {
+        linear: linear,
+        get:get,
+        getPowIn:getPowIn,
+        getPowOut:getPowOut,
+        getPowInOut:getPowInOut,
+        quadIn:quadIn,
+        quadOut:quadOut,
+        quadInOut:quadInOut,
+        cubicIn:cubicIn,
+        cubicOut:cubicOut,
+        cubicInOut:cubicInOut,
+        quartIn:quartIn,
+        quartOut:quartOut,
+        quintIn:quintIn,
+        quintOut:quintOut,
+        quintInOut:quintInOut,
+        sineIn:sineIn,
+        sineOut:sineOut,
+        sineInOut:sineInOut,
+        getBackIn:getBackIn,
+        getBackInOut:getBackInOut,
+        getBackOut:getBackOut,
+        backIn:backIn,
+        backOut:backOut,
+        backInOut:backInOut,
+        circIn:circIn,
+        circOut:circOut,
+        circInOut:circInOut,
+        bounceIn:bounceIn,
+        bounceOut:bounceOut,
+        bounceInOut:bounceInOut,
+        getElasticIn:getElasticIn,
+        getElasticOut:getElasticOut,
+        getElasticInOut:getElasticInOut,
+        elasticIn:elasticIn,
+        elasticOut:elasticOut,
+        elasticInOut:elasticInOut
     });
 })(Asdf);;(function($_) {
 	$_.JSON = {};
@@ -3348,6 +4145,83 @@ module.exports = Asdf;
 	$_.O.extend(promise, {
 		toPromise:toPromise
 	});
+})(Asdf);;(function($_){
+    $_.Scale = {};
+    function uninterpolate(x, a, b){
+        b = b-(a = +a) ? 1/(b-a):0;
+        return (x-a)*b;
+    }
+    function interpolateNumber(x, a, b){
+        b -= a = +a;
+        return a + b*x;
+    }
+
+    function interpolateRgb(x, a, b){
+        var ar = a.r, ag = a.g, ab = a.b, br = b.r - ar, bg = b.g - ag, bb = b.b - ab;
+        return new $_.Color.RGB(ar+br*x, ag+bg *x, ab+bb*x);
+    }
+
+    function interpolateObject(x, a, b){
+        var c = {}, k;
+        for (k in a) {
+            if (k in b) {
+                c[k] = interpolate(x,a[k], b[k]);
+            } else {
+                c[k] = a[k];
+            }
+        }
+        for (k in b) {
+            if (!(k in a)) {
+                c[k] = b[k];
+            }
+        }
+        return c;
+    }
+
+    function interpolateArray(x,a,b){
+        var c = [], na = a.length, nb = b.length, n0 = Math.min(a.length, b.length), i;
+        for (i = 0; i < n0; ++i) c.push(interpolate(x, a[i], b[i]));
+        for (;i < na; ++i) c[i] = a[i];
+        for (;i < nb; ++i) c[i] = b[i];
+        return c;
+    }
+
+    function interpolate(x,a,b){
+        var inter = Asdf.F.overload(interpolateObject, function(x,a,b){
+            return $_.O.isPlainObject(a) && $_.O.isPlainObject(b);
+        });
+        inter = Asdf.F.overload(interpolateArray, function(x,a,b){
+            return $_.O.isArray(a) && $_.O.isArray(b);
+        }, inter);
+        inter = Asdf.F.overload(interpolateNumber, function(x,a,b){
+            return $_.O.isNumber(a)&& $_.O.isNumber(b);
+        }, inter);
+        inter = Asdf.F.overload(interpolateRgb, function(x,a,b){
+            return a instanceof $_.Color.RGB && b instanceof $_.Color.RGB;
+        }, inter);
+        return inter(x,a,b);
+    }
+
+    function _linear(x, domain, range){
+        return interpolate(uninterpolate(x,domain[0],domain[1]), range[0], range[1]);
+    }
+
+    function get(fn, domain, range, n){
+        domain = domain || [0,1];
+        range = range || [0,1];
+        return fn(n, domain, range);
+    }
+    var linear = $_.F.partial(get, _linear, undefined, undefined, undefined );
+    var log = $_.F.partial(get, function(x, domain, range){return _linear(Math.log(x)/Math.log(10), [domain[0]/Math.log(10),domain[1]/Math.log(10)], range);}, undefined, undefined, undefined);
+    var pow = $_.F.partial(get, function(x, domain, range){return _linear(Math.pow(10,x), [Math.pow(10,domain[0]),Math.pow(10,domain[1])], range);}, undefined, undefined, undefined);
+    var sqrt = $_.F.partial(get, function(x, domain, range){return _linear(Math.pow(0.5,x), [Math.pow(0.5,domain[0]),Math.pow(0.5,domain[1])], range);}, undefined, undefined, undefined);
+    $_.O.extend($_.Scale, {
+        get:get,
+        linear:linear,
+        log:log,
+        pow:pow,
+        sqrt:sqrt
+    });
 })(Asdf);;(function($_) {
     var o = $_.Core.namespace($_, 'Utils');
 	function randomMax8HexChars() {
@@ -3364,7 +4238,7 @@ module.exports = Asdf;
 				if (JSON && JSON.parse) {
 					return JSON.parse(jsonString);
 				}
-				return (new Function("return " + jsonString))();
+				return (new Function("return " + jsonString))(); // jshint ignore:line
 			}
 		}
 		return null;
@@ -3380,21 +4254,215 @@ module.exports = Asdf;
     function time(fn){
         var timer = getTimer();
         var startTime = timer();
-        var res = fn(Array.prototype.slice.call(arguments, 1));
+        var res = fn.apply(this,Array.prototype.slice.call(arguments, 1));
         var endTime = timer();
         if(endTime == startTime)
             endTime = timer();
         console.log(endTime - startTime);
         return res;
     }
+
+
+    var con = (function(){
+        var indent = 0;
+        var res = {};
+        if(typeof console === 'undefined') return null;
+        if( !console.group ){
+            res.log =  function(str){
+                return console.log($_.S.times(' ', indent) + str);
+            };
+            res.group = function(str){
+                indent += 2;
+                return console.log($_.S.times(' ', indent) + str);
+            };
+            res.groupEnd = function(){
+                indent -= 2;
+            };
+        }else {
+            res.log = $_.F.bind(console.log, console);
+            res.group = $_.F.bind(console.group, console);
+            res.groupEnd = $_.F.bind(console.groupEnd, console);
+        }
+        return res;
+    })();
+    function stringifyData(args) {
+        var result = [];
+        var slice = Array.prototype.slice;
+        for (var i = 0; i < args.length; ++i) {
+            var arg = args[i];
+            if (arg === undefined) {
+                result[i] = 'undefined';
+            } else if (arg === null) {
+                result[i] = 'null';
+            } else if (arg.constructor) {
+                // TODO constructor comparison does not work for iframes
+                if (arg.constructor === Array) {
+                    if (arg.length < 3) {
+                        result[i] = '[' + stringifyData(arg) + ']';
+                    } else {
+                        result[i] = '[' + stringifyData(slice.call(arg, 0, 1)) + '...' + stringifyData(slice.call(arg, -1)) + ']';
+                    }
+                } else if (arg.constructor === Object) {
+                    result[i] = '#object';
+                } else if (arg.constructor === Function) {
+                    result[i] = '#function';
+                } else if (arg.constructor === String) {
+                    result[i] = '"' + arg + '"';
+                } else if (arg.constructor === Number) {
+                    result[i] = arg;
+                } else {
+                    result[i] = '?';
+                }
+            }
+        }
+        return result.join(',');
+    }
+
+    function spy(fn, desc){
+        if(typeof console === 'undefined') return fn;
+        desc = desc ? desc + ': ' : '';
+        var args = [];
+        var returns = [];
+        var stacks = [];
+        var errors = [];
+        var count = 0;
+        var fndef = $_.F.getDef(fn);
+        var isDir = console.dir;
+        function log(str){
+            con.log(str);
+        }
+        function groupStart(title){
+            con.group(title);
+        }
+        function groupEnd(){
+            con.groupEnd();
+        }
+        function print(name,o){
+            groupStart(name+ '{')
+            if($_.O.isArray(o)){
+                $_.A.each(o, function(v){
+                    log(isDir?v:('  ' + stringifyData(v)));
+                });
+            }else {
+                log(isDir?o:('  ' + stringifyData(o)));
+            }
+            log('}');
+            groupEnd();
+        }
+        var res = function spy() {
+            var stack = trace().slice(1);
+            var error;
+            var timer = getTimer();
+            var arg = Array.prototype.slice.call(arguments, 0);
+            groupStart(desc + 'function ' + fndef.name + '('+ fndef.arguments.join(',') +')'+'{');
+            print('arguments : ', arg);
+            print('stack: ', stack);
+            try{
+                var time = timer();
+                var value = fn.apply(this, arg);
+                time = timer()- time;
+            }catch(e){
+                error = e;
+                print('error', error);
+            }
+            finally{
+                errors.push(error);
+            }
+            print('return: ', value);
+            log('duration: ' + time + 'ms');
+            log('}');
+            groupEnd();
+            args.push(arg);
+            stacks.push(stack);
+            returns.push(value);
+            count ++ ;
+            return value;
+        };
+        res.count = function(){
+            return count;
+        };
+        res.returns = function(){
+            return $_.O.clone(returns);
+        };
+        res.args = function(){
+            return $_.O.clone(args);
+        };
+        res.stack = function(){
+            return $_.O.clone(stacks);
+        };
+        res.error = function(){
+            return $_.O.clone(errors);
+        };
+        return res;
+    }
+
+    function trace(e){
+        function createException(){
+            try{
+                throw new Error();
+            }catch(e){
+                return e;
+            }
+        }
+        function other(curr) {
+            var ANON = '{anonymous}', fnRE = /function(?:\s+([\w$]+))?\s*\(/, stack = [], fn, args, maxStackSize = 10;
+            var slice = Array.prototype.slice;
+            while (curr && stack.length < maxStackSize) {
+                fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON;
+                try {
+                    args = slice.call(curr['arguments'] || []);
+                } catch (e) {
+                    args = ['Cannot access arguments: ' + e];
+                }
+                stack[stack.length] = fn + '(' + stringifyData(args) + ')';
+                try {
+                    curr = curr.caller;
+                } catch (e) {
+                    stack[stack.length] = 'Cannot access caller: ' + e;
+                    break;
+                }
+            }
+            return stack;
+        }
+        var startIdx = 0;
+        e = e || (++startIdx && createException());
+        var nomalizer = $_.F.cases({
+            'chrome': function(e){
+                return (e.stack + '\n')
+                    .replace(/^[\s\S]+?\s+at\s+/, ' at ')
+                    .replace(/^\s+(at eval )?at\s+/gm, '')
+                    .replace(/^([^\(]+?)([\n$])/gm, '{anonymous}() ($1)$2')
+                    .replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}() ($1)')
+                    .replace(/^(.+) \((.+)\)$/gm, '$1@$2')
+                    .split('\n')
+                    .slice(0, -1);
+            },
+            'mozilla': function(e){
+                return e.stack.replace(/(?:\n@:0)?\s+$/m, '')
+                    .replace(/^(?:\((\S*)\))?@/gm, '{anonymous}($1)@')
+                    .split('\n');
+            },
+            'msie': function(e){
+                return e.stack
+                    .replace(/^\s*at\s+(.*)$/gm, '$1')
+                    .replace(/^Anonymous function\s+/gm, '{anonymous}() ')
+                    .replace(/^(.+)\s+\((.+)\)$/gm, '$1@$2')
+                    .split('\n')
+                    .slice(1);
+            }
+        }, function(e){return e.stack});
+        return e.stack?nomalizer($_.Bom.browser,e).slice(startIdx):other(arguments.callee);
+    }
 	$_.O.extend(o, {
 		makeuid : makeuid,
 		parseJson : parseJson,
-        time:time
+        time:time,
+        spy: spy,
+        trace:trace
 	});
 })(Asdf);;(function ($_) {
 	$_.Base = {};
-	function subclass() {};
+	function subclass() {}
 	var Class = function(/*parent, protoProps, staticProps*/) {
 		var arg = $_.A.toArray(arguments), parent = null, protoProps, staticProps;
 		if($_.O.isFunction(arg[0]))
@@ -3526,7 +4594,7 @@ module.exports = Asdf;
                 return this;
             e.splice(index, 1);
         },
-        emit: function(name, args){
+        emit: function(name/*, args*/){
             var args = Array.prototype.slice.call(arguments, 1);
             if(!$_.O.isString(name))
                 throw new TypeError();

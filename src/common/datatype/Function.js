@@ -358,8 +358,9 @@
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
         return function(){
             var res;
+            var args = arguments;
             Asdf.A.each(fns, function(f){
-                res = f.apply(this, arguments);
+                res = f.apply(this, args);
             });
             return res;
         }
@@ -370,7 +371,7 @@
         return function(key){
             var arg = slice.call(arguments, 1);
             var fn;
-            if(fn = get(obj, key)){
+            if(fn = $_.O.get(obj, key)){
                 if(Asdf.O.isFunction(fn)){
                     return fn.apply(this, arg);
                 }
@@ -514,6 +515,203 @@
         }
     }
 
+    var _now = Date.now || function() { return new Date().getTime(); };
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {number} wait
+     * @param {Object=} options
+     * @returns {Function}
+     */
+    function throttle(func, wait, options) {
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
+        wait = wait*1000;
+        var context, args, result;
+        var timeout = null;
+        var previous = 0;
+        options || (options = {});
+        var later = function() {
+            previous = options.leading === false ? 0 : _now();
+            timeout = null;
+            result = func.apply(context, args);
+            context = args = null;
+        };
+        return function() {
+            var now = _now();
+            if (!previous && options.leading === false) previous = now;
+            var remaining = wait - (now - previous);
+            context = this;
+            args = arguments;
+            if (remaining <= 0) {
+                clearTimeout(timeout);
+                timeout = null;
+                previous = now;
+                result = func.apply(context, args);
+                context = args = null;
+            } else if (!timeout && options.trailing !== false) {
+                timeout = setTimeout(later, remaining);
+            }
+            return result;
+        };
+    }
+
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {nubmer} wait
+     * @param {boolean=} immediate
+     * @returns {Function}
+     */
+    function debounce(func, wait, immediate){
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(wait)) throw new TypeError();
+        var timeout, args, context, timestamp, result;
+        wait = wait*1000;
+        var later = function() {
+            var last = _now() - timestamp;
+            if (last < wait) {
+                timeout = setTimeout(later, wait - last);
+            } else {
+                timeout = null;
+                if (!immediate) {
+                    result = func.apply(context, args);
+                    context = args = null;
+                }
+            }
+        };
+        return function() {
+            context = this;
+            args = arguments;
+            timestamp = _now();
+            var callNow = immediate && !timeout;
+            if (!timeout) {
+                timeout = setTimeout(later, wait);
+            }
+            if (callNow) {
+                result = func.apply(context, args);
+                context = args = null;
+            }
+            return result;
+        }
+    }
+
+    function periodize(func, frequency, wait){
+        if(!$_.O.isFunction(func)||!$_.O.isNumber(frequency)||!$_.O.isNumber(wait)) throw new TypeError();
+        wait = wait*1000;
+        return function(cb){
+            if(!$_.O.isFunction(cb)) throw new TypeError();
+            var timeout, interval, timestamp, res;
+            var self = this;
+            var pfn = function(){
+                var last = _now() - timestamp;
+                res = func.call(self, res, Math.min(last/wait,1));
+                if(last >= wait){
+                    if(interval) {
+                        cb.apply(self, res);
+                    }
+                    clearTimeout(timeout);
+                    clearInterval(interval)
+                }
+            };
+            timestamp = _now();
+            timeout = setTimeout(pfn, wait);
+            interval = setInterval(pfn, 1/frequency*1000);
+            res = func.call(self, undefined, 0);
+            return interval;
+        }
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @returns {Function}
+     */
+    function once(func){
+        if(!$_.O.isFunction(func)) throw new TypeError();
+        var ran = false, memo;
+        return function() {
+            if (ran) return memo;
+            ran = true;
+            memo = func.apply(this, arguments);
+            func = null;
+            return memo;
+        };
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} func
+     * @param {Function} hasher
+     * @returns {Function}
+     */
+    function memoize(func, hasher){
+        if(!$_.O.isFunction(func)) throw new TypeError();
+        var memo = {};
+        hasher || (hasher = identity);
+        return function() {
+            var key = hasher.apply(this, arguments);
+            return Asdf.O.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+        };
+    }
+
+    /**
+     * @memberof Asdf.F
+     * @param {Function} fn
+     * @param {object} defaults
+     * @returns {Function}
+     */
+    var FN_DEF = /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)/m;
+    var FN_ARG_SPLIT = /,/;
+    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    function annotate(fn, defaults){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
+        var argNames = $_.A.map(fnText.match(FN_DEF)[2].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return function(obj){
+            var arg = $_.A.map(argNames, function(v){
+                return obj[v]||defaults[v];
+            });
+            return fn.apply(this, arg);
+        }
+    }
+
+    function getDef(fn){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
+        var m = fnText.match(FN_DEF);
+        var argNames = $_.A.map(m[2].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return {
+            name: m[1],
+            arguments: argNames
+        }
+    }
+
+    function converge(after /*fns*/){
+        if(!$_.O.isFunction(after)) throw new TypeError();
+        var fns = $_.A.filter(slice.call(arguments,1), $_.O.isFunction);
+        return function(){
+            var args = arguments;
+            var self = this;
+            return after.apply(self, Asdf.A.map(fns, function(fn){
+                return fn.apply(self, args);
+            }));
+        }
+    }
+
+    function zip(fn /*arrays*/){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var arrays = slice.call(arguments,1);
+        var length = Asdf.A.max(Asdf.A.pluck(arrays, 'length'));
+        var results = new Array(length);
+        for (var i = 0; i < length; i++) results[i] = fn.apply(this,Asdf.A.pluck(arrays, "" + i));
+        return results;
+    }
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -543,7 +741,16 @@
 		toFunction:toFunction,
 		async:async,
 		when:when,
-        curried:curried
+        curried:curried,
+        debounce:debounce,
+        throttle:throttle,
+        once:once,
+        memoize:memoize,
+        periodize:periodize,
+        annotate:annotate,
+        getDef:getDef,
+        converge:converge,
+        zip:zip
 	}, true);
 
 })(Asdf);

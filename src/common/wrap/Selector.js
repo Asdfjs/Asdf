@@ -78,7 +78,7 @@
 		var ret = results || [];
 
 		if ( arr != null ) {
-			if ( arr.length == null || $_.O.isString(arr) ||$_.O.isFunction(arr) || $_.O.isRegexp(arr) || arr===root ) {
+			if ( arr.length == null || $_.O.isString(arr) ||$_.O.isFunction(arr) || $_.O.isRegExp(arr) || arr===root ) {
 				Array.prototype.push.call( ret, arr );
 			} else {
 				merge( ret, arr );

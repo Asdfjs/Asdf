@@ -100,7 +100,7 @@ test("Asdf.F.orElse", function(){
 	}
 	equal(Asdf.F.orElse(fn, elseFn)(1), 2, 'orElse ok');
 });
-test("Asdf.F.guarder", function(){
+test("Asdf.F.guarded", function(){
     var fibo = Asdf.F.guarded([
         {
             test: function(n){return n===0},
@@ -188,4 +188,65 @@ test("Asdf.F.curried", function(){
     var f1 = Asdf.F.curried(add3, 4);
     equal(f1(1,2,3,4), 6, 'argNum ok');
     equal(f1(1)(2)(3)(4), 6, 'argNum ok');
+});
+
+asyncTest("Asdf.F.debounce", function(){
+    var i = 0;
+    var fn = Asdf.F.debounce(function(){i++},0.1);
+    var timer = setInterval(fn, 60);
+    Asdf.F.delay(function(){
+        clearInterval(timer);
+        Asdf.F.delay(function(){
+            equal(i, 1, 'Asdf.F.debounce ok');
+            start();
+        },0.3);
+    },0.3);
+});
+
+asyncTest("Asdf.F.debounce", function(){
+    var i = 0;
+    var fn = Asdf.F.throttle(function(){i++},0.1);
+    var timer = setInterval(fn, 60);
+    Asdf.F.delay(function(){
+        clearInterval(timer);
+        equal(i, 3, 'Asdf.F.debounce ok');
+        start();
+    },0.35);
+});
+
+test("Asdf.F.once", function(){
+    var i = 0;
+    var fn = Asdf.F.once(function(){return i++;});
+    equal(fn(), 0, '첫번째 결과값은 0');
+    equal(fn(), 0, '두번째 결과값은 0');
+    equal(i, 1, 'i값은 1');
+});
+
+test("Asdf.F.memoize", function(){
+    var i = 0;
+    var fn = Asdf.F.memoize(function(a){
+        i++;
+        return a;
+    });
+    equal(fn(1), 1, '첫번째 연산 ok');
+    equal(fn(1), 1, '두번째 연산 ok');
+    equal(i, 1, '연산은 한번만 실행되었음');
+});
+
+test("Asdf.F.annotate", function(){
+    var  fn = function(a,b){return a/b};
+    var f = Asdf.F.annotate(fn, {a:1, b:1});
+    equal(f({a:4,b:2}), 2, '4/2는 2');
+    equal(f({b:2,a:4}), 2, '4/2는 2');
+    equal(f({a:2}),2, '2/1(default) 는 2');
+});
+
+test("Asdf.F.converge", function(){
+    var add = function(a, b) { return a + b; };
+    var subtract = function(a, b) { return a - b; };
+    var multiply = function(a, b) { return a * b; };
+    equal(Asdf.F.converge(multiply, add, subtract)(1, 2), -3, 'converge ok');
+});
+test("Asdf.F.zip", function(){
+   deepEqual(Asdf.F.zip(function(a,b){return a+b},[1,2,3],[1,3,4]), [2,5,7], 'zip ok');
 });
