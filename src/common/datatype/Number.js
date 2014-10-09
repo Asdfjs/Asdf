@@ -9,8 +9,13 @@
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
+    var add = $_.F.curried($_.Core.op["+"], 2);
+    var multiply = $_.F.curried($_.Core.op["*"], 2);
+    var subtract = $_.F.curried($_.Core.op["-"], 2);
+    var divide = $_.F.curried($_.Core.op["/"], 2);
+    var modulo = $_.F.curried($_.Core.op["%"], 2);
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
-
+    var product = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["*"], 1));
     /**
      * @memberof Asdf.N
      * @function
@@ -65,8 +70,10 @@
      */
 	var isNotSame = not(isSame);
 	var isGreaterThan = is(function (n, a){ return n > a;});
+    var isGreaterThanOrEqualTo = is(function (n, a){ return n >= a;});
 	var isNotGreaterThan = not(isGreaterThan);
 	var isLessThan = is(function (n, a){ return n < a;});
+    var isLessThanOrEqualTo = is(function (n, a){ return n <= a;});
 	var isNotLessThan = not(isLessThan);
 
     /**
@@ -133,6 +140,12 @@
 
     $_.O.extend($_.N, {
 		sum: sum,
+        add: add,
+        multiply:multiply,
+        subtract:subtract,
+        divide:divide,
+        modulo:modulo,
+        product:product,
 		isNotNaN: isNotNaN,
 		range: range,
 		isRange: isRange,
@@ -143,9 +156,11 @@
 		isNotSame: isNotSame,
 		isGreaterThan: isGreaterThan,
         gt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThan),2),
-		isNotGreaterThan: isNotGreaterThan,
+		gte: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThanOrEqualTo),2),
+        isNotGreaterThan: isNotGreaterThan,
 		isLessThan: isLessThan,
         lt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThan),2),
+        lte: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThanOrEqualTo),2),
 		isNotLessThan: isNotLessThan,
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,

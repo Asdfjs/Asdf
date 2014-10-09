@@ -134,7 +134,12 @@ module.exports = Asdf;
 			return function () {
 				return fn.apply(this, nativeSlice.call(arguments, n));
 			};
-		}
+		}, 'nAry': function (fn, n) {
+            n==null && fn.length;
+            return function () {
+                return fn.apply(this, nativeSlice.call(arguments, 0, n));
+        };
+    }
 	};
     function namespace(/*[parent], ns_string*/) {
         var parts, i, parent;
@@ -809,7 +814,15 @@ module.exports = Asdf;
 
     function getOrElse(obj, key, defult){
         if(isNotObject(obj)) throw new TypeError();
-        var k = key.split('.');
+        if(has(obj, key))
+            return obj[key];
+        return defult;
+    }
+
+    function pathOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        var k = isString(key)?key.split('.'):key;
+        if(isNotArray(k)) throw new TypeError();
         return Asdf.A.reduce(k, function(acc, a){
             if(acc == defult) return defult;
             if(has(acc, a)){
@@ -826,9 +839,11 @@ module.exports = Asdf;
      * @param {String} key
      * @return {*}
      */
-	var get = partial(getOrElse, undefined, undefined, undefined);
+	var get = $_.Core.combine.nAry(getOrElse, 2);
 
-	function has(obj,str){
+    var path = $_.Core.combine.nAry(pathOrElse, 2);
+
+    function has(obj,str){
         if(Asdf.O.isNotObject(obj)) return false;
 		return str in obj;
 	}
@@ -966,6 +981,8 @@ module.exports = Asdf;
 		toQueryString: toQueryString,
 		get: get,
 		getOrElse: getOrElse,
+        path:path,
+        pathOrElse:pathOrElse,
         remove:remove,
         has:has,
 		set: set,
@@ -1099,7 +1116,7 @@ module.exports = Asdf;
 	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} pre 이전 실행 함수
-	 * @param {boolean} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정 
+	 * @param {boolean=} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정
 	 * @returns {function} 이전 실행 함수, 실행 함수를 실행하는 함수를 반환한다.
 	 * @desc 이전 실행 함수, 실행 함수를 실행하는 함수를 반환한다.
 	 * @example
@@ -1235,6 +1252,8 @@ module.exports = Asdf;
 	 * add2(1,2,3,4); // return 7;
 	 */
 	var extract = before($_.Core.combine.extract, exisFunction);
+
+    var nAry = before($_.Core.combine.nAry,exisFunction);
 	
 	/**
 	 * @memberof Asdf.F
@@ -1726,7 +1745,8 @@ module.exports = Asdf;
         annotate:annotate,
         getDef:getDef,
         converge:converge,
-        zip:zip
+        zip:zip,
+        nAry:nAry
 	}, true);
 
 })(Asdf);
@@ -3286,6 +3306,21 @@ module.exports = Asdf;
         return o;
 
     }
+
+    var substring = Asdf.F.functionize(String.prototype.substring);
+
+    var charAt = Asdf.F.functionize(String.prototype.charAt);
+
+    var charCodeAt = Asdf.F.functionize(String.prototype.charCodeAt);
+
+    var match = Asdf.F.functionize(String.prototype.match);
+
+    var toUpperCase = Asdf.F.functionize(String.prototype.toUpperCase);
+
+    var toLowerCase = Asdf.F.functionize(String.prototype.toLowerCase);
+
+    var split = Asdf.F.functionize(String.prototype.split);
+
     $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
@@ -3311,7 +3346,14 @@ module.exports = Asdf;
 		template:template,
         compareVersion: compareVersion,
         isJSON:isJSON,
-        interpreter:interpreter
+        interpreter:interpreter,
+        substring:substring,
+        charAt:charAt,
+        charCodeAt:charCodeAt,
+        match:match,
+        toUpperCase:toUpperCase,
+        toLowerCase:toLowerCase,
+        split:split
 	});
 })(Asdf);
 ;(function($_) {
@@ -3321,7 +3363,7 @@ module.exports = Asdf;
 	}
     function relocate(arr, fn, context){
         if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotNumber))
-            throw new TypeError()
+            throw new TypeError();
         return function(){
             var res = [];
             var arg = $_.A.toArray(arguments);
@@ -3361,8 +3403,13 @@ module.exports = Asdf;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
+    var add = $_.F.curried($_.Core.op["+"], 2);
+    var multiply = $_.F.curried($_.Core.op["*"], 2);
+    var subtract = $_.F.curried($_.Core.op["-"], 2);
+    var divide = $_.F.curried($_.Core.op["/"], 2);
+    var modulo = $_.F.curried($_.Core.op["%"], 2);
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
-
+    var product = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["*"], 1));
     /**
      * @memberof Asdf.N
      * @function
@@ -3417,8 +3464,10 @@ module.exports = Asdf;
      */
 	var isNotSame = not(isSame);
 	var isGreaterThan = is(function (n, a){ return n > a;});
+    var isGreaterThanOrEqualTo = is(function (n, a){ return n >= a;});
 	var isNotGreaterThan = not(isGreaterThan);
 	var isLessThan = is(function (n, a){ return n < a;});
+    var isLessThanOrEqualTo = is(function (n, a){ return n <= a;});
 	var isNotLessThan = not(isLessThan);
 
     /**
@@ -3485,6 +3534,12 @@ module.exports = Asdf;
 
     $_.O.extend($_.N, {
 		sum: sum,
+        add: add,
+        multiply:multiply,
+        subtract:subtract,
+        divide:divide,
+        modulo:modulo,
+        product:product,
 		isNotNaN: isNotNaN,
 		range: range,
 		isRange: isRange,
@@ -3495,9 +3550,11 @@ module.exports = Asdf;
 		isNotSame: isNotSame,
 		isGreaterThan: isGreaterThan,
         gt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThan),2),
-		isNotGreaterThan: isNotGreaterThan,
+		gte: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThanOrEqualTo),2),
+        isNotGreaterThan: isNotGreaterThan,
 		isLessThan: isLessThan,
         lt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThan),2),
+        lte: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThanOrEqualTo),2),
 		isNotLessThan: isNotLessThan,
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,

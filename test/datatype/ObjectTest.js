@@ -132,8 +132,11 @@ test("Asdf.O.get", function() {
 	var obj = {a:'aa', b:'bb'};
 	equal(Asdf.O.get(obj, 'a'), 'aa','값이 있을 경우');
 	equal(Asdf.O.get(obj, 'c'), null,'값이 없을 경우');
-    equal(Asdf.O.get({a:{b:1}},'a.b.c', 'aa'),'aa', '.으로 구분될 경우');
-    equal(Asdf.O.get({a:{b:1}},'a.b', 'aa'),'1', '.으로 구분될 경우');
+});
+test("Asdf.O.pathOrElse", function(){
+    equal(Asdf.O.pathOrElse({a:{b:1}},'a.b.c', 'aa'),'aa', '.으로 구분될 경우');
+    equal(Asdf.O.pathOrElse({a:{b:1}},'a.b', 'aa'),'1', '.으로 구분될 경우');
+    equal(Asdf.O.pathOrElse({a:{b:1}},['a','b'], 'aa'),'1', '배열 구분될 경우');
 });
 test("Asdf.O.remove", function(){
     var obj = {a:'aa', b:'bb'};

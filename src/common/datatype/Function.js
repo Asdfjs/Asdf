@@ -123,7 +123,7 @@
 	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} pre 이전 실행 함수
-	 * @param {boolean} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정 
+	 * @param {boolean=} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정
 	 * @returns {function} 이전 실행 함수, 실행 함수를 실행하는 함수를 반환한다.
 	 * @desc 이전 실행 함수, 실행 함수를 실행하는 함수를 반환한다.
 	 * @example
@@ -259,6 +259,8 @@
 	 * add2(1,2,3,4); // return 7;
 	 */
 	var extract = before($_.Core.combine.extract, exisFunction);
+
+    var nAry = before($_.Core.combine.nAry,exisFunction);
 	
 	/**
 	 * @memberof Asdf.F
@@ -750,7 +752,8 @@
         annotate:annotate,
         getDef:getDef,
         converge:converge,
-        zip:zip
+        zip:zip,
+        nAry:nAry
 	}, true);
 
 })(Asdf);

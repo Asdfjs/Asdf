@@ -635,6 +635,21 @@
         return o;
 
     }
+
+    var substring = Asdf.F.functionize(String.prototype.substring);
+
+    var charAt = Asdf.F.functionize(String.prototype.charAt);
+
+    var charCodeAt = Asdf.F.functionize(String.prototype.charCodeAt);
+
+    var match = Asdf.F.functionize(String.prototype.match);
+
+    var toUpperCase = Asdf.F.functionize(String.prototype.toUpperCase);
+
+    var toLowerCase = Asdf.F.functionize(String.prototype.toLowerCase);
+
+    var split = Asdf.F.functionize(String.prototype.split);
+
     $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
@@ -660,6 +675,13 @@
 		template:template,
         compareVersion: compareVersion,
         isJSON:isJSON,
-        interpreter:interpreter
+        interpreter:interpreter,
+        substring:substring,
+        charAt:charAt,
+        charCodeAt:charCodeAt,
+        match:match,
+        toUpperCase:toUpperCase,
+        toLowerCase:toLowerCase,
+        split:split
 	});
 })(Asdf);

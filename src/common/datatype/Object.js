@@ -615,7 +615,15 @@
 
     function getOrElse(obj, key, defult){
         if(isNotObject(obj)) throw new TypeError();
-        var k = key.split('.');
+        if(has(obj, key))
+            return obj[key];
+        return defult;
+    }
+
+    function pathOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        var k = isString(key)?key.split('.'):key;
+        if(isNotArray(k)) throw new TypeError();
         return Asdf.A.reduce(k, function(acc, a){
             if(acc == defult) return defult;
             if(has(acc, a)){
@@ -632,9 +640,11 @@
      * @param {String} key
      * @return {*}
      */
-	var get = partial(getOrElse, undefined, undefined, undefined);
+	var get = $_.Core.combine.nAry(getOrElse, 2);
 
-	function has(obj,str){
+    var path = $_.Core.combine.nAry(pathOrElse, 2);
+
+    function has(obj,str){
         if(Asdf.O.isNotObject(obj)) return false;
 		return str in obj;
 	}
@@ -772,6 +782,8 @@
 		toQueryString: toQueryString,
 		get: get,
 		getOrElse: getOrElse,
+        path:path,
+        pathOrElse:pathOrElse,
         remove:remove,
         has:has,
 		set: set,

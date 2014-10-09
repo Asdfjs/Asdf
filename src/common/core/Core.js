@@ -132,7 +132,12 @@
 			return function () {
 				return fn.apply(this, nativeSlice.call(arguments, n));
 			};
-		}
+		}, 'nAry': function (fn, n) {
+            n==null && fn.length;
+            return function () {
+                return fn.apply(this, nativeSlice.call(arguments, 0, n));
+        };
+    }
 	};
     function namespace(/*[parent], ns_string*/) {
         var parts, i, parent;
