@@ -1714,7 +1714,7 @@
         return results;
     }
 
-    var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
+    var complement = before(curry(composeRight, $_.Core.op["!"]),exisFunction);
 
 	$_.O.extend($_.F, {
 		identity: identity,
