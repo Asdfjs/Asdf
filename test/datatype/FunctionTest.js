@@ -250,3 +250,6 @@ test("Asdf.F.converge", function(){
 test("Asdf.F.zip", function(){
    deepEqual(Asdf.F.zip(function(a,b){return a+b},[1,2,3],[1,3,4]), [2,5,7], 'zip ok');
 });
+test("Asdf.F.complement", function(){
+    ok(Asdf.F.complement(Asdf.O.isNotFunction)(function(){}), 'Asdf.complement ok');
+});

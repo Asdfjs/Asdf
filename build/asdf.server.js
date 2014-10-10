@@ -1707,6 +1707,8 @@ module.exports = Asdf;
         return results;
     }
 
+    var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -1746,7 +1748,8 @@ module.exports = Asdf;
         getDef:getDef,
         converge:converge,
         zip:zip,
-        nAry:nAry
+        nAry:nAry,
+        complement:complement
 	}, true);
 
 })(Asdf);

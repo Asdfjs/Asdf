@@ -933,9 +933,9 @@
         var data = {};
         var id = 0;
         var prefix = 'ae';
-        var getData = function (el, key){
+        var getData = function (el, key, isIsolate){
             if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
-            if(!el.aeid || !hasData(el, key)){
+            if(!isIsolate && (!el.aeid || !hasData(el, key))){
                 var p = parent(el);
                 if(!p) return;
                 return getData(p, key);
@@ -959,17 +959,19 @@
             data[aeid][key] = value;
             return el;
         };
-        function parent( element) {
-            do {
-                element = element['parentNode'];
-            } while ( element && element.nodeType !== 1 );
-            return element;
-        }
+        var delData = function(el, key){
+            if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
+            if(hasData(el, key)){
+                delete data[el.aeid][key];
+            }
+            return el
+        };
 
         return {
-            getData: getData,
-            setData: setData,
-            hasData: hasData
+            get: getData,
+            set: setData,
+            has: hasData,
+            del: delData
         }
     })();
 	extend($_.Element,  {
@@ -1022,9 +1024,10 @@
 		isWhitespace: isWhitespace,
         createDom: createDom,
         createText: createText,
-        getData: data.getData,
-        setData: data.setData,
-        hasData: data.hasData,
+        get: data.get,
+        set: data.set,
+        has: data.has,
+        del: data.del,
         getWindow: getWindow,
         offsetParent: offsetParent
 	});

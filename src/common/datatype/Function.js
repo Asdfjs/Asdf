@@ -714,6 +714,8 @@
         return results;
     }
 
+    var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -753,7 +755,8 @@
         getDef:getDef,
         converge:converge,
         zip:zip,
-        nAry:nAry
+        nAry:nAry,
+        complement:complement
 	}, true);
 
 })(Asdf);
