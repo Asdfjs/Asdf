@@ -2454,7 +2454,7 @@ module.exports = Asdf;
         var res = [];
         var a1 = args.shift();
         for(var j = 0; j < a1.length; j++){
-            if(args.length == 0){
+            if(args.length === 0){
                 res.push([a1[j]]);
             }else {
                 var t = map(xprod.apply(self,args), function(v){
@@ -3957,7 +3957,7 @@ module.exports = Asdf;
         if (amount < -1) { amount = -1; }
         if (amount > 1) { amount = 1; }
         return function(t) {
-            if (amount==0) { return t; }
+            if (amount===0) { return t; }
             if (amount<0) { return t*(t*-amount+1+amount); }
             return t*((2-t)*amount+(1-amount));
         }
@@ -4072,14 +4072,14 @@ module.exports = Asdf;
     }
 
     function bounceInOut(t) {
-        if (t<0.5) return bounceIn (t*2) * .5;
+        if (t<0.5) return bounceIn (t*2) * 0.5;
         return bounceOut(t*2-1)*0.5+0.5;
     }
 
     function getElasticIn(amplitude,period) {
         var pi2 = Math.PI*2;
         return function(t) {
-            if (t==0 || t==1) return t;
+            if (t===0 || t===1) return t;
             var s = period/pi2*Math.asin(1/amplitude);
             return -(amplitude*Math.pow(2,10*(t-=1))*Math.sin((t-s)*pi2/period));
         }
@@ -4088,7 +4088,7 @@ module.exports = Asdf;
     function getElasticOut(amplitude,period) {
         var pi2 = Math.PI*2;
         return function(t) {
-            if (t==0 || t==1) return t;
+            if (t===0 || t===1) return t;
             var s = period/pi2 * Math.asin(1/amplitude);
             return (amplitude*Math.pow(2,-10*t)*Math.sin((t-s)*pi2/period )+1);
         }
@@ -4412,14 +4412,16 @@ module.exports = Asdf;
         var res = function spy() {
             var stack = trace().slice(1);
             var error;
+            var value;
+            var time;
             var timer = getTimer();
             var arg = Array.prototype.slice.call(arguments, 0);
             groupStart(desc + 'function ' + fndef.name + '('+ fndef.arguments.join(',') +')'+'{');
             print('arguments : ', arg);
             print('stack: ', stack);
             try{
-                var time = timer();
-                var value = fn.apply(this, arg);
+                time = timer();
+                value = fn.apply(this, arg);
                 time = timer()- time;
             }catch(e){
                 error = e;

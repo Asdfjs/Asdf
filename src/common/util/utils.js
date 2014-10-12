@@ -128,14 +128,16 @@
         var res = function spy() {
             var stack = trace().slice(1);
             var error;
+            var value;
+            var time;
             var timer = getTimer();
             var arg = Array.prototype.slice.call(arguments, 0);
             groupStart(desc + 'function ' + fndef.name + '('+ fndef.arguments.join(',') +')'+'{');
             print('arguments : ', arg);
             print('stack: ', stack);
             try{
-                var time = timer();
-                var value = fn.apply(this, arg);
+                time = timer();
+                value = fn.apply(this, arg);
                 time = timer()- time;
             }catch(e){
                 error = e;

@@ -699,7 +699,7 @@
         var res = [];
         var a1 = args.shift();
         for(var j = 0; j < a1.length; j++){
-            if(args.length == 0){
+            if(args.length === 0){
                 res.push([a1[j]]);
             }else {
                 var t = map(xprod.apply(self,args), function(v){

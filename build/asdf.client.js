@@ -2461,7 +2461,7 @@
         var res = [];
         var a1 = args.shift();
         for(var j = 0; j < a1.length; j++){
-            if(args.length == 0){
+            if(args.length === 0){
                 res.push([a1[j]]);
             }else {
                 var t = map(xprod.apply(self,args), function(v){
@@ -3734,61 +3734,32 @@
 })(Asdf);;(function($_) {
     $_.Event = {};
     var extend = $_.O.extend, slice = Array.prototype.slice;
-    var cache = {};
     var id = 1;
-    function getIndex(element, eventName, handler){
-        if(!element.eId || !cache[element.eId] || !cache[element.eId][eventName])
-            return -1;
-        var i = -1;
-        var arr = cache[element.eId][eventName];
-        for (i = 0; i < arr.length; i++ ){
-            if(arr[i].handler == handler)
-                return i;
-        }
-        return -1;
+    var prefix = 'f';
 
-    }
     function getWrapedhandler(element, eventName, handler){
-        var index = getIndex(element, eventName, handler);
-        if(index == -1){
+        var event = Asdf.Element.get(element, '_event', true)||{};
+        var farr;
+        if(handler._fid && (farr = Asdf.O.path(event,[eventName, handler._fid]))){
+            return farr.pop();
+        }else{
             return handler;
         }
-        return cache[element.eId][eventName][index].wrapedhandler.pop();
-
     }
-    function addEventListener(element, eventName, handler, filterFn) {
-        var wrapedhandler = $_.F.wrap(handler,
-            function(ofn, e) {
-                e = e||window.event;
-                e = fix(e);
-                if(filterFn && !filterFn(e)) return null;
-                return ofn(e);
-            }
-        );
-        var eId;
+
+    function makeid(){
+        return prefix+(id++);
+    }
+
+    function addEventListener(element, eventName, handler) {
         if (element.addEventListener) {
-            element.addEventListener(eventName, wrapedhandler, false);
+            element.addEventListener(eventName, handler, false);
 
         }else {
-            element.attachEvent("on"+ eventName, wrapedhandler);
+            element.attachEvent("on" + eventName, handler);
         }
-        if(!element.eId){
-            element.eId = 'e'+(id++);
-        }
-        eId = element.eId;
-        var index = getIndex(element, eventName, handler);
-        if(!cache[eId]){
-            cache[eId] = {};
-        }
-        if(!cache[eId][eventName]){
-            cache[eId][eventName] = [];
-        }
-        if(index != -1)
-            cache[eId][eventName][index].wrapedhandler.push(wrapedhandler);
-        else
-            cache[eId][eventName].push({handler:handler, wrapedhandler:[wrapedhandler]});
-
     }
+
     function removeEventListener(element, eventName, handler){
         if(element.removeEventListener){
             element.removeEventListener( eventName, handler, false );
@@ -3859,53 +3830,72 @@
         }
         return event;
     }
-    function on(element, eventName, fn, filterFn){
-        addEventListener(element, eventName, fn, filterFn);
+
+    function on(element, eventName, handler, filterFn){
+        var wrapedhandler = $_.F.wrap(handler,
+            function(ofn, e) {
+                e = e||window.event;
+                e = fix(e);
+                return Asdf.F.before(ofn,filterFn||Asdf.F.toFunction(true), true)(e);
+            }
+        );
+        var _fid = makeid();
+        handler._fid = _fid;
+        addEventListener(element, eventName, wrapedhandler);
+        var event = Asdf.Element.get(element, '_event', true)||{};
+        if(!event[eventName])
+            event[eventName] = {};
+        if(!event[eventName][_fid])
+            event[eventName][_fid] = [];
+        event[eventName][_fid].push(wrapedhandler);
+        Asdf.Element.set(element, '_event', event);
         return element;
     }
+
     function once(element, eventName, fn, filterFn){
         var tfn = $_.F.wrap(fn, function(ofn){
             var arg = slice.call(arguments, 1);
             ofn.apply(this,arg);
             remove(element, eventName, tfn);
         });
-        addEventListener(element, eventName, tfn, filterFn);
+        on(element, eventName, tfn, filterFn);
         return element;
     }
+
     function remove(element, eventName, handler) {
-        var wrapedhandler = getWrapedhandler(element, eventName, handler)||handler;
+        var wrapedhandler = getWrapedhandler(element, eventName, handler);
         removeEventListener(element, eventName, wrapedhandler);
         return element;
     }
+
     function removeAll(element, eventName) {
-        if(!element.eId || !cache[element.eId])
+        var event;
+        if(!(event = Asdf.Element.get(element, '_event', true)))
             return element;
-        var events = [], i, j;
+        var removeEvents = [];
         if(eventName){
-            events = $_.A.map(cache[element.eId][eventName], function(v) {
+            $_.O.each(event[eventName], function(v) {
                 v.eventName = eventName;
-                return v;
+                removeEvents.push(v);
             });
-            cache[element.eId][eventName] = null;
+            event[eventName] = null;
         }else {
-            $_.A.each(cache[element.eId], function(arr, key) {
-                if($_.O.isArray(arr)){
-                    Array.prototype.push.apply(events, $_.A.map(arr, function(value) {
-                            value.eventName = key;
-                            return value;}
-                    ));
-                }
+            $_.O.each(event, function(ev, key) {
+                $_.O.each(ev, function(v){
+                    v.eventName = key;
+                    removeEvents.push(v);
+                });
             });
-            cache[element.eId] = null;
+            Asdf.Element.del(element, '_event');
         }
-        for ( i = 0; events && i < events.length; i++){
-            var e = events[i];
-            for(j = 0 ; j < e.wrapedhandler.length; j++ ){
-                removeEventListener(element, e.eventName, e.wrapedhandler[j]);
-            }
-        }
+        Asdf.A.each(removeEvents, function(v){
+            Asdf.A.each(v, function(fn){
+                removeEventListener(element, v.eventName, fn);
+            });
+        });
         return element;
     }
+
     function createEvent(name) {
         var event;
         if(document.createEvent) {
@@ -5406,7 +5396,7 @@
         if (amount < -1) { amount = -1; }
         if (amount > 1) { amount = 1; }
         return function(t) {
-            if (amount==0) { return t; }
+            if (amount===0) { return t; }
             if (amount<0) { return t*(t*-amount+1+amount); }
             return t*((2-t)*amount+(1-amount));
         }
@@ -5521,14 +5511,14 @@
     }
 
     function bounceInOut(t) {
-        if (t<0.5) return bounceIn (t*2) * .5;
+        if (t<0.5) return bounceIn (t*2) * 0.5;
         return bounceOut(t*2-1)*0.5+0.5;
     }
 
     function getElasticIn(amplitude,period) {
         var pi2 = Math.PI*2;
         return function(t) {
-            if (t==0 || t==1) return t;
+            if (t===0 || t===1) return t;
             var s = period/pi2*Math.asin(1/amplitude);
             return -(amplitude*Math.pow(2,10*(t-=1))*Math.sin((t-s)*pi2/period));
         }
@@ -5537,7 +5527,7 @@
     function getElasticOut(amplitude,period) {
         var pi2 = Math.PI*2;
         return function(t) {
-            if (t==0 || t==1) return t;
+            if (t===0 || t===1) return t;
             var s = period/pi2 * Math.asin(1/amplitude);
             return (amplitude*Math.pow(2,-10*t)*Math.sin((t-s)*pi2/period )+1);
         }
@@ -5861,14 +5851,16 @@
         var res = function spy() {
             var stack = trace().slice(1);
             var error;
+            var value;
+            var time;
             var timer = getTimer();
             var arg = Array.prototype.slice.call(arguments, 0);
             groupStart(desc + 'function ' + fndef.name + '('+ fndef.arguments.join(',') +')'+'{');
             print('arguments : ', arg);
             print('stack: ', stack);
             try{
-                var time = timer();
-                var value = fn.apply(this, arg);
+                time = timer();
+                value = fn.apply(this, arg);
                 time = timer()- time;
             }catch(e){
                 error = e;
