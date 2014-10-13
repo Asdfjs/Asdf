@@ -393,7 +393,7 @@
 	 */
 	function sort(arr, sortfn){
 		if($_.O.isNotArray(arr)) throw new TypeError();
-		return arr.sort(sortfn);
+		return arr.sort(sortfn||asc);
 	}
 	function desc(a, b) {
 		if(a == null)

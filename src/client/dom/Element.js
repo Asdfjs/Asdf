@@ -974,6 +974,15 @@
             del: delData
         }
     })();
+
+    function getElementsByClassName(element, className){
+        if(element.querySelectorAll){
+            return element.querySelectorAll('.'+className);
+        }else if(element.getElementsByTagName){
+            return Asdf.A.filter(element.getElementsByTagName('*'), Asdf.F.partial(hasClass, undefined, className));
+        }
+    }
+
 	extend($_.Element,  {
 		walk: walk,
 		visible: visible,
@@ -1029,6 +1038,7 @@
         has: data.has,
         del: data.del,
         getWindow: getWindow,
-        offsetParent: offsetParent
+        offsetParent: offsetParent,
+        getElementsByClassName:getElementsByClassName
 	});
 })(Asdf);

@@ -47,13 +47,14 @@
 		return child;
 	};
     function getDefaultConstructor(){
-        return function constructor(){
-            if(this.constructor !== constructor) return new constructor();
+        var c = function (){
+            if(this.constructor !== c ) return new c();
             var self = this;
-            $_.O.each(constructor.prototype, function(v, k){
+            $_.O.each(c.prototype, function(v, k){
                 if(!$_.O.isFunction(v))self[k] = $_.O.clone(v);
             });
         }
+        return c;
     }
 	$_.O.extend($_.Base, {
 		Class: Class,
