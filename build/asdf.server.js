@@ -1509,9 +1509,6 @@ module.exports = Asdf;
                 return bind.apply(r,$_.A.merge([r,this], arguments));
         }
     }
-
-    var _now = Date.now || function() { return new Date().getTime(); };
-
     /**
      * @memberof Asdf.F
      * @param {Function} func
@@ -1527,13 +1524,13 @@ module.exports = Asdf;
         var previous = 0;
         options || (options = {});
         var later = function() {
-            previous = options.leading === false ? 0 : _now();
+            previous = options.leading === false ? 0 : $_.Utils.now();
             timeout = null;
             result = func.apply(context, args);
             context = args = null;
         };
         return function() {
-            var now = _now();
+            var now = $_.Utils.now();
             if (!previous && options.leading === false) previous = now;
             var remaining = wait - (now - previous);
             context = this;
@@ -1564,7 +1561,7 @@ module.exports = Asdf;
         var timeout, args, context, timestamp, result;
         wait = wait*1000;
         var later = function() {
-            var last = _now() - timestamp;
+            var last = $_.Utils.now() - timestamp;
             if (last < wait) {
                 timeout = setTimeout(later, wait - last);
             } else {
@@ -1578,7 +1575,7 @@ module.exports = Asdf;
         return function() {
             context = this;
             args = arguments;
-            timestamp = _now();
+            timestamp = $_.Utils.now();
             var callNow = immediate && !timeout;
             if (!timeout) {
                 timeout = setTimeout(later, wait);
@@ -1599,7 +1596,7 @@ module.exports = Asdf;
             var timeout, interval, timestamp, res;
             var self = this;
             var pfn = function(){
-                var last = _now() - timestamp;
+                var last = $_.Utils.now() - timestamp;
                 res = func.call(self, res, Math.min(last/wait,1));
                 if(last >= wait){
                     if(interval) {
@@ -1609,7 +1606,7 @@ module.exports = Asdf;
                     clearInterval(interval)
                 }
             };
-            timestamp = _now();
+            timestamp = $_.Utils.now();
             timeout = setTimeout(pfn, wait);
             interval = setInterval(pfn, 1/frequency*1000);
             res = func.call(self, undefined, 0);
@@ -4515,12 +4512,14 @@ module.exports = Asdf;
         }, function(e){return e.stack});
         return e.stack?nomalizer($_.Bom.browser,e).slice(startIdx):other(arguments.callee);
     }
+    var now = Date.now || function() { return new Date().getTime(); };
 	$_.O.extend(o, {
 		makeuid : makeuid,
 		parseJson : parseJson,
         time:time,
         spy: spy,
-        trace:trace
+        trace:trace,
+        now:now
 	});
 })(Asdf);;(function ($_) {
 	$_.Base = {};

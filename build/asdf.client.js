@@ -1516,9 +1516,6 @@
                 return bind.apply(r,$_.A.merge([r,this], arguments));
         }
     }
-
-    var _now = Date.now || function() { return new Date().getTime(); };
-
     /**
      * @memberof Asdf.F
      * @param {Function} func
@@ -1534,13 +1531,13 @@
         var previous = 0;
         options || (options = {});
         var later = function() {
-            previous = options.leading === false ? 0 : _now();
+            previous = options.leading === false ? 0 : $_.Utils.now();
             timeout = null;
             result = func.apply(context, args);
             context = args = null;
         };
         return function() {
-            var now = _now();
+            var now = $_.Utils.now();
             if (!previous && options.leading === false) previous = now;
             var remaining = wait - (now - previous);
             context = this;
@@ -1571,7 +1568,7 @@
         var timeout, args, context, timestamp, result;
         wait = wait*1000;
         var later = function() {
-            var last = _now() - timestamp;
+            var last = $_.Utils.now() - timestamp;
             if (last < wait) {
                 timeout = setTimeout(later, wait - last);
             } else {
@@ -1585,7 +1582,7 @@
         return function() {
             context = this;
             args = arguments;
-            timestamp = _now();
+            timestamp = $_.Utils.now();
             var callNow = immediate && !timeout;
             if (!timeout) {
                 timeout = setTimeout(later, wait);
@@ -1606,7 +1603,7 @@
             var timeout, interval, timestamp, res;
             var self = this;
             var pfn = function(){
-                var last = _now() - timestamp;
+                var last = $_.Utils.now() - timestamp;
                 res = func.call(self, res, Math.min(last/wait,1));
                 if(last >= wait){
                     if(interval) {
@@ -1616,7 +1613,7 @@
                     clearInterval(interval)
                 }
             };
-            timestamp = _now();
+            timestamp = $_.Utils.now();
             timeout = setTimeout(pfn, wait);
             interval = setInterval(pfn, 1/frequency*1000);
             res = func.call(self, undefined, 0);
@@ -5964,12 +5961,14 @@
         }, function(e){return e.stack});
         return e.stack?nomalizer($_.Bom.browser,e).slice(startIdx):other(arguments.callee);
     }
+    var now = Date.now || function() { return new Date().getTime(); };
 	$_.O.extend(o, {
 		makeuid : makeuid,
 		parseJson : parseJson,
         time:time,
         spy: spy,
-        trace:trace
+        trace:trace,
+        now:now
 	});
 })(Asdf);;(function($_) {
     var o = $_.Core.namespace($_, 'Utils');
@@ -6519,6 +6518,118 @@
 		request: request,
 		responders: responders
 	});
+})(Asdf);;/**
+ * Created by sungwon on 14. 10. 20.
+ */
+(function($_) {
+    $_.Cookie = {};
+    var MAX_COOKIE_LENGTH = 3950;
+    var SPLIT_RE_ = /\s*;\s*/;
+    var isEnabled = function() {
+        return navigator.cookieEnabled;
+    };
+    var isValidName = function(name) {
+        return !(/[;=\s]/.test(name));
+    };
+    var isValidValue = function(value) {
+        return !(/[;\r\n]/.test(value));
+    };
+
+    var set = function(context, name, value, maxAge, path, domain, secure){
+        if($_.O.isNotObject(context)||!isValidName(name)||!isValidValue(value)) throw new TypeError();
+        maxAge = $_.O.isUndefined(maxAge)? -1: maxAge;
+        var str = [domain?';domain='+domain:'',
+            path?';path='+path:'',
+            maxAge<0?'':maxAge===0?';expires='+(new Date(1970,1,1)).toUTCString():';expires='+(new Date(($_.Utils.now()+maxAge *1000))).toUTCString(),
+            secure?';secure':''].join('');
+        _setCookie(context, name+'='+value+str);
+    };
+    var _setCookie = function(context,str){
+        context.cookie = str;
+    };
+    var get = function(context, name, defaultValue){
+        if($_.O.isNotObject(context)||!isValidName(name)) throw new TypeError();
+        var parts = _getParts(_getCookie(context)||'');
+        var nameEq = name + '=';
+        for(var i = 0; i < parts.length; i++){
+            if($_.S.startsWith(parts[i], nameEq)){
+                return parts[i].substr(nameEq.length);
+            }
+            if(parts[i]==name)
+                return '';
+
+        }
+        return defaultValue;
+    };
+    var _getCookie = function(context){
+        return context.cookie;
+    };
+    var remove = function(context, name, path, domain){
+        var res = containsKey(context,name);
+        set(context, name, '', 0, path, domain);
+        return res;
+    };
+    var containsKey = function(context, name){
+        return $_.O.isNotUndefined(get(context, name));
+    };
+    var keys = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var kv = _getKeyValues(_getCookie(context)||'');
+        return $_.A.pluck(kv, '0');
+    };
+    var values = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var kv = _getKeyValues(_getCookie(context)||'');
+        return $_.A.pluck(kv, '1');
+    };
+    var isEmpty = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        return !_getCookie(context);
+    };
+    var getCount = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var c = _getCookie(context);
+        return c?_getParts(c).length:0;
+    };
+    var containsValue = function(context, value){
+        if($_.O.isNotObject(context)||!isValidValue(value)) throw new TypeError();
+        return $_.A.contains(values(context), value);
+    };
+    var clear = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var k = keys(context);
+        Asdf.A.each(k, function(v){
+            remove(context, v);
+        })
+    };
+
+    var _getParts = function(str){
+        return str.split(SPLIT_RE_);
+    };
+    var _getKeyValues = function(str){
+        var parts = _getParts(str);
+        return $_.A.map(parts, function(v){
+            var index = v.indexOf('=');
+            return index ==-1?['',v]:[v.substring(0,index), v.substring(index+1)];
+        });
+    };
+
+    $_.Cookie = {
+        set:set,
+        get:get,
+        keys: keys,
+        values: values,
+        remove:remove,
+        clear:clear,
+        containsKey: containsKey,
+        containsValue: containsValue,
+        isEnabled:isEnabled,
+        isValidName:isValidName,
+        isValidValue:isValidValue,
+        isEmpty:isEmpty,
+        getCount:getCount
+    }
+
 })(Asdf);;(function($_) {
 	var history = $_.History = {};
 	var timer = null;

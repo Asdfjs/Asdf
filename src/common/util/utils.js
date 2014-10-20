@@ -231,11 +231,13 @@
         }, function(e){return e.stack});
         return e.stack?nomalizer($_.Bom.browser,e).slice(startIdx):other(arguments.callee);
     }
+    var now = Date.now || function() { return new Date().getTime(); };
 	$_.O.extend(o, {
 		makeuid : makeuid,
 		parseJson : parseJson,
         time:time,
         spy: spy,
-        trace:trace
+        trace:trace,
+        now:now
 	});
 })(Asdf);

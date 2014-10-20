@@ -29,6 +29,7 @@ module.exports = function(grunt) {
                     'src/common/base/Chain.js',
                     'src/client/async/*.js',
                     'src/client/ajax/*.js',
+                    'src/client/cookie/*.js',
                     'src/client/history/*.js'
                 ],
                 dest: 'build/<%= pkg.name %>.client.js'
