@@ -676,17 +676,20 @@
             return fn.apply(this, arg);
         }
     }
-    function doctest(fn, start){
-        start = start||'>>>';
+    function doctest(fn, startsWith){
+        startsWith = startsWith||'>>>';
         if(!$_.O.isFunction(fn)) throw new TypeError();
         var def = getDef(fn);
         var lines = def.comments.join('\n').split('\n');
         return Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,start);
+            return $_.S.startsWith(l,startsWith);
         }), function(exe){
-            return (new Function('return ' + exe.substring(start.length)))();
+            try{
+                return (new Function('return ' + exe.substring(startsWith.length)))();
+            }catch(e){
+                return e;
+            }
         });
-
     }
 
     function getDef(fn){
