@@ -141,7 +141,12 @@
 			return function () {
 				return fn.apply(this, nativeSlice.call(arguments, n));
 			};
-		}
+		}, 'nAry': function (fn, n) {
+            n==null && fn.length;
+            return function () {
+                return fn.apply(this, nativeSlice.call(arguments, 0, n));
+        };
+    }
 	};
     function namespace(/*[parent], ns_string*/) {
         var parts, i, parent;
@@ -524,6 +529,12 @@
 	 */
 	var isNotNumber = not(isNumber);
 
+    function isBoolean(obj){
+        return nativeToString.call(obj) === objectType.BOOLEAN_CLASS
+    }
+
+    var isNotBoolean = not(isBoolean);
+
 	/**
 	 * @memberof Asdf.O
 	 * @param {Object} object 판단 객체
@@ -549,7 +560,7 @@
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Regexp인지 판단한다.
 	 */
-	function isRegexp(object) {
+	function isRegExp(object) {
 		return nativeToString.call(object) === objectType.REGEXP_CLASS;
 	}
 	
@@ -560,7 +571,7 @@
 	 * @returns {boolean} Regexp 객체여부를 반환하다.
 	 * @desc 해당 메소드를 사용하면 객체가 Regexp아닌지 판단한다.
 	 */
-	var isNotRegexp = not(isRegexp);
+	var isNotRegExp = not(isRegExp);
 	
 	/**
 	 * @memberof Asdf.O
@@ -808,12 +819,25 @@
 		return obj;
 	}
 
-	function getOrElse(obj, key, defult){
-		if(isNotObject(obj)) throw new TypeError();
-		if(has(obj, key))
-			return obj[key];
-		return defult;
-	}
+    function getOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        if(has(obj, key))
+            return obj[key];
+        return defult;
+    }
+
+    function pathOrElse(obj, key, defult){
+        if(isNotObject(obj)) throw new TypeError();
+        var k = isString(key)?key.split('.'):key;
+        if(isNotArray(k)) throw new TypeError();
+        return Asdf.A.reduce(k, function(acc, a){
+            if(acc == defult) return defult;
+            if(has(acc, a)){
+                return acc[a];
+            }
+            return defult;
+        }, obj);
+    }
 
     /**
      * @memberof Asdf.O
@@ -822,9 +846,12 @@
      * @param {String} key
      * @return {*}
      */
-	var get = partial(getOrElse, undefined, undefined, undefined);
+	var get = $_.Core.combine.nAry(getOrElse, 2);
 
-	function has(obj,str){
+    var path = $_.Core.combine.nAry(pathOrElse, 2);
+
+    function has(obj,str){
+        if(Asdf.O.isNotObject(obj)) return false;
 		return str in obj;
 	}
 
@@ -876,10 +903,20 @@
      * @returns {Boolean}
      */
     function equals(obj, obj2){
-        if(obj == null|| obj2 == null) return false;
-        if(obj===obj2) return true;
+        if (obj === obj2) return obj !== 0 || 1 / obj === 1 / obj2;
+        if(obj == null|| obj2 == null) return obj === obj2;
         if(obj.equals)
            return obj.equals(obj2);
+        var className = nativeToString.call(obj);
+        if(className !== nativeToString.call(obj2)) return false;
+        if(isRegExp(obj) || isString(obj))
+            return ''  + obj === '' + obj2;
+        if(isNumber(obj)){
+            if (+obj !== +obj) return +obj2 !== +obj2;
+            return +obj === 0 ? 1 / +obj === 1 / obj2 : +obj === +obj2;
+        }
+        if(isDate(obj)||isBoolean(obj))
+            return +obj === +obj2;
         if(!(isPlainObject(obj)||isArray(obj))|| obj.constructor !== obj2.constructor) return false;
         var k1 = keys(obj);
         var k2 = keys(obj2);
@@ -890,6 +927,12 @@
             if(!res) return false;
         }
         return true;
+    }
+
+    function tap(obj, fn){
+        if(isNotObject(obj) || isNotFunction(fn)) throw new TypeError();
+            fn(obj);
+        return obj;
     }
 
 	extend(o, {
@@ -928,10 +971,12 @@
 		isNotString: isNotString,
 		isNumber : isNumber,
 		isNotNumber: isNotNumber,
+        isBoolean:isBoolean,
+        isNotBoolean:isNotBoolean,
 		isDate : isDate,
 		isNotDate: isNotDate,
-		isRegexp: isRegexp,
-		isNotRegexp: isNotRegexp,
+        isRegExp: isRegExp,
+		isNotRegExp: isNotRegExp,
 		isUndefined : isUndefined,
 		isNotUndefined: isNotUndefined,
 		isNull : isNull,
@@ -943,11 +988,14 @@
 		toQueryString: toQueryString,
 		get: get,
 		getOrElse: getOrElse,
+        path:path,
+        pathOrElse:pathOrElse,
         remove:remove,
         has:has,
 		set: set,
 		type:type,
-        equals:equals
+        equals:equals,
+        tap:tap
 	});
 })(Asdf);
 ;/**
@@ -1075,7 +1123,7 @@
 	 * @memberof Asdf.F
 	 * @param {function} func 실행 함수
 	 * @param {function} pre 이전 실행 함수
-	 * @param {boolean} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정 
+	 * @param {boolean=} stop 이전 실행 함수의 결과값여부에 따라 실행 함수를 실행여부를 결정
 	 * @returns {function} 이전 실행 함수, 실행 함수를 실행하는 함수를 반환한다.
 	 * @desc 이전 실행 함수, 실행 함수를 실행하는 함수를 반환한다.
 	 * @example
@@ -1211,6 +1259,8 @@
 	 * add2(1,2,3,4); // return 7;
 	 */
 	var extract = before($_.Core.combine.extract, exisFunction);
+
+    var nAry = before($_.Core.combine.nAry,exisFunction);
 	
 	/**
 	 * @memberof Asdf.F
@@ -1323,7 +1373,7 @@
         return function(key){
             var arg = slice.call(arguments, 1);
             var fn;
-            if(fn = get(obj, key)){
+            if(fn = $_.O.get(obj, key)){
                 if(Asdf.O.isFunction(fn)){
                     return fn.apply(this, arg);
                 }
@@ -1466,9 +1516,6 @@
                 return bind.apply(r,$_.A.merge([r,this], arguments));
         }
     }
-
-    var _now = Date.now || function() { return new Date().getTime(); };
-
     /**
      * @memberof Asdf.F
      * @param {Function} func
@@ -1484,13 +1531,13 @@
         var previous = 0;
         options || (options = {});
         var later = function() {
-            previous = options.leading === false ? 0 : _now();
+            previous = options.leading === false ? 0 : $_.Utils.now();
             timeout = null;
             result = func.apply(context, args);
             context = args = null;
         };
         return function() {
-            var now = _now();
+            var now = $_.Utils.now();
             if (!previous && options.leading === false) previous = now;
             var remaining = wait - (now - previous);
             context = this;
@@ -1521,7 +1568,7 @@
         var timeout, args, context, timestamp, result;
         wait = wait*1000;
         var later = function() {
-            var last = _now() - timestamp;
+            var last = $_.Utils.now() - timestamp;
             if (last < wait) {
                 timeout = setTimeout(later, wait - last);
             } else {
@@ -1535,7 +1582,7 @@
         return function() {
             context = this;
             args = arguments;
-            timestamp = _now();
+            timestamp = $_.Utils.now();
             var callNow = immediate && !timeout;
             if (!timeout) {
                 timeout = setTimeout(later, wait);
@@ -1556,7 +1603,7 @@
             var timeout, interval, timestamp, res;
             var self = this;
             var pfn = function(){
-                var last = _now() - timestamp;
+                var last = $_.Utils.now() - timestamp;
                 res = func.call(self, res, Math.min(last/wait,1));
                 if(last >= wait){
                     if(interval) {
@@ -1566,7 +1613,7 @@
                     clearInterval(interval)
                 }
             };
-            timestamp = _now();
+            timestamp = $_.Utils.now();
             timeout = setTimeout(pfn, wait);
             interval = setInterval(pfn, 1/frequency*1000);
             res = func.call(self, undefined, 0);
@@ -1613,13 +1660,13 @@
      * @param {object} defaults
      * @returns {Function}
      */
-    var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_DEF = /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)\s*\{([\s\S]*)\}\s*/m;
     var FN_ARG_SPLIT = /,/;
-    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    var STRIP_COMMENTS = /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg;
     function annotate(fn, defaults){
         if(!$_.O.isFunction(fn)) throw new TypeError();
         var fnText = fn.toString().replace(STRIP_COMMENTS, '');
-        var argNames = $_.A.map(fnText.match(FN_ARGS)[1].split(FN_ARG_SPLIT), function(arg){
+        var argNames = $_.A.map(fnText.match(FN_DEF)[2].split(FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return function(obj){
@@ -1629,6 +1676,63 @@
             return fn.apply(this, arg);
         }
     }
+    function doctest(fn, startsWith){
+        startsWith = startsWith||'>>>';
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var def = getDef(fn);
+        var lines = def.comments.join('\n').split('\n');
+        return Asdf.A.map($_.A.filter(lines, function(l){
+            return $_.S.startsWith(l,startsWith);
+        }), function(exe){
+            try{
+                return (new Function('return ' + exe.substring(startsWith.length)))();
+            }catch(e){
+                return e;
+            }
+        });
+    }
+
+    function getDef(fn){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var comments = [];
+        var fnText = fn.toString().replace(STRIP_COMMENTS, function(m,p1,p2){
+            comments.push($_.S.trim(p1||p2));
+            return '';
+        });
+        var m = fnText.match(FN_DEF);
+        var argNames = $_.A.map(m[2].split(FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        return {
+            name: m[1],
+            arguments: argNames,
+            body:m[3],
+            comments:comments
+        }
+    }
+
+    function converge(after /*fns*/){
+        if(!$_.O.isFunction(after)) throw new TypeError();
+        var fns = $_.A.filter(slice.call(arguments,1), $_.O.isFunction);
+        return function(){
+            var args = arguments;
+            var self = this;
+            return after.apply(self, Asdf.A.map(fns, function(fn){
+                return fn.apply(self, args);
+            }));
+        }
+    }
+
+    function zip(fn /*arrays*/){
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var arrays = slice.call(arguments,1);
+        var length = Asdf.A.max(Asdf.A.pluck(arrays, 'length'));
+        var results = new Array(length);
+        for (var i = 0; i < length; i++) results[i] = fn.apply(this,Asdf.A.pluck(arrays, "" + i));
+        return results;
+    }
+
+    var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -1665,7 +1769,13 @@
         once:once,
         memoize:memoize,
         periodize:periodize,
-        annotate:annotate
+        annotate:annotate,
+        getDef:getDef,
+        converge:converge,
+        zip:zip,
+        nAry:nAry,
+        complement:complement,
+        doctest:doctest
 	}, true);
 
 })(Asdf);
@@ -1961,7 +2071,7 @@
 	 * @returns {Array} collection 객체에 method를 실행한 결과를 array Type으로 반환한다.
 	 * @desc 각각의 collection객체 안을 순환하면서 method를 실행하고 그 결과를 반환한다.  
 	 * @example
-	 * Asdf.A.invode([[3,1,2],['c','b','a']], 'sort') //return [[1,2,3],['a','b','c']];
+	 * Asdf.A.invoke([[3,1,2],['c','b','a']], 'sort') //return [[1,2,3],['a','b','c']];
 	 */
 	function invoke(col, method) {
 		if (col == null || $_.O.isNotCollection(col))
@@ -2064,7 +2174,7 @@
 	 */
 	function sort(arr, sortfn){
 		if($_.O.isNotArray(arr)) throw new TypeError();
-		return arr.sort(sortfn);
+		return arr.sort(sortfn||asc);
 	}
 	function desc(a, b) {
 		if(a == null)
@@ -2096,17 +2206,18 @@
 	 * @memberof A
 	 * @func
 	 * @param {Array} arr 대상 객체
-	 * @param {string} key key값
-	 * @param {function=} sort 정렬 함수
+	 * @param {string|function} key key값
+	 * @param {function=} order 정렬 함수
 	 * @returns {Array} 특정 key값으로 정렬한 후 결과 값을 반환한다.
 	 * @desc arr안에 객체를 key 값을 기준으로 정렬한다. sort함수가 없는 경우 오름차순으로 정렬한다.
 	 * @example
 	 * Asdf.A.sortBy([[3,1],[4],[2,6,3]], 'length') //return [[4],[3,1],[2,6,3]]
 	 */
 	function sortBy(arr, key, order) {
-		if($_.O.isNotArray(arr)||$_.O.isNotString(key)) throw new TypeError();
+		if($_.O.isNotArray(arr)||($_.O.isNotString(key)&&$_.O.isNotFunction(key))) throw new TypeError();
 		order = order || asc;
-		return sort(arr, function(a, b){return order(a[key], b[key]);});
+		return sort(arr, function(a, b){return order(($_.O.isFunction(key) ? key : $_.O.isFunction(a[key])? a[key]: function() {return a[key];}).call(a)
+            , ($_.O.isFunction(key) ? key : $_.O.isFunction(b[key])? b[key]: function() {return b[key];}).call(b));});
 	}
 	
 	/**
@@ -2120,29 +2231,42 @@
 	 * @example
 	 * Asdf.A.groupBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); }); //return {1:[1.3],2:[2.1,2,4]}
 	 */
-	function groupBy(col,key) {
+	function groupBy(col,key, context) {
 		if (col == null || $_.O.isNotCollection(col))
 			throw new TypeError();
 		if (!($_.O.isString(key)||$_.O.isFunction(key)))
 			throw new TypeError();
 		var result = {};
 		each(col, function(value, index, list) {
-			var k = ($_.O.isFunction(key))? key(value):value[key];
+			var k = ($_.O.isFunction(key))? key.call(context,value):value[key];
 			(result[k] || (result[k] = [])).push(value);
 		});
 		return result;
 	}
 	
-	function sortedIndex(array, obj, iterator) {
+	function bisectLeft(array, obj, iterator) {
 		iterator || (iterator = $_.F.identity);
 		var low = 0, high = array.length;
+        var value =  iterator(obj);
 		while (low < high) {
-			var mid = (low + high) >> 1;
-			iterator(array[mid]) < iterator(obj) ? low = mid + 1
+			var mid = (low + high) >>> 1;
+			iterator(array[mid]) < value ? low = mid + 1
 					: high = mid;
 		}
 		return low;
 	}
+
+    function bisectRight(array, obj, iterator) {
+        iterator || (iterator = $_.F.identity);
+        var low = 0, high = array.length;
+        var value =  iterator(obj);
+        while (low < high) {
+            var mid = (low + high) >>> 1;
+            iterator(array[mid]) > value ? high = mid
+                : low = mid+1;
+        }
+        return low;
+    }
 	
 	/**
 	 * @memberof A
@@ -2349,6 +2473,24 @@
 	    for (var i = 0; i < length; i++) results[i] = pluck(args, "" + i);
 	    return results;
 	}
+
+    function xprod(){
+        var args = slice.call(arguments);
+        var self = this;
+        var res = [];
+        var a1 = args.shift();
+        for(var j = 0; j < a1.length; j++){
+            if(args.length === 0){
+                res.push([a1[j]]);
+            }else {
+                var t = map(xprod.apply(self,args), function(v){
+                    return prepend(v,a1[j]);
+                });
+                merge(res,t);
+            }
+        }
+        return res;
+    }
 	
 	/**
 	 * @memberof A
@@ -2378,7 +2520,6 @@
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
-	 * @param {boolean} isSorted 정렬 여부
 	 * @returns {Number} array에서 item값을 찾아 그 위치를 반환한다.
 	 * @desc array에서 item 위치를 뒤부터 찾아서 그 위치를 반환한다. 만약 없을 경우 -1을 반환한다.
 	 * @example
@@ -2424,8 +2565,17 @@
 		return fn.apply(context, array);
 	}
 
-    function contains(array, item){
-        return indexOf(array, item) >= 0;
+    function contains(array, item, context){
+        return Asdf.O.isFunction(item)?_containsWith(array,item, context):indexOf(array, item) >= 0;
+    }
+
+    function _containsWith(array, fn,context){
+        for(var i =0; i < array.length; i++){
+            if(fn.call(context, array[i], i, array)){
+                return true;
+            }
+        }
+        return false;
     }
 
     function concat(array){
@@ -2460,12 +2610,49 @@
         return array;
     }
 
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function prepend(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.unshift(item);
+        return array;
+    }
+
+    /**
+     * @memberof A
+     * @param {Array} array
+     * @param {*} item
+     * @returns {Array}
+     */
+    function append(array, item){
+        if(Asdf.O.isNotArray(array)) throw new TypeError();
+        array.push(item);
+        return array;
+    }
+
+    function ap(fns, values){
+        if(Asdf.O.isNotArray(fns)||Asdf.O.isNotArray(values)) throw new TypeError();
+        fns = filter(fns, $_.O.isFunction);
+        return reduce(fns, function(acc, fn){
+            return merge(acc, map(values, fn));
+        }, []);
+    }
+
+    function take(array, n){
+        return slice.call(array, 0, Math.min(n, array.length));
+    }
+
 	$_.O.extend($_.A, {
 		each: each,
 		map: map,
 		reduce: reduce,
 		reduceRight: reduceRight,
 		first: first,
+        get: get,
 		last: last,
 		filter: filter,
 		reject: reject,
@@ -2481,7 +2668,8 @@
 		sortBy: sortBy,
 		sort: sort,
 		groupBy: groupBy,
-		sortedIndex: sortedIndex,
+        bisectLeft: bisectLeft,
+        bisectRight:bisectRight,
 		toArray: toArray,
 		size: size,
 		clear: clear,
@@ -2503,7 +2691,12 @@
         concat: concat,
         count: count,
         repeat:repeat,
-        rotate: rotate
+        rotate: rotate,
+        prepend:prepend,
+        append:append,
+        ap:ap,
+        take:take,
+        xprod:xprod
 	}, true);
 })(Asdf);;/**
  * @project Asdf.js
@@ -3142,6 +3335,21 @@
         return o;
 
     }
+
+    var substring = Asdf.F.functionize(String.prototype.substring);
+
+    var charAt = Asdf.F.functionize(String.prototype.charAt);
+
+    var charCodeAt = Asdf.F.functionize(String.prototype.charCodeAt);
+
+    var match = Asdf.F.functionize(String.prototype.match);
+
+    var toUpperCase = Asdf.F.functionize(String.prototype.toUpperCase);
+
+    var toLowerCase = Asdf.F.functionize(String.prototype.toLowerCase);
+
+    var split = Asdf.F.functionize(String.prototype.split);
+
     $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
@@ -3167,7 +3375,14 @@
 		template:template,
         compareVersion: compareVersion,
         isJSON:isJSON,
-        interpreter:interpreter
+        interpreter:interpreter,
+        substring:substring,
+        charAt:charAt,
+        charCodeAt:charCodeAt,
+        match:match,
+        toUpperCase:toUpperCase,
+        toLowerCase:toLowerCase,
+        split:split
 	});
 })(Asdf);
 ;(function($_) {
@@ -3177,7 +3392,7 @@
 	}
     function relocate(arr, fn, context){
         if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotNumber))
-            throw new TypeError()
+            throw new TypeError();
         return function(){
             var res = [];
             var arg = $_.A.toArray(arguments);
@@ -3212,18 +3427,18 @@
      * @name Asdf.N
      */
 	$_.N = {};
-	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose, iterate = $_.Core.behavior.iterate;
+	var is =  $_.Core.returnType.is, compose = $_.Core.behavior.compose;
 	var curry = $_.Core.combine.curry;
 	var partial = $_.Core.combine.partial;
 	var not = curry(compose, $_.Core.op["!"]);
 	var isNotNaN = not(isNaN);
-	function multiply() {
-		var arg = $_.A.toArray(arguments);
-		arg = $_.A.filter(arg, isNotNaN);
-		return $_.A.reduce(arg, $_.Core.op["*"], 1);
-	}
+    var add = $_.F.curried($_.Core.op["+"], 2);
+    var multiply = $_.F.curried($_.Core.op["*"], 2);
+    var subtract = $_.F.curried($_.Core.op["-"], 2);
+    var divide = $_.F.curried($_.Core.op["/"], 2);
+    var modulo = $_.F.curried($_.Core.op["%"], 2);
 	var sum = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["+"], 0));
-
+    var product = $_.F.compose($_.Arg.toArray, partial($_.A.filter, undefined, isNotNaN), partial($_.A.reduce, undefined, $_.Core.op["*"], 1));
     /**
      * @memberof Asdf.N
      * @function
@@ -3278,8 +3493,10 @@
      */
 	var isNotSame = not(isSame);
 	var isGreaterThan = is(function (n, a){ return n > a;});
+    var isGreaterThanOrEqualTo = is(function (n, a){ return n >= a;});
 	var isNotGreaterThan = not(isGreaterThan);
 	var isLessThan = is(function (n, a){ return n < a;});
+    var isLessThanOrEqualTo = is(function (n, a){ return n <= a;});
 	var isNotLessThan = not(isLessThan);
 
     /**
@@ -3346,6 +3563,12 @@
 
     $_.O.extend($_.N, {
 		sum: sum,
+        add: add,
+        multiply:multiply,
+        subtract:subtract,
+        divide:divide,
+        modulo:modulo,
+        product:product,
 		isNotNaN: isNotNaN,
 		range: range,
 		isRange: isRange,
@@ -3355,8 +3578,12 @@
 		isSame : isSame,
 		isNotSame: isNotSame,
 		isGreaterThan: isGreaterThan,
-		isNotGreaterThan: isNotGreaterThan,
+        gt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThan),2),
+		gte: Asdf.F.curried(Asdf.Arg.relocate([1,0], isGreaterThanOrEqualTo),2),
+        isNotGreaterThan: isNotGreaterThan,
 		isLessThan: isLessThan,
+        lt: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThan),2),
+        lte: Asdf.F.curried(Asdf.Arg.relocate([1,0], isLessThanOrEqualTo),2),
 		isNotLessThan: isNotLessThan,
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
@@ -3526,61 +3753,32 @@
 })(Asdf);;(function($_) {
     $_.Event = {};
     var extend = $_.O.extend, slice = Array.prototype.slice;
-    var cache = {};
     var id = 1;
-    function getIndex(element, eventName, handler){
-        if(!element.eId || !cache[element.eId] || !cache[element.eId][eventName])
-            return -1;
-        var i = -1;
-        var arr = cache[element.eId][eventName];
-        for (i = 0; i < arr.length; i++ ){
-            if(arr[i].handler == handler)
-                return i;
-        }
-        return -1;
+    var prefix = 'f';
 
-    }
     function getWrapedhandler(element, eventName, handler){
-        var index = getIndex(element, eventName, handler);
-        if(index == -1){
+        var event = Asdf.Element.get(element, '_event', true)||{};
+        var farr;
+        if(handler._fid && (farr = Asdf.O.path(event,[eventName, handler._fid]))){
+            return farr.pop();
+        }else{
             return handler;
         }
-        return cache[element.eId][eventName][index].wrapedhandler.pop();
-
     }
-    function addEventListener(element, eventName, handler, filterFn) {
-        var wrapedhandler = $_.F.wrap(handler,
-            function(ofn, e) {
-                e = e||window.event;
-                e = fix(e);
-                if(filterFn && !filterFn(e)) return null;
-                return ofn(e);
-            }
-        );
-        var eId;
+
+    function makeid(){
+        return prefix+(id++);
+    }
+
+    function addEventListener(element, eventName, handler) {
         if (element.addEventListener) {
-            element.addEventListener(eventName, wrapedhandler, false);
+            element.addEventListener(eventName, handler, false);
 
         }else {
-            element.attachEvent("on"+ eventName, wrapedhandler);
+            element.attachEvent("on" + eventName, handler);
         }
-        if(!element.eId){
-            element.eId = 'e'+(id++);
-        }
-        eId = element.eId;
-        var index = getIndex(element, eventName, handler);
-        if(!cache[eId]){
-            cache[eId] = {};
-        }
-        if(!cache[eId][eventName]){
-            cache[eId][eventName] = [];
-        }
-        if(index != -1)
-            cache[eId][eventName][index].wrapedhandler.push(wrapedhandler);
-        else
-            cache[eId][eventName].push({handler:handler, wrapedhandler:[wrapedhandler]});
-
     }
+
     function removeEventListener(element, eventName, handler){
         if(element.removeEventListener){
             element.removeEventListener( eventName, handler, false );
@@ -3651,53 +3849,72 @@
         }
         return event;
     }
-    function on(element, eventName, fn, filterFn){
-        addEventListener(element, eventName, fn, filterFn);
+
+    function on(element, eventName, handler, filterFn){
+        var wrapedhandler = $_.F.wrap(handler,
+            function(ofn, e) {
+                e = e||window.event;
+                e = fix(e);
+                return Asdf.F.before(ofn,filterFn||Asdf.F.toFunction(true), true)(e);
+            }
+        );
+        var _fid = makeid();
+        handler._fid = _fid;
+        addEventListener(element, eventName, wrapedhandler);
+        var event = Asdf.Element.get(element, '_event', true)||{};
+        if(!event[eventName])
+            event[eventName] = {};
+        if(!event[eventName][_fid])
+            event[eventName][_fid] = [];
+        event[eventName][_fid].push(wrapedhandler);
+        Asdf.Element.set(element, '_event', event);
         return element;
     }
+
     function once(element, eventName, fn, filterFn){
         var tfn = $_.F.wrap(fn, function(ofn){
             var arg = slice.call(arguments, 1);
             ofn.apply(this,arg);
             remove(element, eventName, tfn);
         });
-        addEventListener(element, eventName, tfn, filterFn);
+        on(element, eventName, tfn, filterFn);
         return element;
     }
+
     function remove(element, eventName, handler) {
-        var wrapedhandler = getWrapedhandler(element, eventName, handler)||handler;
+        var wrapedhandler = getWrapedhandler(element, eventName, handler);
         removeEventListener(element, eventName, wrapedhandler);
         return element;
     }
+
     function removeAll(element, eventName) {
-        if(!element.eId || !cache[element.eId])
+        var event;
+        if(!(event = Asdf.Element.get(element, '_event', true)))
             return element;
-        var events = [], i, j;
+        var removeEvents = [];
         if(eventName){
-            events = $_.A.map(cache[element.eId][eventName], function(v) {
+            $_.O.each(event[eventName], function(v) {
                 v.eventName = eventName;
-                return v;
+                removeEvents.push(v);
             });
-            cache[element.eId][eventName] = null;
+            event[eventName] = null;
         }else {
-            $_.A.each(cache[element.eId], function(arr, key) {
-                if($_.O.isArray(arr)){
-                    Array.prototype.push.apply(events, $_.A.map(arr, function(value) {
-                            value.eventName = key;
-                            return value;}
-                    ));
-                }
+            $_.O.each(event, function(ev, key) {
+                $_.O.each(ev, function(v){
+                    v.eventName = key;
+                    removeEvents.push(v);
+                });
             });
-            cache[element.eId] = null;
+            Asdf.Element.del(element, '_event');
         }
-        for ( i = 0; events && i < events.length; i++){
-            var e = events[i];
-            for(j = 0 ; j < e.wrapedhandler.length; j++ ){
-                removeEventListener(element, e.eventName, e.wrapedhandler[j]);
-            }
-        }
+        Asdf.A.each(removeEvents, function(v){
+            Asdf.A.each(v, function(fn){
+                removeEventListener(element, v.eventName, fn);
+            });
+        });
         return element;
     }
+
     function createEvent(name) {
         var event;
         if(document.createEvent) {
@@ -4668,9 +4885,9 @@
         var data = {};
         var id = 0;
         var prefix = 'ae';
-        var getData = function (el, key){
+        var getData = function (el, key, isIsolate){
             if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
-            if(!el.aeid || !hasData(el, key)){
+            if(!isIsolate && (!el.aeid || !hasData(el, key))){
                 var p = parent(el);
                 if(!p) return;
                 return getData(p, key);
@@ -4694,19 +4911,30 @@
             data[aeid][key] = value;
             return el;
         };
-        function parent( element) {
-            do {
-                element = element['parentNode'];
-            } while ( element && element.nodeType !== 1 );
-            return element;
-        }
+        var delData = function(el, key){
+            if($_.O.isNotNode(el) || $_.O.isNotString(key)) throw new TypeError();
+            if(hasData(el, key)){
+                delete data[el.aeid][key];
+            }
+            return el
+        };
 
         return {
-            getData: getData,
-            setData: setData,
-            hasData: hasData
+            get: getData,
+            set: setData,
+            has: hasData,
+            del: delData
         }
     })();
+
+    function getElementsByClassName(element, className){
+        if(element.querySelectorAll){
+            return element.querySelectorAll('.'+className);
+        }else if(element.getElementsByTagName){
+            return Asdf.A.filter(element.getElementsByTagName('*'), Asdf.F.partial(hasClass, undefined, className));
+        }
+    }
+
 	extend($_.Element,  {
 		walk: walk,
 		visible: visible,
@@ -4757,11 +4985,13 @@
 		isWhitespace: isWhitespace,
         createDom: createDom,
         createText: createText,
-        getData: data.getData,
-        setData: data.setData,
-        hasData: data.hasData,
+        get: data.get,
+        set: data.set,
+        has: data.has,
+        del: data.del,
         getWindow: getWindow,
-        offsetParent: offsetParent
+        offsetParent: offsetParent,
+        getElementsByClassName:getElementsByClassName
 	});
 })(Asdf);;(function ($_) {
 	$_.Template = {};
@@ -5187,6 +5417,42 @@
         colorNameList:colorNameList
     });
 })(Asdf);;(function($_) {
+    $_.Debug = {};
+    var debug = false;
+    function setDebug(d){
+        debug = !!d;
+    }
+    function assert(fn, startsWith){
+        if(!debug) return fn;
+        startsWith = startsWith||'!!';
+        var self = this;
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var def = $_.F.getDef(fn);
+        var lines = def.comments.join('\n').split('\n');
+        var fns =  Asdf.A.map($_.A.filter(lines, function(l){
+            return $_.S.startsWith(l,startsWith);
+        }), function(exe){
+            return (new Function(def.arguments,'return ' + exe.substring(startsWith.length)));
+        });
+        return $_.F.before(fn, function(){
+            var args = arguments;
+            var res = [];
+            $_.A.each(fns, function(f){
+                if(f.apply(self, args)!==true){
+                    res.push(f.toString());
+                }
+            });
+            if(res.length)
+                throw new Error(res.join('\n'));
+            return res;
+        });
+    }
+    $_.O.extend($_.Debug, {
+        setDebug:setDebug,
+        assert:assert
+    });
+
+})(Asdf);;(function($_) {
     $_.Ease = {};
 
     function linear(t) { return t; }
@@ -5195,7 +5461,7 @@
         if (amount < -1) { amount = -1; }
         if (amount > 1) { amount = 1; }
         return function(t) {
-            if (amount==0) { return t; }
+            if (amount===0) { return t; }
             if (amount<0) { return t*(t*-amount+1+amount); }
             return t*((2-t)*amount+(1-amount));
         }
@@ -5310,14 +5576,14 @@
     }
 
     function bounceInOut(t) {
-        if (t<0.5) return bounceIn (t*2) * .5;
+        if (t<0.5) return bounceIn (t*2) * 0.5;
         return bounceOut(t*2-1)*0.5+0.5;
     }
 
     function getElasticIn(amplitude,period) {
         var pi2 = Math.PI*2;
         return function(t) {
-            if (t==0 || t==1) return t;
+            if (t===0 || t===1) return t;
             var s = period/pi2*Math.asin(1/amplitude);
             return -(amplitude*Math.pow(2,10*(t-=1))*Math.sin((t-s)*pi2/period));
         }
@@ -5326,7 +5592,7 @@
     function getElasticOut(amplitude,period) {
         var pi2 = Math.PI*2;
         return function(t) {
-            if (t==0 || t==1) return t;
+            if (t===0 || t===1) return t;
             var s = period/pi2 * Math.asin(1/amplitude);
             return (amplitude*Math.pow(2,-10*t)*Math.sin((t-s)*pi2/period )+1);
         }
@@ -5552,17 +5818,215 @@
     function time(fn){
         var timer = getTimer();
         var startTime = timer();
-        var res = fn(Array.prototype.slice.call(arguments, 1));
+        var res = fn.apply(this,Array.prototype.slice.call(arguments, 1));
         var endTime = timer();
         if(endTime == startTime)
             endTime = timer();
         console.log(endTime - startTime);
         return res;
     }
+
+
+    var con = (function(){
+        var indent = 0;
+        var res = {};
+        if(typeof console === 'undefined') return null;
+        if( !console.group ){
+            res.log =  function(str){
+                return console.log($_.S.times(' ', indent) + str);
+            };
+            res.group = function(str){
+                indent += 2;
+                return console.log($_.S.times(' ', indent) + str);
+            };
+            res.groupEnd = function(){
+                indent -= 2;
+            };
+        }else {
+            res.log = $_.F.bind(console.log, console);
+            res.group = $_.F.bind(console.group, console);
+            res.groupEnd = $_.F.bind(console.groupEnd, console);
+        }
+        return res;
+    })();
+    function stringifyData(args) {
+        var result = [];
+        var slice = Array.prototype.slice;
+        for (var i = 0; i < args.length; ++i) {
+            var arg = args[i];
+            if (arg === undefined) {
+                result[i] = 'undefined';
+            } else if (arg === null) {
+                result[i] = 'null';
+            } else if (arg.constructor) {
+                // TODO constructor comparison does not work for iframes
+                if (arg.constructor === Array) {
+                    if (arg.length < 3) {
+                        result[i] = '[' + stringifyData(arg) + ']';
+                    } else {
+                        result[i] = '[' + stringifyData(slice.call(arg, 0, 1)) + '...' + stringifyData(slice.call(arg, -1)) + ']';
+                    }
+                } else if (arg.constructor === Object) {
+                    result[i] = '#object';
+                } else if (arg.constructor === Function) {
+                    result[i] = '#function';
+                } else if (arg.constructor === String) {
+                    result[i] = '"' + arg + '"';
+                } else if (arg.constructor === Number) {
+                    result[i] = arg;
+                } else {
+                    result[i] = '?';
+                }
+            }
+        }
+        return result.join(',');
+    }
+
+    function spy(fn, desc){
+        if(typeof console === 'undefined') return fn;
+        desc = desc ? desc + ': ' : '';
+        var args = [];
+        var returns = [];
+        var stacks = [];
+        var errors = [];
+        var count = 0;
+        var fndef = $_.F.getDef(fn);
+        var isDir = console.dir;
+        function log(str){
+            con.log(str);
+        }
+        function groupStart(title){
+            con.group(title);
+        }
+        function groupEnd(){
+            con.groupEnd();
+        }
+        function print(name,o){
+            groupStart(name+ '{')
+            if($_.O.isArray(o)){
+                $_.A.each(o, function(v){
+                    log(isDir?v:('  ' + stringifyData(v)));
+                });
+            }else {
+                log(isDir?o:('  ' + stringifyData(o)));
+            }
+            log('}');
+            groupEnd();
+        }
+        var res = function spy() {
+            var stack = trace().slice(1);
+            var error;
+            var value;
+            var time;
+            var timer = getTimer();
+            var arg = Array.prototype.slice.call(arguments, 0);
+            groupStart(desc + 'function ' + fndef.name + '('+ fndef.arguments.join(',') +')'+'{');
+            print('arguments : ', arg);
+            print('stack: ', stack);
+            try{
+                time = timer();
+                value = fn.apply(this, arg);
+                time = timer()- time;
+            }catch(e){
+                error = e;
+                print('error', error);
+            }
+            finally{
+                errors.push(error);
+            }
+            print('return: ', value);
+            log('duration: ' + time + 'ms');
+            log('}');
+            groupEnd();
+            args.push(arg);
+            stacks.push(stack);
+            returns.push(value);
+            count ++ ;
+            return value;
+        };
+        res.count = function(){
+            return count;
+        };
+        res.returns = function(){
+            return $_.O.clone(returns);
+        };
+        res.args = function(){
+            return $_.O.clone(args);
+        };
+        res.stack = function(){
+            return $_.O.clone(stacks);
+        };
+        res.error = function(){
+            return $_.O.clone(errors);
+        };
+        return res;
+    }
+
+    function trace(e){
+        function createException(){
+            try{
+                throw new Error();
+            }catch(e){
+                return e;
+            }
+        }
+        function other(curr) {
+            var ANON = '{anonymous}', fnRE = /function(?:\s+([\w$]+))?\s*\(/, stack = [], fn, args, maxStackSize = 10;
+            var slice = Array.prototype.slice;
+            while (curr && stack.length < maxStackSize) {
+                fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON;
+                try {
+                    args = slice.call(curr['arguments'] || []);
+                } catch (e) {
+                    args = ['Cannot access arguments: ' + e];
+                }
+                stack[stack.length] = fn + '(' + stringifyData(args) + ')';
+                try {
+                    curr = curr.caller;
+                } catch (e) {
+                    stack[stack.length] = 'Cannot access caller: ' + e;
+                    break;
+                }
+            }
+            return stack;
+        }
+        var startIdx = 0;
+        e = e || (++startIdx && createException());
+        var nomalizer = $_.F.cases({
+            'chrome': function(e){
+                return (e.stack + '\n')
+                    .replace(/^[\s\S]+?\s+at\s+/, ' at ')
+                    .replace(/^\s+(at eval )?at\s+/gm, '')
+                    .replace(/^([^\(]+?)([\n$])/gm, '{anonymous}() ($1)$2')
+                    .replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}() ($1)')
+                    .replace(/^(.+) \((.+)\)$/gm, '$1@$2')
+                    .split('\n')
+                    .slice(0, -1);
+            },
+            'mozilla': function(e){
+                return e.stack.replace(/(?:\n@:0)?\s+$/m, '')
+                    .replace(/^(?:\((\S*)\))?@/gm, '{anonymous}($1)@')
+                    .split('\n');
+            },
+            'msie': function(e){
+                return e.stack
+                    .replace(/^\s*at\s+(.*)$/gm, '$1')
+                    .replace(/^Anonymous function\s+/gm, '{anonymous}() ')
+                    .replace(/^(.+)\s+\((.+)\)$/gm, '$1@$2')
+                    .split('\n')
+                    .slice(1);
+            }
+        }, function(e){return e.stack});
+        return e.stack?nomalizer($_.Bom.browser,e).slice(startIdx):other(arguments.callee);
+    }
+    var now = Date.now || function() { return new Date().getTime(); };
 	$_.O.extend(o, {
 		makeuid : makeuid,
 		parseJson : parseJson,
-        time:time
+        time:time,
+        spy: spy,
+        trace:trace,
+        now:now
 	});
 })(Asdf);;(function($_) {
     var o = $_.Core.namespace($_, 'Utils');
@@ -5659,13 +6123,14 @@
 		return child;
 	};
     function getDefaultConstructor(){
-        return function constructor(){
-            if(this.constructor !== constructor) return new constructor();
+        var c = function (){
+            if(this.constructor !== c ) return new c();
             var self = this;
-            $_.O.each(constructor.prototype, function(v, k){
+            $_.O.each(c.prototype, function(v, k){
                 if(!$_.O.isFunction(v))self[k] = $_.O.clone(v);
             });
         }
+        return c;
     }
 	$_.O.extend($_.Base, {
 		Class: Class,
@@ -6111,6 +6576,118 @@
 		request: request,
 		responders: responders
 	});
+})(Asdf);;/**
+ * Created by sungwon on 14. 10. 20.
+ */
+(function($_) {
+    $_.Cookie = {};
+    var MAX_COOKIE_LENGTH = 3950;
+    var SPLIT_RE_ = /\s*;\s*/;
+    var isEnabled = function() {
+        return navigator.cookieEnabled;
+    };
+    var isValidName = function(name) {
+        return !(/[;=\s]/.test(name));
+    };
+    var isValidValue = function(value) {
+        return !(/[;\r\n]/.test(value));
+    };
+
+    var set = function(context, name, value, maxAge, path, domain, secure){
+        if($_.O.isNotObject(context)||!isValidName(name)||!isValidValue(value)) throw new TypeError();
+        maxAge = $_.O.isUndefined(maxAge)? -1: maxAge;
+        var str = [domain?';domain='+domain:'',
+            path?';path='+path:'',
+            maxAge<0?'':maxAge===0?';expires='+(new Date(1970,1,1)).toUTCString():';expires='+(new Date(($_.Utils.now()+maxAge *1000))).toUTCString(),
+            secure?';secure':''].join('');
+        _setCookie(context, name+'='+value+str);
+    };
+    var _setCookie = function(context,str){
+        context.cookie = str;
+    };
+    var get = function(context, name, defaultValue){
+        if($_.O.isNotObject(context)||!isValidName(name)) throw new TypeError();
+        var parts = _getParts(_getCookie(context)||'');
+        var nameEq = name + '=';
+        for(var i = 0; i < parts.length; i++){
+            if($_.S.startsWith(parts[i], nameEq)){
+                return parts[i].substr(nameEq.length);
+            }
+            if(parts[i]==name)
+                return '';
+
+        }
+        return defaultValue;
+    };
+    var _getCookie = function(context){
+        return context.cookie;
+    };
+    var remove = function(context, name, path, domain){
+        var res = containsKey(context,name);
+        set(context, name, '', 0, path, domain);
+        return res;
+    };
+    var containsKey = function(context, name){
+        return $_.O.isNotUndefined(get(context, name));
+    };
+    var keys = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var kv = _getKeyValues(_getCookie(context)||'');
+        return $_.A.pluck(kv, '0');
+    };
+    var values = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var kv = _getKeyValues(_getCookie(context)||'');
+        return $_.A.pluck(kv, '1');
+    };
+    var isEmpty = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        return !_getCookie(context);
+    };
+    var getCount = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var c = _getCookie(context);
+        return c?_getParts(c).length:0;
+    };
+    var containsValue = function(context, value){
+        if($_.O.isNotObject(context)||!isValidValue(value)) throw new TypeError();
+        return $_.A.contains(values(context), value);
+    };
+    var clear = function(context){
+        if($_.O.isNotObject(context)) throw new TypeError();
+        var k = keys(context);
+        Asdf.A.each(k, function(v){
+            remove(context, v);
+        })
+    };
+
+    var _getParts = function(str){
+        return str.split(SPLIT_RE_);
+    };
+    var _getKeyValues = function(str){
+        var parts = _getParts(str);
+        return $_.A.map(parts, function(v){
+            var index = v.indexOf('=');
+            return index ==-1?['',v]:[v.substring(0,index), v.substring(index+1)];
+        });
+    };
+
+    $_.Cookie = {
+        set:set,
+        get:get,
+        keys: keys,
+        values: values,
+        remove:remove,
+        clear:clear,
+        containsKey: containsKey,
+        containsValue: containsValue,
+        isEnabled:isEnabled,
+        isValidName:isValidName,
+        isValidValue:isValidValue,
+        isEmpty:isEmpty,
+        getCount:getCount
+    }
+
 })(Asdf);;(function($_) {
 	var history = $_.History = {};
 	var timer = null;
