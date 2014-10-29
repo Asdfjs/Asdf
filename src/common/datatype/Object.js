@@ -237,7 +237,7 @@
 	function isObject(object) {
 		return object === Object(object);
 	}
-	
+
 	/**
 	 * @memberof Asdf.O
 	 * @func
@@ -294,7 +294,7 @@
 	function isString(object) {
 		return nativeToString.call(object) === objectType.STRING_CLASS;
 	}
-	
+
 	/**
 	 * @memberof Asdf.O
 	 * @func
