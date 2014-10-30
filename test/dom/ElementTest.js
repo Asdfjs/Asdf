@@ -319,7 +319,7 @@ test("Asdf.Element.contains", function(){
     div.innerHTML = '<div id="aaa">bb</div>';
     ok(Asdf.Element.contains(div, Asdf.Element.first(div)), 'contains ok');
 });
-test("Asdf.Element.comparePostion", function(){
+test("Asdf.Element.comparePosition", function(){
     div.innerHTML = '<div id="aaa">bb</div>';
-    equal(Asdf.Element.comparePostion(div, Asdf.Element.first(div)), 20, 'comparePostion ok');
+    equal(Asdf.Element.comparePosition(div, Asdf.Element.first(div)), 20, 'comparePostion ok');
 });

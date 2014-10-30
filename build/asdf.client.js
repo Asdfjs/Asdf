@@ -4947,7 +4947,7 @@
             parent.compareDocumentPosition? !!(parent.compareDocumentPosition(child) & 16) :
             _isParent(parent, child);
     }
-    function comparePostion(a,b){
+    function comparePosition(a,b){
         return a.compareDocumentPosition ?
             a.compareDocumentPosition(b) :
             a.contains ?
@@ -5019,7 +5019,7 @@
         offsetParent: offsetParent,
         getElementsByClassName:getElementsByClassName,
         contains:contains,
-        comparePostion:comparePostion
+        comparePosition:comparePosition
 	});
 })(Asdf);;(function ($_) {
 	$_.Template = {};
