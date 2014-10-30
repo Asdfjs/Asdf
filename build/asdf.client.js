@@ -4934,6 +4934,32 @@
             return Asdf.A.filter(element.getElementsByTagName('*'), Asdf.F.partial(hasClass, undefined, className));
         }
     }
+    function _isParent(p, c){
+        if (c) do {
+            if (c === p) return true;
+        } while ((c = c.parentNode));
+        return false;
+    }
+    function contains(parent, child){
+        return parent.contains ?
+            parent != child && parent.contains(child) :
+            $_.O.isDocument(parent) && parent.documentElement.contains?parent.documentElement.contains(child) :
+            parent.compareDocumentPosition? !!(parent.compareDocumentPosition(child) & 16) :
+            _isParent(parent, child);
+    }
+    function comparePostion(a,b){
+        return a.compareDocumentPosition ?
+            a.compareDocumentPosition(b) :
+            a.contains ?
+                (a != b && a.contains(b) && 16) +
+                    (a != b && b.contains(a) && 8) +
+                    (a.sourceIndex >= 0 && b.sourceIndex >= 0 ?
+                        (a.sourceIndex < b.sourceIndex && 4) +
+                            (a.sourceIndex > b.sourceIndex && 2) :
+                        1) +
+                    0 :
+                0;
+    }
 
 	extend($_.Element,  {
 		walk: walk,
@@ -4991,7 +5017,9 @@
         del: data.del,
         getWindow: getWindow,
         offsetParent: offsetParent,
-        getElementsByClassName:getElementsByClassName
+        getElementsByClassName:getElementsByClassName,
+        contains:contains,
+        comparePostion:comparePostion
 	});
 })(Asdf);;(function ($_) {
 	$_.Template = {};
