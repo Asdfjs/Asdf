@@ -1009,6 +1009,10 @@
                 0;
     }
 
+    function compareNode(a,b){
+        return 3-(comparePosition(a,b)&6);
+    }
+
 	extend($_.Element,  {
 		walk: walk,
 		visible: visible,
@@ -1067,6 +1071,7 @@
         offsetParent: offsetParent,
         getElementsByClassName:getElementsByClassName,
         contains:contains,
-        comparePosition:comparePosition
+        comparePosition:comparePosition,
+        compareNode:compareNode
 	});
 })(Asdf);
