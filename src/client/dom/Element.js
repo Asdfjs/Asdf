@@ -1013,6 +1013,79 @@
         return 3-(comparePosition(a,b)&6);
     }
 
+
+    var pseudos = {
+        'empty': function(element){
+            var child = element.firstChild;
+            return !(child && child.nodeType === 1) && !(element.innerText || element.textContent || '').length;
+        },
+        'not':function(element, expression){
+            return !matchesSelector(element, expression);
+        },
+        'contains': function(element, text){
+            return (element.innerText||element.textContent||'').indexOf(text)>-1;
+        },
+        'first-child': function(element){
+            return !prev(element);
+        },
+        'last-child':function(element){
+            return !next(element);
+        },
+        'only-child': function(element){
+            return !prev(element) && !next(element);
+        },
+        'nth-child': function(){
+
+        },
+        'nth-last-child': function(){
+
+        },
+        'nth-of-type': function(){
+
+        },
+        'nth-last-of-type':function(){
+
+        },
+        'index': function(){
+
+        },
+        'even': function(){
+
+        },
+        'odd':function(){
+
+        },
+        'first-of-type':function(element){
+            var nodeName = element.nodeName;
+            while(element=prev(element)) if(element.nodeName === nodeName) return false;
+            return true;
+        },
+        'last-of-type':function(element){
+            var nodeName = element.nodeName;
+            while(element=next(element)) if(element.nodeName === nodeName) return false;
+            return true;
+        },
+        'only-of-type':function(element){
+            return pseudos['first-of-type'](element) && pseudos['last-of-type'](element);
+        },
+        'enabled': function(element){
+            return !element.disabled;
+        },
+        'disabled': function(element){
+            return element.disabled
+        },
+        'checked': function(element){
+            return element.checked || element.selected;
+        },
+        'focus': function(element){
+
+        },
+        'selected': function(element){
+            return element.selected;
+        }
+
+    };
+
 	extend($_.Element,  {
 		walk: walk,
 		visible: visible,

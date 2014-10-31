@@ -566,7 +566,7 @@
 		if(obj.clone)
 			return obj.clone();
 		if(isArray(obj)||isPlainObject(obj))
-			return isArray(obj) ? obj.slice() : extend(true, {}, obj);
+			return isArray(obj) ? obj.slice(0) : extend(true, {}, obj);
 		throw new TypeError();
 	}
 	

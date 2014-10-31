@@ -399,20 +399,22 @@
         };
         return orElse(f, overloadedFn, stop)
     }
-    function errorHandler(fn, handler){
+    function errorHandler(fn, handler, finhandler){
         return function(){
             try{
                 return fn.apply(this, arguments);
             }catch(e){
-                return handler(e)
+                return handler(e);
+            }finally{
+                if(finhandler)
+                    finhandler.apply(this, arguments);
             }
         }
     }
 
     function trys(){
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-        var fn = $_.A.reduce(fns, errorHandler);
-        return fn;
+        return $_.A.reduce(fns, nAry(errorHandler,2));
     }
 
     /**
