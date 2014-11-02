@@ -1085,6 +1085,15 @@
         }
 
     };
+    function getElementsByXPath(element, expression){
+        if(!$_.Bom.features.XPath) throw error();
+        var results = [];
+        var query = document.evaluate(expression, element || document,
+            null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        for (var i = 0, length = query.snapshotLength; i < length; i++)
+            results.push(query.snapshotItem(i));
+        return results;
+    }
 
 	extend($_.Element,  {
 		walk: walk,
@@ -1145,6 +1154,7 @@
         getElementsByClassName:getElementsByClassName,
         contains:contains,
         comparePosition:comparePosition,
-        compareNode:compareNode
+        compareNode:compareNode,
+        getElementsByXPath:getElementsByXPath
 	});
 })(Asdf);

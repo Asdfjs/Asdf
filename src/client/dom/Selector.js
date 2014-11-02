@@ -65,6 +65,9 @@
         runescape = new RegExp( "\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig" );
 
     var _tokenCache = {};
+    var alwaysFalse = $_.F.toFunction(false);
+    var alwaysTrue =  $_.F.toFunction(true);
+
     function tokenize(selector){
         var c = _tokenCache[selector+' '];
         if(c) return $_.O.clone(c);

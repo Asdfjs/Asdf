@@ -1,61 +1,123 @@
 (function($_) {
 	$_.Bom = {};
-	var Browser = (function() {
-		var ua = navigator.userAgent;
-		ua = ua.toLowerCase();
-		var match = /(chrome)[ \/]([\w.]+)/.exec(ua)
-				|| /(webkit)[ \/]([\w.]+)/.exec(ua)
-				|| /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua)
-				|| /(msie) ([\w.]+)/.exec(ua) 
-				|| /(msie)(?:.*?Trident.*? rv:([\w.]+))/.exec('msie'+ua)
-				|| ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) || [];
+    var alwaysFalse = $_.F.toFunction(false);
+    var rnative = /^[^{]+\{\s*\[native \w/;
+	var Browser = getBrowser(window);
+    function getBrowser(win) {
+        var ua = win.navigator.userAgent;
+        var doc = win.document;
+        ua = ua.toLowerCase();
+        var match = /(chrome)[ \/]([\w.]+)/.exec(ua)
+            || /(webkit)[ \/]([\w.]+)/.exec(ua)
+            || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua)
+            || /(msie) ([\w.]+)/.exec(ua)
+            || /(msie)(?:.*?Trident.*? rv:([\w.]+))/.exec('msie'+ua)
+            || ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) || [];
         var browser = match[1] || "";
         var version = match[2] || "0";
-        var documentMode =  browser != 'msie'? undefined : document.documentMode || (document.compatMode == 'CSS1Compat'? parseInt(this.version,10) : 5);
-		return {
-			browser : browser,
-			version : version,
+        var documentMode =  browser != 'msie'? undefined : doc.documentMode || (doc.compatMode == 'CSS1Compat'? parseInt(version,10) : 5);
+        return {
+            browser : browser,
+            version : version,
             documentMode:documentMode
         };
-	})();
+    }
+    function _reset(div){
+        div.innerHTML = '';
+        div.id = '';
+        div.name = '';
+        div.className = '';
+    }
+
+    function getSupport(win){
+        var doc = win.document;
+        var docElem = doc.documentElement;
+        var support = {};
+        var div = document.createElement('div');
+        var fragment = document.createDocumentFragment();
+        var input = document.createElement('input');
+        support.attribute = $_.F.errorHandler(function(div){
+            div.className = 'i';
+            return !div.getAttribute('className');
+        }, alwaysFalse, _reset)(div);
+        support.htmlSerialize = $_.F.errorHandler(function(div){
+            div.innerHTML = '<link/>';
+            return !!div.getElementsByTagName( "link" ).length;
+        }, alwaysFalse, _reset)(div);
+        support.html5Clone = doc.createElement( "nav" ).cloneNode( true ).outerHTML !== "<:nav></:nav>";
+        support.getElementsByTagName = $_.F.errorHandler(function(div){
+            div.appendChild(doc.createComment(''));
+            return !div.getElementsByTagName('*').length;
+        }, alwaysFalse, _reset)(div);
+        support.getElementsByClassName = rnative.test(doc.getElementsByClassName);
+        support.getById = $_.F.errorHandler(function(div){
+            docElem.appendChild(div).id = 'aa';
+            return !doc.getElementsByName || !doc.getElementsByName('aa').length;
+        }, alwaysFalse, _reset)(div);
+        support.leadingWhitespace = $_.F.errorHandler(function(div){
+            div.innerHTML = '  ';
+            return div.firstChild.nodeType === 3;
+        }, alwaysFalse, _reset)(div);
+        support.tbody = $_.F.errorHandler(function(div){
+            div.innerHTML = '<table></table>';
+            return !div.getElementsByTagName('tbody').length;
+        }, alwaysFalse, _reset)(div);
+        support.qsa = rnative.test(doc.querySelectorAll);
+        support.appendChecked =$_.F.errorHandler(function(div,input, fragment){
+            input.type = 'checkbox';
+            input.checked = true;
+            fragment.appendChild(input);
+            return input.checked;
+        }, alwaysFalse, _reset)(div, input, fragment);
+        support.noCloneChecked = $_.F.errorHandler(function(div){
+            div.innerHTML = '<textarea>x</textarea>';
+            return !!div.cloneNode( true ).lastChild.defaultValue;
+        }, alwaysFalse, _reset)(div);
+        support.noCloneEvent = $_.F.errorHandler(function(div){
+            var res = true;
+            div.attachEvent&&div.attachEvent( "onclick", function() {
+                res = false;
+            });
+            div.cloneNode( true ).click();
+            return res;
+        }, alwaysFalse, _reset)(div);
+        support.deleteExpando = $_.F.errorHandler(function(div){
+            delete div.test;
+            return true;
+        }, alwaysFalse, _reset)(div);
+        support.XPath = rnative.test(doc.evaluate);
+        support.ElementExtensions = (function() {
+            var constructor = win.Element || win.HTMLElement;
+            return !!(constructor && constructor.prototype);
+        })();
+        support.SpecificElementExtensions = (function() {
+            if (typeof window.HTMLDivElement !== 'undefined')
+                return true;
+            var form = document.createElement('form'), isSupported = false;
+            if (div['__proto__'] && (div['__proto__'] !== form['__proto__'])) {
+                isSupported = true;
+            }
+            form = null;
+            return isSupported;
+        })();
+        div.parentNode&&div.parentNode.removeChild(div);
+        div = fragment = null;
+        return support;
+    }
 
 	var features = {
-		XPath : !!document.evaluate,
-
-		SelectorsAPI : !!document.querySelector,
-
-		ElementExtensions : (function() {
-			var constructor = window.Element || window.HTMLElement;
-			return !!(constructor && constructor.prototype);
-		})(),
-		SpecificElementExtensions : (function() {
-			if (typeof window.HTMLDivElement !== 'undefined')
-				return true;
-
-			var div = document.createElement('div'), form = document
-					.createElement('form'), isSupported = false;
-
-			if (div['__proto__'] && (div['__proto__'] !== form['__proto__'])) {
-				isSupported = true;
-			}
-
-			div = form = null;
-
-			return isSupported;
-		})(),
-
         CanAddNameOrTypeAttributes : Browser.browser != 'msie' || Browser.documentMode >= 9,
-
         CanUseChildrenAttribute : Browser.browser != 'msie' && Browser.browser != 'mozilla' ||
             Browser.browser == 'msie' && Browser.documentMode >= 9 ||
             Browser.browser == 'mozilla' && Asdf.S.compareVersion(Browser.version, '1.9.1') >=0,
         CanUseParentElementProperty : Browser.browser == 'msie' || Browser.browser == 'opera' || Browser.browser == 'webkit'
 	};
+    $_.O.extend(features, getSupport(window));
     var browserMap = {
         'firefox' : 'mozilla',
         'ff': 'mozilla',
         'ie': 'msie'
-    }
+    };
     function isBrowser(browser){
         if(!Asdf.O.isString(browser)) throw new TypeError()
         return (browserMap[browser.toLowerCase()]||browser.toLowerCase()) == Browser.browser
@@ -69,6 +131,7 @@
 		browser : Browser.browser,
 		version: Browser.version,
         documentMode: Browser.documentMode,
-		features:features
+		features:features,
+        getSupport:getSupport
 	});
 })(Asdf);
