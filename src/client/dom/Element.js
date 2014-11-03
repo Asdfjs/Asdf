@@ -976,10 +976,32 @@
     })();
 
     function getElementsByClassName(element, className){
-        if(element.querySelectorAll){
+        if(element.getElementsByClassName){
+            return element.getElementsByClassName(className);
+        }else if(element.querySelectorAll){
             return element.querySelectorAll('.'+className);
         }else if(element.getElementsByTagName){
             return Asdf.A.filter(element.getElementsByTagName('*'), Asdf.F.partial(hasClass, undefined, className));
+        }else {
+            throw new Error();
+        }
+    }
+    function getElementsByTagName(element, tag){
+        element = element||document;
+        if(!$_.Bom.features.getElementsByTagName){
+            var res = element.getElementsByTagName(tag);
+            if(tag==='*'){
+                return $_.A.filter(res, function(e){return e.nodeType === 1});
+
+            }
+            return res;
+        }
+        if(element.getElementsByTagName){
+            return element.getElementsByClassName(tag);
+        }else if (element.querySelectorAll){
+            return element.querySelectorAll(tag);
+        }else {
+            throw new Error();
         }
     }
     function _isParent(p, c){
