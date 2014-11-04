@@ -130,7 +130,7 @@
 	 * @desc 해당 메소드를 사용하면 객체가 Element인지 판단한다.
 	 */
 	function isElement(object) {
-		return !!(object && object.nodeType !== 3);
+		return !!(object && object.nodeType === 1);
 	}
 	/**
 	 * @memberof Asdf.O

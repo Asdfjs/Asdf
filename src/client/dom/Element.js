@@ -4,16 +4,15 @@
  * @namespace Asdf.Element
  */
 (function($_) {
-	var nativeSlice = Array.prototype.slice, extend = $_.O.extend,
-		isElement = $_.O.isElement, isString = $_.O.isString, trim = $_.S.trim;
+	var nativeSlice = Array.prototype.slice, extend = $_.O.extend, isString = $_.O.isString;
 	var tempParent = document.createElement('div');
 	$_.Element = {};
-	function recursivelyCollect(element, property, until) {
+	function recursivelyCollect(element, property, until, isReverse) {
 		var elements = [];
 		while (element = element[property]) {
 			if (element.nodeType == 1)
-				elements.push(element);
-			if (element == until)
+				elements[isReverse?'unshift':'push'](element);
+			if ($_.O.isFunction(until)?until(element):element == until)
 				break;
 		}
 		return elements;
@@ -188,6 +187,33 @@
 			throw new TypeError();
 		return recursively(element, 'parentNode');
 	}
+
+    function commonParent(element /*,element...*/){
+        if($_.A.any(arguments, $_.O.isNotElement)) throw new TypeError();
+        if(!arguments.length){
+            return null
+        }else if(arguments.length === 0){
+            return arguments[0];
+        }
+        var paths = [];
+        var minLength = Infinity;
+        $_.A.each(arguments, function(el){
+            var parents = recursivelyCollect(el, 'parentNode', null, true);
+            paths.push(parents);
+            minLength = Math.min(minLength, parents.length)
+        });
+        var res = null;
+        for (var i = 0; i < minLength; i++) {
+            var first = paths[0][i];
+            for (var j = 1; j < arguments.length; j++) {
+                if (first != paths[j][i]) {
+                    return res;
+                }
+            }
+            res = first;
+        }
+        return res;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -975,6 +1001,17 @@
         }
     })();
 
+    function outerHTML(element){
+        if($_.O.isNotElement(element)) throw new TypeError();
+        if('outerHTML' in element) return element.outerHTML;
+        else {
+            var doc = element.ownerDocument;
+            var div = doc.createElement('div');
+            div.appendChild(element.cloneNode(true));
+            return div.innerHTML;
+        }
+    }
+
     function getElementsByClassName(element, className){
         if(element.getElementsByClassName){
             return element.getElementsByClassName(className);
@@ -987,7 +1024,6 @@
         }
     }
     function getElementsByTagName(element, tag){
-        element = element||document;
         if(!$_.Bom.features.getElementsByTagName){
             var res = element.getElementsByTagName(tag);
             if(tag==='*'){
@@ -1036,6 +1072,31 @@
     }
 
 
+    var _matchNTH = /^([+-]?\d*)?([a-z]+)?([+-]\d+)?$/;
+    var _parseNTH = $_.F.memoize(function (str){
+        var parsed = str.match(_matchNTH);
+        if(!parsed) return null;
+        var special = parsed[2] || false;
+        var a = parsed[1] || 1;
+        if (a === '-') a = -1;
+        var b = +parsed[3] || 0;
+        return $_.F.cases({
+            n: {a:a-0, b:b-0},
+            odd: {a:2, b:1},
+            even: {a:2, b:0}
+        }, $_.F.toFunction({a:0, b:a-0}))(special);
+    });
+    function _getNTH(node, expression,isReverse, ofType){
+        var p = parent(node);
+        var parsed = _parseNTH(expression);
+        var ns = children(p);
+        if(ofType){
+            ns = $_.A.filter(ns, function(el){return el.tagName === node.tagName;});
+        }
+        var indexs = $_.A.filter($_.N.range(1, ns.length+1), function(pos){return (parsed.a===0)?pos === parsed.b:((pos - parsed.b) % parsed.a) === 0;});
+        if(isReverse) indexs.reverse();
+        return $_.A.map(indexs, function(pos){return ns[pos-1];});
+    }
     var pseudos = {
         'empty': function(element){
             var child = element.firstChild;
@@ -1056,26 +1117,26 @@
         'only-child': function(element){
             return !prev(element) && !next(element);
         },
-        'nth-child': function(){
-
+        'nth-child': function(node, expression){
+            return $_.A.contains(_getNTH(node, expression)||[], node);
         },
-        'nth-last-child': function(){
-
+        'nth-last-child':function(node, expression){
+            return $_.A.contains(_getNTH(node, expression, true)||[], node);
         },
-        'nth-of-type': function(){
-
+        'nth-of-type': function(node, expression){
+            return $_.A.contains(_getNTH(node, expression, false, true)||[], node);
         },
-        'nth-last-of-type':function(){
-
+        'nth-last-of-type':function(node, expression){
+            return $_.A.contains(_getNTH(node, expression, true, true)||[], node);
         },
-        'index': function(){
-
+        'index': function(node, index){
+            return $_.A.contains(_getNTH(node, index+1+'')||[], node);
         },
-        'even': function(){
-
+        'even': function(node){
+            return $_.A.contains(_getNTH(node, '2n')||[], node);
         },
-        'odd':function(){
-
+        'odd':function(node){
+            return $_.A.contains(_getNTH(node, '2n+1')||[], node);
         },
         'first-of-type':function(element){
             var nodeName = element.nodeName;
@@ -1129,6 +1190,7 @@
 		html: html,
 		parent: parent,
 		parents: parents,
+        commonParent:commonParent,
 		next: next,
 		prev: prev,
 		nexts: nexts,
@@ -1177,6 +1239,11 @@
         contains:contains,
         comparePosition:comparePosition,
         compareNode:compareNode,
-        getElementsByXPath:getElementsByXPath
+        getElementsByXPath:getElementsByXPath,
+        getElementsByTagName:getElementsByTagName,
+        outerHTML:outerHTML
 	});
+    $_.O.each(pseudos, function(v,k){
+        $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
+    });
 })(Asdf);

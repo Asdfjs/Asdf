@@ -329,7 +329,7 @@ module.exports = Asdf;
 	 * @desc 해당 메소드를 사용하면 객체가 Element인지 판단한다.
 	 */
 	function isElement(object) {
-		return !!(object && object.nodeType !== 3);
+		return !!(object && object.nodeType === 1);
 	}
 	/**
 	 * @memberof Asdf.O
@@ -765,7 +765,7 @@ module.exports = Asdf;
 		if(obj.clone)
 			return obj.clone();
 		if(isArray(obj)||isPlainObject(obj))
-			return isArray(obj) ? obj.slice() : extend(true, {}, obj);
+			return isArray(obj) ? obj.slice(0) : extend(true, {}, obj);
 		throw new TypeError();
 	}
 	
@@ -1392,20 +1392,22 @@ module.exports = Asdf;
         };
         return orElse(f, overloadedFn, stop)
     }
-    function errorHandler(fn, handler){
+    function errorHandler(fn, handler, finhandler){
         return function(){
             try{
                 return fn.apply(this, arguments);
             }catch(e){
-                return handler(e)
+                return handler(e);
+            }finally{
+                if(finhandler)
+                    finhandler.apply(this, arguments);
             }
         }
     }
 
     function trys(){
         var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-        var fn = $_.A.reduce(fns, errorHandler);
-        return fn;
+        return $_.A.reduce(fns, nAry(errorHandler,2));
     }
 
     /**
@@ -1634,7 +1636,7 @@ module.exports = Asdf;
     /**
      * @memberof Asdf.F
      * @param {Function} func
-     * @param {Function} hasher
+     * @param {Function=} hasher
      * @returns {Function}
      */
     function memoize(func, hasher){

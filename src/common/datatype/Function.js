@@ -643,7 +643,7 @@
     /**
      * @memberof Asdf.F
      * @param {Function} func
-     * @param {Function} hasher
+     * @param {Function=} hasher
      * @returns {Function}
      */
     function memoize(func, hasher){
