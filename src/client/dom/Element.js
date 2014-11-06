@@ -854,11 +854,16 @@
         }
         if(nodeType !== 11 && (match = rquickExpr(selector))){
             if(m = match[1]){
-                if($_.O.isDocument(element)){
-                    var el = element.getElementById(m);
-                }
-            }
+                return results.push(getElementById(element, m));
+            }else if(match[2]){
+				return $_.A.merge(results, getElementsByTagName(element, selector));
+			}else if((m = match[3])){
+				return $_.A.merge(results,getElementsByClassName(element, m));
+			}
         }
+		if(element.querySelectorAll){
+			nid = old = 'tem_'+new Date()*1;
+		}
 		/*if(!$_.O.isNode(element))
 			throw new TypeError();
 		if(window.Sizzle){
