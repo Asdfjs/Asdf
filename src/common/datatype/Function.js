@@ -4,7 +4,8 @@
  */
 (function($_) {
     /**
-     * @namespace Asdf.F
+     * @namespace
+	 * @name Asdf.F
      */
 	$_.F = {};
 	var slice = Array.prototype.slice, fnProto = Function.prototype, nativeBind = fnProto.bind;

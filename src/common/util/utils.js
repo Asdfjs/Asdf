@@ -1,4 +1,11 @@
+/**
+ * @project Asdf.js
+ */
 (function($_) {
+    /**
+     * @namespace
+     * @name Asdf.Utils
+     */
     var o = $_.Core.namespace($_, 'Utils');
 	function randomMax8HexChars() {
 		return (((1 + Math.random()) * 0x100000000) | 0).toString(16)

@@ -1,4 +1,8 @@
 (function($_) {
+    /**
+     * @namespace
+     * @name Asdf.Utils
+     */
     var o = $_.Core.namespace($_, 'Selector');
     var expando = "expando" + 1 * new Date();
     var booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",
@@ -390,6 +394,8 @@
         equalTagName:equalTagName,
         ofnToElements:ofnToElements,
         compositFn:compositFn,
-        oToOfn:oToOfn
+        oToOfn:oToOfn,
+        tokenize:tokenize,
+        toSelector:toSelector
     })
 })(Asdf);

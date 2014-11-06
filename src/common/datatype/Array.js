@@ -2,7 +2,7 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name A
+ * @name Asdf.A
  */
 (function($_) {
 	$_.A = {};
@@ -20,7 +20,7 @@
 	var _eachWithTermination = partial(coreEach, undefined, 0, undefined, inc, undefined, undefined);
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
@@ -42,7 +42,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
@@ -64,7 +64,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
@@ -97,7 +97,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
@@ -123,7 +123,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection} first 대상 객체
 	 * @param {collection} second 추가 객체
 	 * @returns {collection} first에 second를 추가한다.  first 객체를 반환한다.
@@ -146,7 +146,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection} col 대상 객체
 	 * @param {number} [n=0] index
 	 * @returns {*} col[n]값을 반환한다.
@@ -158,7 +158,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[0]값을 반환한다.
@@ -167,7 +167,7 @@
 	var first = partial(get, undefined, 0);
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[col.length-1]값을 반환한다.
@@ -178,7 +178,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -201,7 +201,7 @@
 		return results;
 	}
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -216,7 +216,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -239,7 +239,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -262,7 +262,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {*} target 비교 값
@@ -282,7 +282,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {(string|function)} method 이름 또는 function
@@ -302,7 +302,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {String} key
@@ -317,7 +317,7 @@
 		return map(col, function(obj){ return obj[key]; });
 	}
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {function=} iterator
@@ -339,7 +339,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {function=} iterator
@@ -361,7 +361,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @returns {Array} 대상객체를 섞은 후 반환한다.
@@ -382,7 +382,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} arr 대상 객체
 	 * @param {function=} sortfn 정렬 함수
@@ -422,7 +422,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} arr 대상 객체
 	 * @param {string|function} key key값
@@ -440,7 +440,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {(string|function)} key key값 또는 처리 함수 값
@@ -488,7 +488,7 @@
     }
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {Array} array를 반환한다.
@@ -509,7 +509,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @returns {number} col.length를 반환한다.
@@ -522,7 +522,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @returns {Array} 빈 대상 객체를 반환한다.
@@ -541,7 +541,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {number} [n=1] 버릴 갯수
@@ -555,7 +555,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @returns {Array} ==false인 values를 제거하고 나머지 array를 반환한다.
@@ -569,7 +569,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {boolean=} shallow deep여부 false면 deep 
@@ -589,7 +589,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {...*=} values 대상 객체
@@ -604,7 +604,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {boolean=} isSorted 정렬 여부
@@ -631,7 +631,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체
 	 * @returns {Array} array들의 합집합을 반환한다.
@@ -644,7 +644,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체
 	 * @returns {Array} array들의 교집합을 반환한다.
@@ -662,7 +662,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {...Array} others array 객체
@@ -677,7 +677,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체들
 	 * @returns {Array} 대상 객체들이 합쳐친 array 객체를 반환한다.
@@ -712,7 +712,7 @@
     }
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
@@ -735,7 +735,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
@@ -753,7 +753,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {Array} fns [function1, functio2..]
@@ -770,7 +770,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {function} fn 실행 함수
@@ -830,7 +830,7 @@
     }
 
     /**
-     * @memberof A
+     * @memberof Asdf.A
      * @param {Array} array
      * @param {*} item
      * @returns {Array}
@@ -842,7 +842,7 @@
     }
 
     /**
-     * @memberof A
+     * @memberof Asdf.A
      * @param {Array} array
      * @param {*} item
      * @returns {Array}

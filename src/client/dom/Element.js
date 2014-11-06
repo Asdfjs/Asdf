@@ -839,22 +839,24 @@
 			throw new TypeError();
 		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
+
 	function find(element, selector, results, seed){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		results = results||[];
 		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
 	}
+
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
 	function querySelectorAll(element, selector, results) {
         results = results||[];
         var match,m, nodeType = element.nodeType;
-        if($_.O.isNotDocument(element)||$_.O.isNotElement(element)||nodeType !==11){
+        if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
             return results;
         }
-        if(nodeType !== 11 && (match = rquickExpr(selector))){
+        if(nodeType !== 11 && (match = rquickExpr.exec(selector))){
             if(m = match[1]){
-                return results.push(getElementById(element, m));
+                return $_.A.append(results,getElementById(element, m));
             }else if(match[2]){
 				return $_.A.merge(results, getElementsByTagName(element, selector));
 			}else if((m = match[3])){
@@ -862,24 +864,38 @@
 			}
         }
 		if(element.querySelectorAll){
-			nid = old = 'tem_'+new Date()*1;
-		}
-		/*if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(window.Sizzle){
-			return Sizzle(selector, element);
-		}
-		else if(element.querySelectorAll) {
-			return element.querySelectorAll(selector);
-		}else {
-			var a=element.all, c=[], sel = selector.replace(/\[for\b/gi, '[htmlFor').split(','), i, j,s=document.createStyleSheet();
-			for (i=sel.length; i--;) {
-				s.addRule(sel[i], 'k:v');
-				for (j=a.length; j--;) a[j].currentStyle.k && c.push(a[j]);
-				s.removeRule(0);
+			var nid, old;
+			nid = old = $_.Utils.makeuid();
+			var nel = element;
+			debugger;
+			var nsel = $_.O.isNotElement(element)&&selector;
+			if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
+				var groups = $_.Selector.tokenize(selector);
+				if((old = attr(element,'id'))) {
+					nid = old.replace(/'|\\/g, "\\$&");
+				} else {
+					attr(element,'id', nid);
+				}
+				nid = "[id='"+nid+"'] ";
+				groups =  $_.A.map(groups, function(v){
+					return nid + $_.Selector.toSelector(v);
+				});
+				nel = /[+~]/.test(selector) && parent(element)||element;
+				nsel = groups.join(',');
 			}
-			return c;
-		}*/
+			if(nsel){
+				try{
+					return $_.A.merge(results, nel.querySelectorAll(nsel));
+				} catch(e){
+				}finally{
+					if(!old){
+						removeAttr(element, 'id');
+					}
+				}
+
+			}
+			throw new Error();
+		}
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -1041,7 +1057,7 @@
         }else if(element.querySelectorAll){
             return element.querySelectorAll('.'+className);
         }else if(element.getElementsByTagName){
-            return Asdf.A.filter(element.getElementsByTagName('*'), Asdf.F.partial(hasClass, undefined, className));
+            return $_.A.filter(element.getElementsByTagName('*'), $_.F.partial(hasClass, undefined, className));
         }else {
             throw new Error();
         }
@@ -1051,12 +1067,11 @@
             var res = element.getElementsByTagName(tag);
             if(tag==='*'){
                 return $_.A.filter(res, function(e){return e.nodeType === 1});
-
             }
             return res;
         }
         if(element.getElementsByTagName){
-            return element.getElementsByClassName(tag);
+            return element.getElementsByTagName(tag);
         }else if (element.querySelectorAll){
             return element.querySelectorAll(tag);
         }else {
@@ -1066,7 +1081,7 @@
     function getElementById(element, id){
         var el;
         if($_.O.isDocument(element)){
-            el = element.getElementById('id');
+            el = element.getElementById(id);
             if(el && el.parentNode){
                 if(el.id === id)
                     return el;
