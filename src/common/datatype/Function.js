@@ -662,13 +662,11 @@
      * @param {object} defaults
      * @returns {Function}
      */
-    var FN_DEF = /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)\s*\{([\s\S]*)\}\s*/m;
-    var FN_ARG_SPLIT = /,/;
-    var STRIP_COMMENTS = /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg;
+
     function annotate(fn, defaults){
         if(!$_.O.isFunction(fn)) throw new TypeError();
-        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
-        var argNames = $_.A.map(fnText.match(FN_DEF)[2].split(FN_ARG_SPLIT), function(arg){
+        var fnText = fn.toString().replace($_.R.STRIP_COMMENTS, '');
+        var argNames = $_.A.map(fnText.match($_.R.FN_DEF)[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return function(obj){
@@ -678,31 +676,16 @@
             return fn.apply(this, arg);
         }
     }
-    function doctest(fn, startsWith){
-        startsWith = startsWith||'>>>';
-        if(!$_.O.isFunction(fn)) throw new TypeError();
-        var def = getDef(fn);
-        var lines = def.comments.join('\n').split('\n');
-        return Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,startsWith);
-        }), function(exe){
-            try{
-                return (new Function('return ' + exe.substring(startsWith.length)))();
-            }catch(e){
-                return e;
-            }
-        });
-    }
 
     function getDef(fn){
-        if(!$_.O.isFunction(fn)) throw new TypeError();
+        //if(!$_.O.isFunction(fn)) throw new TypeError();
         var comments = [];
-        var fnText = fn.toString().replace(STRIP_COMMENTS, function(m,p1,p2){
+        var fnText = fn.toString().replace($_.R.STRIP_COMMENTS, function(m,p1,p2){
             comments.push($_.S.trim(p1||p2));
             return '';
         });
-        var m = fnText.match(FN_DEF);
-        var argNames = $_.A.map(m[2].split(FN_ARG_SPLIT), function(arg){
+        var m = fnText.match($_.R.FN_DEF);
+        var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return {
@@ -776,8 +759,7 @@
         converge:converge,
         zip:zip,
         nAry:nAry,
-        complement:complement,
-        doctest:doctest
+        complement:complement
 	}, true);
 
 })(Asdf);
