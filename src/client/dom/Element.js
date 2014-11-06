@@ -839,28 +839,62 @@
 			throw new TypeError();
 		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
+
 	function find(element, selector, results, seed){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		results = results||[];
 		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
 	}
-	function querySelectorAll(element, selector) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(window.Sizzle){
-			return Sizzle(selector, element);
-		}
-		else if(element.querySelectorAll) {
-			return element.querySelectorAll(selector);
-		}else {
-			var a=element.all, c=[], sel = selector.replace(/\[for\b/gi, '[htmlFor').split(','), i, j,s=document.createStyleSheet();
-			for (i=sel.length; i--;) {
-				s.addRule(sel[i], 'k:v');
-				for (j=a.length; j--;) a[j].currentStyle.k && c.push(a[j]);
-				s.removeRule(0);
+
+    var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
+	function querySelectorAll(element, selector, results) {
+        results = results||[];
+        var match,m, nodeType = element.nodeType;
+        if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
+            return results;
+        }
+        if(nodeType !== 11 && (match = rquickExpr.exec(selector))){
+            if(m = match[1]){
+                return $_.A.append(results,getElementById(element, m));
+            }else if(match[2]){
+				return $_.A.merge(results, getElementsByTagName(element, selector));
+			}else if((m = match[3])){
+				return $_.A.merge(results,getElementsByClassName(element, m));
 			}
-			return c;
+        }
+		if(element.querySelectorAll){
+			var nid, old;
+			nid = old = $_.Utils.makeuid();
+			var nel = element;
+			debugger;
+			var nsel = $_.O.isNotElement(element)&&selector;
+			if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
+				var groups = $_.Selector.tokenize(selector);
+				if((old = attr(element,'id'))) {
+					nid = old.replace(/'|\\/g, "\\$&");
+				} else {
+					attr(element,'id', nid);
+				}
+				nid = "[id='"+nid+"'] ";
+				groups =  $_.A.map(groups, function(v){
+					return nid + $_.Selector.toSelector(v);
+				});
+				nel = /[+~]/.test(selector) && parent(element)||element;
+				nsel = groups.join(',');
+			}
+			if(nsel){
+				try{
+					return $_.A.merge(results, nel.querySelectorAll(nsel));
+				} catch(e){
+				}finally{
+					if(!old){
+						removeAttr(element, 'id');
+					}
+				}
+
+			}
+			throw new Error();
 		}
 	}
 	function closest(element, selector, context){
@@ -870,12 +904,17 @@
 			element = element !== context && element !== document && element.parentNode;
 	    return element;
 	}
+
+    /**
+     *
+     * @param {HTMLElement} element
+     * @param selector
+     * @returns {boolean}
+     */
 	function matchesSelector(element, selector){
-		if(!$_.O.isNode(element))
+		if(!$_.O.isElement(element))
 			throw new TypeError();
-		if (!element || element.nodeType !== 1) return false
-	    var mSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
-	                          element.oMatchesSelector || element.matchesSelector;
+	    var mSelector = element.matches||element.mozMatchesSelector||element.webkitMatchesSelector;
 	    if (mSelector) return mSelector.call(element, selector);
 	    var match, parent = element.parentNode, temp = !parent;
 	    if (temp) (parent = tempParent).appendChild(element);
@@ -1018,7 +1057,7 @@
         }else if(element.querySelectorAll){
             return element.querySelectorAll('.'+className);
         }else if(element.getElementsByTagName){
-            return Asdf.A.filter(element.getElementsByTagName('*'), Asdf.F.partial(hasClass, undefined, className));
+            return $_.A.filter(element.getElementsByTagName('*'), $_.F.partial(hasClass, undefined, className));
         }else {
             throw new Error();
         }
@@ -1028,17 +1067,33 @@
             var res = element.getElementsByTagName(tag);
             if(tag==='*'){
                 return $_.A.filter(res, function(e){return e.nodeType === 1});
-
             }
             return res;
         }
         if(element.getElementsByTagName){
-            return element.getElementsByClassName(tag);
+            return element.getElementsByTagName(tag);
         }else if (element.querySelectorAll){
             return element.querySelectorAll(tag);
         }else {
             throw new Error();
         }
+    }
+    function getElementById(element, id){
+        var el;
+        if($_.O.isDocument(element)){
+            el = element.getElementById(id);
+            if(el && el.parentNode){
+                if(el.id === id)
+                    return el;
+            }else{
+                return null;
+            }
+        } else {
+            if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
+                return el;
+            }
+        }
+		throw new Error();
     }
     function _isParent(p, c){
         if (c) do {
@@ -1086,7 +1141,7 @@
             even: {a:2, b:0}
         }, $_.F.toFunction({a:0, b:a-0}))(special);
     });
-    function _getNTH(node, expression,isReverse, ofType){
+    function getNTH(node, expression,isReverse, ofType){
         var p = parent(node);
         var parsed = _parseNTH(expression);
         var ns = children(p);
@@ -1118,25 +1173,25 @@
             return !prev(element) && !next(element);
         },
         'nth-child': function(node, expression){
-            return $_.A.contains(_getNTH(node, expression)||[], node);
+            return $_.A.contains(getNTH(node, expression)||[], node);
         },
         'nth-last-child':function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, true)||[], node);
         },
         'nth-of-type': function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, false, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, false, true)||[], node);
         },
         'nth-last-of-type':function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, true, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, true, true)||[], node);
         },
         'index': function(node, index){
-            return $_.A.contains(_getNTH(node, index+1+'')||[], node);
+            return $_.A.contains(getNTH(node, index+1+'')||[], node);
         },
         'even': function(node){
-            return $_.A.contains(_getNTH(node, '2n')||[], node);
+            return $_.A.contains(getNTH(node, '2n')||[], node);
         },
         'odd':function(node){
-            return $_.A.contains(_getNTH(node, '2n+1')||[], node);
+            return $_.A.contains(getNTH(node, '2n+1')||[], node);
         },
         'first-of-type':function(element){
             var nodeName = element.nodeName;
@@ -1241,7 +1296,9 @@
         compareNode:compareNode,
         getElementsByXPath:getElementsByXPath,
         getElementsByTagName:getElementsByTagName,
-        outerHTML:outerHTML
+        outerHTML:outerHTML,
+        getNTH:getNTH,
+		getElementById:getElementById
 	});
     $_.O.each(pseudos, function(v,k){
         $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
