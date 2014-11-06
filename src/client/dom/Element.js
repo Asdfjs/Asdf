@@ -845,8 +845,21 @@
 		results = results||[];
 		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
 	}
-	function querySelectorAll(element, selector) {
-		if(!$_.O.isNode(element))
+    var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
+	function querySelectorAll(element, selector, results) {
+        results = results||[];
+        var match,m, nodeType = element.nodeType;
+        if($_.O.isNotDocument(element)||$_.O.isNotElement(element)||nodeType !==11){
+            return results;
+        }
+        if(nodeType !== 11 && (match = rquickExpr(selector))){
+            if(m = match[1]){
+                if($_.O.isDocument(element)){
+                    var el = element.getElementById(m);
+                }
+            }
+        }
+		/*if(!$_.O.isNode(element))
 			throw new TypeError();
 		if(window.Sizzle){
 			return Sizzle(selector, element);
@@ -861,7 +874,7 @@
 				s.removeRule(0);
 			}
 			return c;
-		}
+		}*/
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -870,12 +883,17 @@
 			element = element !== context && element !== document && element.parentNode;
 	    return element;
 	}
+
+    /**
+     *
+     * @param {HTMLElement} element
+     * @param selector
+     * @returns {boolean}
+     */
 	function matchesSelector(element, selector){
-		if(!$_.O.isNode(element))
+		if(!$_.O.isElement(element))
 			throw new TypeError();
-		if (!element || element.nodeType !== 1) return false
-	    var mSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
-	                          element.oMatchesSelector || element.matchesSelector;
+	    var mSelector = element.matches||element.mozMatchesSelector||element.webkitMatchesSelector;
 	    if (mSelector) return mSelector.call(element, selector);
 	    var match, parent = element.parentNode, temp = !parent;
 	    if (temp) (parent = tempParent).appendChild(element);
@@ -1040,6 +1058,23 @@
             throw new Error();
         }
     }
+    function getElementById(element, id){
+        var el;
+        if($_.O.isDocument(element)){
+            el = element.getElementById('id');
+            if(el && el.parentNode){
+                if(el.id === id)
+                    return el;
+            }else{
+                return null;
+            }
+        } else {
+            if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
+                return el;
+            }
+        }
+		throw new Error();
+    }
     function _isParent(p, c){
         if (c) do {
             if (c === p) return true;
@@ -1086,7 +1121,7 @@
             even: {a:2, b:0}
         }, $_.F.toFunction({a:0, b:a-0}))(special);
     });
-    function _getNTH(node, expression,isReverse, ofType){
+    function getNTH(node, expression,isReverse, ofType){
         var p = parent(node);
         var parsed = _parseNTH(expression);
         var ns = children(p);
@@ -1118,25 +1153,25 @@
             return !prev(element) && !next(element);
         },
         'nth-child': function(node, expression){
-            return $_.A.contains(_getNTH(node, expression)||[], node);
+            return $_.A.contains(getNTH(node, expression)||[], node);
         },
         'nth-last-child':function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, true)||[], node);
         },
         'nth-of-type': function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, false, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, false, true)||[], node);
         },
         'nth-last-of-type':function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, true, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, true, true)||[], node);
         },
         'index': function(node, index){
-            return $_.A.contains(_getNTH(node, index+1+'')||[], node);
+            return $_.A.contains(getNTH(node, index+1+'')||[], node);
         },
         'even': function(node){
-            return $_.A.contains(_getNTH(node, '2n')||[], node);
+            return $_.A.contains(getNTH(node, '2n')||[], node);
         },
         'odd':function(node){
-            return $_.A.contains(_getNTH(node, '2n+1')||[], node);
+            return $_.A.contains(getNTH(node, '2n+1')||[], node);
         },
         'first-of-type':function(element){
             var nodeName = element.nodeName;
@@ -1241,7 +1276,9 @@
         compareNode:compareNode,
         getElementsByXPath:getElementsByXPath,
         getElementsByTagName:getElementsByTagName,
-        outerHTML:outerHTML
+        outerHTML:outerHTML,
+        getNTH:getNTH,
+		getElementById:getElementById
 	});
     $_.O.each(pseudos, function(v,k){
         $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
