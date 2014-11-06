@@ -679,7 +679,7 @@
     }
 
     function getDef(fn){
-        //if(!$_.O.isFunction(fn)) throw new TypeError();
+        if(!$_.O.isFunction(fn)) throw new TypeError();
         var comments = [];
         var fnText = fn.toString().replace($_.R.STRIP_COMMENTS, function(m,p1,p2){
             comments.push($_.S.trim(p1||p2));
@@ -760,7 +760,9 @@
         converge:converge,
         zip:zip,
         nAry:nAry,
-        complement:complement
+        complement:complement,
+		alwaysFalse: toFunction(false),
+		alwaysTrue:  toFunction(true)
 	}, true);
 
 })(Asdf);

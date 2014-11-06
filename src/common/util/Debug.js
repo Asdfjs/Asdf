@@ -1,6 +1,6 @@
 (function($_) {
     $_.Debug = {};
-    var debug = false;
+    var debug = true;
     function setDebug(d){
         debug = !!d;
     }
@@ -60,14 +60,26 @@
     }
 
     var STRIP_COMMENTS = /(?:\/\*(\{[\s\S]*?\})\*\/)/mg;
-
+    var rcomment = /\{!\{(\d+)\}!\}/mg;
     function validate(fn){
         if(!debug) return fn;
-        var self = this;
+        var comment = [];
         if(!$_.O.isFunction(fn)) throw new TypeError();
-        var def = $_.F.getDef(fn.toString().replace(STRIP_COMMENTS, function(p,p1){
-            return '+p1+'
-        }));
+        var fnText = fn.toString().replace(STRIP_COMMENTS, function(_,p1){
+            return '{!{'+(comment.push(p1)-1)+'}!}'
+        }).replace($_.R.STRIP_COMMENTS, '');
+        var m = fnText.match($_.R.FN_DEF);
+        var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
+        });
+        var argTest = Asdf.A.map($_.A.filter(argNames, function(n){
+            return rcomment.test(n);
+        }), function(exe){
+            return (new Function(def.arguments,'return ' + exe.substring(paramStr.length)));
+        });
+        console.log(argNames);
+        /*
+
         var pfns =  Asdf.A.map($_.A.filter(def.arguments, function(l){
             return $_.S.startsWith(l,'{');
         }), function(exe){
@@ -98,6 +110,7 @@
                 throw new Error(rerr.join('\n'));
             return res;
         });
+        */
     }
     $_.O.extend($_.Debug, {
         setDebug:setDebug,

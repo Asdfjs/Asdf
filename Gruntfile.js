@@ -9,8 +9,8 @@ module.exports = function(grunt) {
             client: {
                 src: ['src/client/*.js',
                     'src/common/core/*.js',
-                    'src/common/datatype/Regexp.js',
                     'src/common/datatype/Object.js',
+                    'src/common/datatype/Regexp.js',
                     'src/common/datatype/Function.js',
                     'src/common/datatype/Array.js',
                     'src/common/datatype/String.js',

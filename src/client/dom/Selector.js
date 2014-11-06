@@ -139,8 +139,6 @@
                     // Supplemental Plane codepoint (surrogate pair)
                     String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
         };
-    var alwaysFalse = $_.F.toFunction(false);
-    var alwaysTrue =  $_.F.toFunction(true);
     var _rbuggyMathches = [];
     var _rbuggyQSA = [];
 
