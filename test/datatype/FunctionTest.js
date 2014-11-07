@@ -240,3 +240,16 @@ test("Asdf.F.annotate", function(){
     equal(f({b:2,a:4}), 2, '4/2는 2');
     equal(f({a:2}),2, '2/1(default) 는 2');
 });
+
+test("Asdf.F.converge", function(){
+    var add = function(a, b) { return a + b; };
+    var subtract = function(a, b) { return a - b; };
+    var multiply = function(a, b) { return a * b; };
+    equal(Asdf.F.converge(multiply, add, subtract)(1, 2), -3, 'converge ok');
+});
+test("Asdf.F.zip", function(){
+   deepEqual(Asdf.F.zip(function(a,b){return a+b},[1,2,3],[1,3,4]), [2,5,7], 'zip ok');
+});
+test("Asdf.F.complement", function(){
+    ok(Asdf.F.complement(Asdf.O.isNotFunction)(function(){}), 'Asdf.complement ok');
+});

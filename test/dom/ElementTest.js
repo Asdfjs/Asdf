@@ -315,3 +315,11 @@ test("Asdf.Element.offset", function(){
     equal(Asdf.Element.offset(div.firstChild).top, 10, 'top ok');
     Asdf.Element.remove(div);
 });
+test("Asdf.Element.contains", function(){
+    div.innerHTML = '<div id="aaa">bb</div>';
+    ok(Asdf.Element.contains(div, Asdf.Element.first(div)), 'contains ok');
+});
+test("Asdf.Element.comparePosition", function(){
+    div.innerHTML = '<div id="aaa">bb</div>';
+    equal(Asdf.Element.comparePosition(div, Asdf.Element.first(div)), 20, 'comparePostion ok');
+});
