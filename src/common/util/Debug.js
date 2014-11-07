@@ -59,58 +59,40 @@
         });
     }
 
-    var STRIP_COMMENTS = /(?:\/\*(\{[\s\S]*?\})\*\/)/mg;
-    var rcomment = /\{!\{(\d+)\}!\}/mg;
+    var STRIP_COMMENTS = /(?:\/\*\{([\s\S]+?)\}\*\/)/mg;
+    var rargcomment = /\{(\d+)\}\s*(\w+)/m;
     function validate(fn){
         if(!debug) return fn;
-        var comment = [];
         if(!$_.O.isFunction(fn)) throw new TypeError();
+        var comment = [];
         var fnText = fn.toString().replace(STRIP_COMMENTS, function(_,p1){
-            return '{!{'+(comment.push(p1)-1)+'}!}'
+            return '{'+(comment.push(p1)-1)+'}'
         }).replace($_.R.STRIP_COMMENTS, '');
         var m = fnText.match($_.R.FN_DEF);
         var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
-        var argTest = Asdf.A.map($_.A.filter(argNames, function(n){
-            return rcomment.test(n);
-        }), function(exe){
-            return (new Function(def.arguments,'return ' + exe.substring(paramStr.length)));
-        });
-        console.log(argNames);
-        /*
-
-        var pfns =  Asdf.A.map($_.A.filter(def.arguments, function(l){
-            return $_.S.startsWith(l,'{');
-        }), function(exe){
-            return (new Function(def.arguments,'return ' + exe.substring(paramStr.length)));
-        });
-        var rfns =  Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,returnStr);
-        }), function(exe){
-            return (new Function('res','return ' + exe.substring(paramStr.length)));
-        });
+        var self = this;
+        var argTest = $_.A.reduce(argNames, function(o,v,i){
+            var m =rargcomment.exec(v);
+            if(!m) return o;
+            var index = i;
+            var argName = m[2];
+            var type = comment[m[1]];
+            return $_.A.append(o,function(){
+                var arg = arguments[index], ct;
+                if( (ct = typeOf(arg))=== type)
+                    return true;
+                throw new TypeError(argName +" type must be a " + type + '. current type is '+ct+'.');
+            });
+        }, []);
         return $_.F.wrap(fn, function(ofn){
             var args = Array.prototype.slice.call(arguments,1);
-            var perr = [], rerr = [];
-            $_.A.each(pfns, function(f){
-                if(f.apply(self, args)!==true){
-                    perr.push($_.S.trim($_.F.getDef(f).body).substring(7));
-                }
+            $_.A.each(argTest, function(f){
+                f.apply(self, args);
             });
-            if(perr.length)
-                throw new Error(perr.join('\n'));
-            var res = ofn.apply(this, args);
-            $_.A.each(rfns, function(f){
-                if(f.call(self, res)!==true){
-                    rerr.push($_.S.trim($_.F.getDef(f).body).substring(7));
-                }
-            });
-            if(rerr.length)
-                throw new Error(rerr.join('\n'));
-            return res;
+            return ofn.apply(this, args);
         });
-        */
     }
     $_.O.extend($_.Debug, {
         setDebug:setDebug,

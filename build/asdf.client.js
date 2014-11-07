@@ -998,13 +998,22 @@
         tap:tap
 	});
 })(Asdf);
-;/**
+;(function($_) {
+    $_.R = {
+        FN_DEF: /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)\s*\{([\s\S]*)\}\s*/m,
+        FN_ARG_SPLIT: /,/,
+        STRIP_COMMENTS: /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg
+    };
+    $_.O.extend($_.R, {
+    });
+})(Asdf);;/**
  * @project Asdf.js
  * @author N3735
  */
 (function($_) {
     /**
-     * @namespace Asdf.F
+     * @namespace
+	 * @name Asdf.F
      */
 	$_.F = {};
 	var slice = Array.prototype.slice, fnProto = Function.prototype, nativeBind = fnProto.bind;
@@ -1662,13 +1671,11 @@
      * @param {object} defaults
      * @returns {Function}
      */
-    var FN_DEF = /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)\s*\{([\s\S]*)\}\s*/m;
-    var FN_ARG_SPLIT = /,/;
-    var STRIP_COMMENTS = /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg;
+
     function annotate(fn, defaults){
         if(!$_.O.isFunction(fn)) throw new TypeError();
-        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
-        var argNames = $_.A.map(fnText.match(FN_DEF)[2].split(FN_ARG_SPLIT), function(arg){
+        var fnText = fn.toString().replace($_.R.STRIP_COMMENTS, '');
+        var argNames = $_.A.map(fnText.match($_.R.FN_DEF)[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return function(obj){
@@ -1678,31 +1685,16 @@
             return fn.apply(this, arg);
         }
     }
-    function doctest(fn, startsWith){
-        startsWith = startsWith||'>>>';
-        if(!$_.O.isFunction(fn)) throw new TypeError();
-        var def = getDef(fn);
-        var lines = def.comments.join('\n').split('\n');
-        return Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,startsWith);
-        }), function(exe){
-            try{
-                return (new Function('return ' + exe.substring(startsWith.length)))();
-            }catch(e){
-                return e;
-            }
-        });
-    }
 
     function getDef(fn){
         if(!$_.O.isFunction(fn)) throw new TypeError();
         var comments = [];
-        var fnText = fn.toString().replace(STRIP_COMMENTS, function(m,p1,p2){
+        var fnText = fn.toString().replace($_.R.STRIP_COMMENTS, function(m,p1,p2){
             comments.push($_.S.trim(p1||p2));
             return '';
         });
-        var m = fnText.match(FN_DEF);
-        var argNames = $_.A.map(m[2].split(FN_ARG_SPLIT), function(arg){
+        var m = fnText.match($_.R.FN_DEF);
+        var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return {
@@ -1777,7 +1769,8 @@
         zip:zip,
         nAry:nAry,
         complement:complement,
-        doctest:doctest
+		alwaysFalse: toFunction(false),
+		alwaysTrue:  toFunction(true)
 	}, true);
 
 })(Asdf);
@@ -1785,7 +1778,7 @@
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name A
+ * @name Asdf.A
  */
 (function($_) {
 	$_.A = {};
@@ -1803,7 +1796,7 @@
 	var _eachWithTermination = partial(coreEach, undefined, 0, undefined, inc, undefined, undefined);
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
@@ -1825,7 +1818,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
@@ -1847,7 +1840,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
@@ -1880,7 +1873,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
@@ -1906,7 +1899,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection} first 대상 객체
 	 * @param {collection} second 추가 객체
 	 * @returns {collection} first에 second를 추가한다.  first 객체를 반환한다.
@@ -1929,7 +1922,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection} col 대상 객체
 	 * @param {number} [n=0] index
 	 * @returns {*} col[n]값을 반환한다.
@@ -1941,7 +1934,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[0]값을 반환한다.
@@ -1950,7 +1943,7 @@
 	var first = partial(get, undefined, 0);
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[col.length-1]값을 반환한다.
@@ -1961,7 +1954,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -1984,7 +1977,7 @@
 		return results;
 	}
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -1999,7 +1992,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -2022,7 +2015,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -2045,7 +2038,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {*} target 비교 값
@@ -2065,7 +2058,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {(string|function)} method 이름 또는 function
@@ -2085,7 +2078,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {String} key
@@ -2100,7 +2093,7 @@
 		return map(col, function(obj){ return obj[key]; });
 	}
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {function=} iterator
@@ -2122,7 +2115,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {function=} iterator
@@ -2144,7 +2137,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @returns {Array} 대상객체를 섞은 후 반환한다.
@@ -2165,7 +2158,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} arr 대상 객체
 	 * @param {function=} sortfn 정렬 함수
@@ -2205,7 +2198,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} arr 대상 객체
 	 * @param {string|function} key key값
@@ -2223,7 +2216,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {(string|function)} key key값 또는 처리 함수 값
@@ -2271,7 +2264,7 @@
     }
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {Array} array를 반환한다.
@@ -2292,7 +2285,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @returns {number} col.length를 반환한다.
@@ -2305,7 +2298,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @returns {Array} 빈 대상 객체를 반환한다.
@@ -2324,7 +2317,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {number} [n=1] 버릴 갯수
@@ -2338,7 +2331,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @returns {Array} ==false인 values를 제거하고 나머지 array를 반환한다.
@@ -2352,7 +2345,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {boolean=} shallow deep여부 false면 deep 
@@ -2372,7 +2365,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {...*=} values 대상 객체
@@ -2387,7 +2380,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {boolean=} isSorted 정렬 여부
@@ -2414,7 +2407,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체
 	 * @returns {Array} array들의 합집합을 반환한다.
@@ -2427,7 +2420,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체
 	 * @returns {Array} array들의 교집합을 반환한다.
@@ -2445,7 +2438,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {...Array} others array 객체
@@ -2460,7 +2453,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체들
 	 * @returns {Array} 대상 객체들이 합쳐친 array 객체를 반환한다.
@@ -2495,7 +2488,7 @@
     }
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
@@ -2518,7 +2511,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
@@ -2536,7 +2529,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {Array} fns [function1, functio2..]
@@ -2553,7 +2546,7 @@
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {function} fn 실행 함수
@@ -2613,7 +2606,7 @@
     }
 
     /**
-     * @memberof A
+     * @memberof Asdf.A
      * @param {Array} array
      * @param {*} item
      * @returns {Array}
@@ -2625,7 +2618,7 @@
     }
 
     /**
-     * @memberof A
+     * @memberof Asdf.A
      * @param {Array} array
      * @param {*} item
      * @returns {Array}
@@ -4856,28 +4849,62 @@
 			throw new TypeError();
 		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
+
 	function find(element, selector, results, seed){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		results = results||[];
 		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
 	}
-	function querySelectorAll(element, selector) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(window.Sizzle){
-			return Sizzle(selector, element);
-		}
-		else if(element.querySelectorAll) {
-			return element.querySelectorAll(selector);
-		}else {
-			var a=element.all, c=[], sel = selector.replace(/\[for\b/gi, '[htmlFor').split(','), i, j,s=document.createStyleSheet();
-			for (i=sel.length; i--;) {
-				s.addRule(sel[i], 'k:v');
-				for (j=a.length; j--;) a[j].currentStyle.k && c.push(a[j]);
-				s.removeRule(0);
+
+    var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
+	function querySelectorAll(element, selector, results) {
+        results = results||[];
+        var match,m, nodeType = element.nodeType;
+        if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
+            return results;
+        }
+        if(nodeType !== 11 && (match = rquickExpr.exec(selector))){
+            if(m = match[1]){
+                return $_.A.append(results,getElementById(element, m));
+            }else if(match[2]){
+				return $_.A.merge(results, getElementsByTagName(element, selector));
+			}else if((m = match[3])){
+				return $_.A.merge(results,getElementsByClassName(element, m));
 			}
-			return c;
+        }
+		if(element.querySelectorAll){
+			var nid, old;
+			nid = old = $_.Utils.makeuid();
+			var nel = element;
+			debugger;
+			var nsel = $_.O.isNotElement(element)&&selector;
+			if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
+				var groups = $_.Selector.tokenize(selector);
+				if((old = attr(element,'id'))) {
+					nid = old.replace(/'|\\/g, "\\$&");
+				} else {
+					attr(element,'id', nid);
+				}
+				nid = "[id='"+nid+"'] ";
+				groups =  $_.A.map(groups, function(v){
+					return nid + $_.Selector.toSelector(v);
+				});
+				nel = /[+~]/.test(selector) && parent(element)||element;
+				nsel = groups.join(',');
+			}
+			if(nsel){
+				try{
+					return $_.A.merge(results, nel.querySelectorAll(nsel));
+				} catch(e){
+				}finally{
+					if(!old){
+						removeAttr(element, 'id');
+					}
+				}
+
+			}
+			throw new Error();
 		}
 	}
 	function closest(element, selector, context){
@@ -4887,12 +4914,17 @@
 			element = element !== context && element !== document && element.parentNode;
 	    return element;
 	}
+
+    /**
+     *
+     * @param {HTMLElement} element
+     * @param selector
+     * @returns {boolean}
+     */
 	function matchesSelector(element, selector){
-		if(!$_.O.isNode(element))
+		if(!$_.O.isElement(element))
 			throw new TypeError();
-		if (!element || element.nodeType !== 1) return false
-	    var mSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
-	                          element.oMatchesSelector || element.matchesSelector;
+	    var mSelector = element.matches||element.mozMatchesSelector||element.webkitMatchesSelector;
 	    if (mSelector) return mSelector.call(element, selector);
 	    var match, parent = element.parentNode, temp = !parent;
 	    if (temp) (parent = tempParent).appendChild(element);
@@ -5035,7 +5067,7 @@
         }else if(element.querySelectorAll){
             return element.querySelectorAll('.'+className);
         }else if(element.getElementsByTagName){
-            return Asdf.A.filter(element.getElementsByTagName('*'), Asdf.F.partial(hasClass, undefined, className));
+            return $_.A.filter(element.getElementsByTagName('*'), $_.F.partial(hasClass, undefined, className));
         }else {
             throw new Error();
         }
@@ -5045,17 +5077,33 @@
             var res = element.getElementsByTagName(tag);
             if(tag==='*'){
                 return $_.A.filter(res, function(e){return e.nodeType === 1});
-
             }
             return res;
         }
         if(element.getElementsByTagName){
-            return element.getElementsByClassName(tag);
+            return element.getElementsByTagName(tag);
         }else if (element.querySelectorAll){
             return element.querySelectorAll(tag);
         }else {
             throw new Error();
         }
+    }
+    function getElementById(element, id){
+        var el;
+        if($_.O.isDocument(element)){
+            el = element.getElementById(id);
+            if(el && el.parentNode){
+                if(el.id === id)
+                    return el;
+            }else{
+                return null;
+            }
+        } else {
+            if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
+                return el;
+            }
+        }
+		throw new Error();
     }
     function _isParent(p, c){
         if (c) do {
@@ -5103,7 +5151,7 @@
             even: {a:2, b:0}
         }, $_.F.toFunction({a:0, b:a-0}))(special);
     });
-    function _getNTH(node, expression,isReverse, ofType){
+    function getNTH(node, expression,isReverse, ofType){
         var p = parent(node);
         var parsed = _parseNTH(expression);
         var ns = children(p);
@@ -5135,25 +5183,25 @@
             return !prev(element) && !next(element);
         },
         'nth-child': function(node, expression){
-            return $_.A.contains(_getNTH(node, expression)||[], node);
+            return $_.A.contains(getNTH(node, expression)||[], node);
         },
         'nth-last-child':function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, true)||[], node);
         },
         'nth-of-type': function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, false, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, false, true)||[], node);
         },
         'nth-last-of-type':function(node, expression){
-            return $_.A.contains(_getNTH(node, expression, true, true)||[], node);
+            return $_.A.contains(getNTH(node, expression, true, true)||[], node);
         },
         'index': function(node, index){
-            return $_.A.contains(_getNTH(node, index+1+'')||[], node);
+            return $_.A.contains(getNTH(node, index+1+'')||[], node);
         },
         'even': function(node){
-            return $_.A.contains(_getNTH(node, '2n')||[], node);
+            return $_.A.contains(getNTH(node, '2n')||[], node);
         },
         'odd':function(node){
-            return $_.A.contains(_getNTH(node, '2n+1')||[], node);
+            return $_.A.contains(getNTH(node, '2n+1')||[], node);
         },
         'first-of-type':function(element){
             var nodeName = element.nodeName;
@@ -5258,12 +5306,18 @@
         compareNode:compareNode,
         getElementsByXPath:getElementsByXPath,
         getElementsByTagName:getElementsByTagName,
-        outerHTML:outerHTML
+        outerHTML:outerHTML,
+        getNTH:getNTH,
+		getElementById:getElementById
 	});
     $_.O.each(pseudos, function(v,k){
         $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
     });
 })(Asdf);;(function($_) {
+    /**
+     * @namespace
+     * @name Asdf.Utils
+     */
     var o = $_.Core.namespace($_, 'Selector');
     var expando = "expando" + 1 * new Date();
     var booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",
@@ -5315,6 +5369,65 @@
             "needsContext": new RegExp( "^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" +
                 whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i" )
         },
+        matchFunction = {
+            "ATTR": function(match){
+                match[1] = match[1].replace( runescape, funescape );
+                // Move the given value to match[3] whether quoted or unquoted
+                match[3] = ( match[3] || match[4] || match[5] || "" ).replace( runescape, funescape );
+                if ( match[2] === "~=" ) {
+                    match[3] = " " + match[3] + " ";
+                }
+                return match.slice( 0, 4 );
+            },"CHILD": function( match ) {
+                /* matches from matchExpr["CHILD"]
+                 1 type (only|nth|...)
+                 2 what (child|of-type)
+                 3 argument (even|odd|\d*|\d*n([+-]\d+)?|...)
+                 4 xn-component of xn+y argument ([+-]?\d*n|)
+                 5 sign of xn-component
+                 6 x of xn-component
+                 7 sign of y-component
+                 8 y of y-component
+                 */
+                match[1] = match[1].toLowerCase();
+                if ( match[1].slice( 0, 3 ) === "nth" ) {
+                    // nth-* requires argument
+                    if ( !match[3] ) {
+                        throw new Error( match[0] );
+                    }
+                    // numeric x and y parameters for Expr.filter.CHILD
+                    // remember that false/true cast respectively to 0/1
+                    match[4] = +( match[4] ? match[5] + (match[6] || 1) : 2 * ( match[3] === "even" || match[3] === "odd" ) );
+                    match[5] = +( ( match[7] + match[8] ) || match[3] === "odd" );
+                    // other types prohibit arguments
+                } else if ( match[3] ) {
+                    throw new Error( match[0] );
+                }
+                return match;
+            },
+            "PSEUDO": function( match ) {
+                var excess,
+                    unquoted = !match[6] && match[2];
+                if ( matchExpr["CHILD"].test( match[0] ) ) {
+                    return null;
+                }
+                // Accept quoted arguments as-is
+                if ( match[3] ) {
+                    match[2] = match[4] || match[5] || "";
+                    // Strip excess characters from unquoted arguments
+                } else if ( unquoted && rpseudo.test( unquoted ) &&
+                    // Get excess from tokenize (recursively)
+                    (excess = tokenize( unquoted, true )) &&
+                    // advance to the next closing parenthesis
+                    (excess = unquoted.indexOf( ")", unquoted.length - excess ) - unquoted.length) ) {
+                    // excess is a negative index
+                    match[0] = match[0].slice( 0, excess );
+                    match[2] = unquoted.slice( 0, excess );
+                }
+                // Return only captures needed by the pseudo filter method (type and argument)
+                return match.slice( 0, 3 );
+            }
+        },
         rinputs = /^(?:input|select|textarea|button)$/i,
         rheader = /^h\d$/i,
 
@@ -5327,21 +5440,82 @@
         rescape = /'|\\/g,
 
     // CSS escapes http://www.w3.org/TR/CSS21/syndata.html#escaped-characters
-        runescape = new RegExp( "\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig" );
+        runescape = new RegExp( "\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig" ) ,
+        funescape = function( _, escaped, escapedWhitespace ) {
+            var high = "0x" + escaped - 0x10000;
+            // NaN means non-codepoint
+            // Support: Firefox<24
+            // Workaround erroneous numeric interpretation of +"0x"
+            return high !== high || escapedWhitespace ?
+                escaped :
+                high < 0 ?
+                    // BMP codepoint
+                    String.fromCharCode( high + 0x10000 ) :
+                    // Supplemental Plane codepoint (surrogate pair)
+                    String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
+        };
+    var _rbuggyMathches = [];
+    var _rbuggyQSA = [];
 
-    var _tokenCache = {};
-    var alwaysFalse = $_.F.toFunction(false);
-    var alwaysTrue =  $_.F.toFunction(true);
+    var opposite = {
+        'parentNode': 'childNode',
+        'previousSibling':'nextSibling',
+        'childNode':'parentNode',
+        'nextSibling': 'previousSibling'
+    };
+    var combinators = {
+        ' ': {dir: 'parentNode', first:true}
 
-    function tokenize(selector){
-        var c = _tokenCache[selector+' '];
-        if(c) return $_.O.clone(c);
+    };
 
-        var str = selector;
-        var res = [];
-
+    var filter = 'ID,TAG,CLASS,ATTR,CHILD,PSEUDO'.split(',');
+    function _tokenize(selector){
+        var str = selector,res = [], matched, match, tokens;
+        while(str){
+            if(!matched)
+                res.push((tokens = []));
+            else if((match = rcomma.exec(str)))
+                str = str.slice(match[0].length)||str;
+            matched = false;
+            if((match = rcombinators.exec(str))){
+                matched = match.shift();
+                tokens.push({
+                    value:matched,
+                    type:match[0].replace(rtrim, ' ')
+                });
+                str = str.slice(matched.length)
+            }
+            $_.A.each(filter, function(type){
+                if((match = matchExpr[type].exec(str)) && (!matchFunction[type]|| (match = matchFunction[type](match)))){
+                    matched = match.shift();
+                    tokens.push({
+                        value:matched,
+                        type:type,
+                        matcheds:match
+                    });
+                    str = str.slice(matched.length);
+                }
+            });
+            if(!matched){
+                break;
+            }
+        }
+        if(str) throw new Error();
+        return res;
     }
-
+    var tokenize = $_.F.compose($_.F.memoize(_tokenize, function(str){return str+' '}), $_.O.clone);
+    function select(expression, element, results, seed){
+        results = results||[];
+        element = element || document;
+        return _select(expression.replace(rtrim, '$1'), element, results, seed);
+    }
+    function _select(expression, element, results, seed){
+    }
+    function toSelector(tokens){
+        return $_.A.reduce(tokens, function(str, i){
+            return str+ i.value;
+        }, '')
+    }
     function markFunction(fn){
         fn[expando] = true;
         return fn;
@@ -5533,7 +5707,9 @@
         equalTagName:equalTagName,
         ofnToElements:ofnToElements,
         compositFn:compositFn,
-        oToOfn:oToOfn
+        oToOfn:oToOfn,
+        tokenize:tokenize,
+        toSelector:toSelector
     })
 })(Asdf);;(function ($_) {
 	$_.Template = {};
@@ -5960,47 +6136,98 @@
     });
 })(Asdf);;(function($_) {
     $_.Debug = {};
-    var debug = false;
+    var debug = true;
     function setDebug(d){
         debug = !!d;
     }
-    function validate(fn, paramStr, returnStr){
-        if(!debug) return fn;
-        paramStr = paramStr||'!>>';
-        returnStr = returnStr||'!<<';
-        var self = this;
+
+    function typeOf(value) {
+        var s = typeof value;
+        if (s == 'object') {
+            if (value) {
+                if (value instanceof Array) {
+                    return 'array';
+                } else if (value instanceof Object) {
+                    return s;
+                }
+                var className = Object.prototype.toString.call(
+                    /** @type {Object} */ (value));
+                if (className == '[object Window]') {
+                    return 'object';
+                }
+                if ((className == '[object Array]' ||
+                    typeof value.length == 'number' &&
+                    typeof value.splice != 'undefined' &&
+                    typeof value.propertyIsEnumerable != 'undefined' &&
+                    !value.propertyIsEnumerable('splice')
+                    )) {
+                    return 'array';
+                }
+                if ((className == '[object Function]' ||
+                    typeof value.call != 'undefined' &&
+                    typeof value.propertyIsEnumerable != 'undefined' &&
+                    !value.propertyIsEnumerable('call'))) {
+                    return 'function';
+                }
+            } else {
+                return 'null';
+            }
+
+        } else if (s == 'function' && typeof value.call == 'undefined') {
+            return 'object';
+        }
+        return s;
+    }
+
+    function doctest(fn, startsWith){
+        startsWith = startsWith||'>>>';
         if(!$_.O.isFunction(fn)) throw new TypeError();
         var def = $_.F.getDef(fn);
         var lines = def.comments.join('\n').split('\n');
-        var pfns =  Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,paramStr);
+        return Asdf.A.map($_.A.filter(lines, function(l){
+            return $_.S.startsWith(l,startsWith);
         }), function(exe){
-            return (new Function(def.arguments,'return ' + exe.substring(paramStr.length)));
+            try{
+                return (new Function('return ' + exe.substring(startsWith.length)))();
+            }catch(e){
+                return e;
+            }
         });
-        var rfns =  Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,returnStr);
-        }), function(exe){
-            return (new Function('res','return ' + exe.substring(paramStr.length)));
+    }
+
+    var STRIP_COMMENTS = /(?:\/\*\{([\s\S]+?)\}\*\/)/mg;
+    var rargcomment = /\{(\d+)\}\s*(\w+)/m;
+    function validate(fn){
+        if(!debug) return fn;
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var comment = [];
+        var fnText = fn.toString().replace(STRIP_COMMENTS, function(_,p1){
+            return '{'+(comment.push(p1)-1)+'}'
+        }).replace($_.R.STRIP_COMMENTS, '');
+        var m = fnText.match($_.R.FN_DEF);
+        var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
         });
+        var self = this;
+        var argTest = $_.A.reduce(argNames, function(o,v,i){
+            var m =rargcomment.exec(v);
+            if(!m) return o;
+            var index = i;
+            var argName = m[2];
+            var type = comment[m[1]];
+            return $_.A.append(o,function(){
+                var arg = arguments[index], ct;
+                if( (ct = typeOf(arg))=== type)
+                    return true;
+                throw new TypeError(argName +" type must be a " + type + '. current type is '+ct+'.');
+            });
+        }, []);
         return $_.F.wrap(fn, function(ofn){
             var args = Array.prototype.slice.call(arguments,1);
-            var perr = [], rerr = [];
-            $_.A.each(pfns, function(f){
-                if(f.apply(self, args)!==true){
-                    perr.push($_.S.trim($_.F.getDef(f).body).substring(7));
-                }
+            $_.A.each(argTest, function(f){
+                f.apply(self, args);
             });
-            if(perr.length)
-                throw new Error(perr.join('\n'));
-            var res = ofn.apply(this, args);
-            $_.A.each(rfns, function(f){
-                if(f.call(self, res)!==true){
-                    rerr.push($_.S.trim($_.F.getDef(f).body).substring(7));
-                }
-            });
-            if(rerr.length)
-                throw new Error(rerr.join('\n'));
-            return res;
+            return ofn.apply(this, args);
         });
     }
     $_.O.extend($_.Debug, {
@@ -6342,7 +6569,14 @@
         pow:pow,
         sqrt:sqrt
     });
-})(Asdf);;(function($_) {
+})(Asdf);;/**
+ * @project Asdf.js
+ */
+(function($_) {
+    /**
+     * @namespace
+     * @name Asdf.Utils
+     */
     var o = $_.Core.namespace($_, 'Utils');
 	function randomMax8HexChars() {
 		return (((1 + Math.random()) * 0x100000000) | 0).toString(16)

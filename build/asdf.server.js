@@ -997,7 +997,8 @@ module.exports = Asdf;
  */
 (function($_) {
     /**
-     * @namespace Asdf.F
+     * @namespace
+	 * @name Asdf.F
      */
 	$_.F = {};
 	var slice = Array.prototype.slice, fnProto = Function.prototype, nativeBind = fnProto.bind;
@@ -1655,13 +1656,11 @@ module.exports = Asdf;
      * @param {object} defaults
      * @returns {Function}
      */
-    var FN_DEF = /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)\s*\{([\s\S]*)\}\s*/m;
-    var FN_ARG_SPLIT = /,/;
-    var STRIP_COMMENTS = /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg;
+
     function annotate(fn, defaults){
         if(!$_.O.isFunction(fn)) throw new TypeError();
-        var fnText = fn.toString().replace(STRIP_COMMENTS, '');
-        var argNames = $_.A.map(fnText.match(FN_DEF)[2].split(FN_ARG_SPLIT), function(arg){
+        var fnText = fn.toString().replace($_.R.STRIP_COMMENTS, '');
+        var argNames = $_.A.map(fnText.match($_.R.FN_DEF)[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return function(obj){
@@ -1671,31 +1670,16 @@ module.exports = Asdf;
             return fn.apply(this, arg);
         }
     }
-    function doctest(fn, startsWith){
-        startsWith = startsWith||'>>>';
-        if(!$_.O.isFunction(fn)) throw new TypeError();
-        var def = getDef(fn);
-        var lines = def.comments.join('\n').split('\n');
-        return Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,startsWith);
-        }), function(exe){
-            try{
-                return (new Function('return ' + exe.substring(startsWith.length)))();
-            }catch(e){
-                return e;
-            }
-        });
-    }
 
     function getDef(fn){
         if(!$_.O.isFunction(fn)) throw new TypeError();
         var comments = [];
-        var fnText = fn.toString().replace(STRIP_COMMENTS, function(m,p1,p2){
+        var fnText = fn.toString().replace($_.R.STRIP_COMMENTS, function(m,p1,p2){
             comments.push($_.S.trim(p1||p2));
             return '';
         });
-        var m = fnText.match(FN_DEF);
-        var argNames = $_.A.map(m[2].split(FN_ARG_SPLIT), function(arg){
+        var m = fnText.match($_.R.FN_DEF);
+        var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         return {
@@ -1770,7 +1754,8 @@ module.exports = Asdf;
         zip:zip,
         nAry:nAry,
         complement:complement,
-        doctest:doctest
+		alwaysFalse: toFunction(false),
+		alwaysTrue:  toFunction(true)
 	}, true);
 
 })(Asdf);
@@ -1778,7 +1763,7 @@ module.exports = Asdf;
  * @project Asdf.js
  * @author N3735
  * @namespace
- * @name A
+ * @name Asdf.A
  */
 (function($_) {
 	$_.A = {};
@@ -1796,7 +1781,7 @@ module.exports = Asdf;
 	var _eachWithTermination = partial(coreEach, undefined, 0, undefined, inc, undefined, undefined);
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
@@ -1818,7 +1803,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {object=} context iterator의 context
@@ -1840,7 +1825,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
@@ -1873,7 +1858,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection|Array} col collection 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
 	 * @param {*} memo 초기 값
@@ -1899,7 +1884,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection} first 대상 객체
 	 * @param {collection} second 추가 객체
 	 * @returns {collection} first에 second를 추가한다.  first 객체를 반환한다.
@@ -1922,7 +1907,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @param {collection} col 대상 객체
 	 * @param {number} [n=0] index
 	 * @returns {*} col[n]값을 반환한다.
@@ -1934,7 +1919,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[0]값을 반환한다.
@@ -1943,7 +1928,7 @@ module.exports = Asdf;
 	var first = partial(get, undefined, 0);
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {*} col[col.length-1]값을 반환한다.
@@ -1954,7 +1939,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -1977,7 +1962,7 @@ module.exports = Asdf;
 		return results;
 	}
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -1992,7 +1977,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -2015,7 +2000,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {function} iterator 실행 함수 인자값으로 value, key, col이 들어간다.
@@ -2038,7 +2023,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {*} target 비교 값
@@ -2058,7 +2043,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {(string|function)} method 이름 또는 function
@@ -2078,7 +2063,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @param {String} key
@@ -2093,7 +2078,7 @@ module.exports = Asdf;
 		return map(col, function(obj){ return obj[key]; });
 	}
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {function=} iterator
@@ -2115,7 +2100,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {function=} iterator
@@ -2137,7 +2122,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @returns {Array} 대상객체를 섞은 후 반환한다.
@@ -2158,7 +2143,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} arr 대상 객체
 	 * @param {function=} sortfn 정렬 함수
@@ -2198,7 +2183,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} arr 대상 객체
 	 * @param {string|function} key key값
@@ -2216,7 +2201,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @param {(string|function)} key key값 또는 처리 함수 값
@@ -2264,7 +2249,7 @@ module.exports = Asdf;
     }
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection|Array} col 대상 객체
 	 * @returns {Array} array를 반환한다.
@@ -2285,7 +2270,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {collection} col 대상 객체
 	 * @returns {number} col.length를 반환한다.
@@ -2298,7 +2283,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @returns {Array} 빈 대상 객체를 반환한다.
@@ -2317,7 +2302,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {number} [n=1] 버릴 갯수
@@ -2331,7 +2316,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @returns {Array} ==false인 values를 제거하고 나머지 array를 반환한다.
@@ -2345,7 +2330,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {boolean=} shallow deep여부 false면 deep 
@@ -2365,7 +2350,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {...*=} values 대상 객체
@@ -2380,7 +2365,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {boolean=} isSorted 정렬 여부
@@ -2407,7 +2392,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체
 	 * @returns {Array} array들의 합집합을 반환한다.
@@ -2420,7 +2405,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체
 	 * @returns {Array} array들의 교집합을 반환한다.
@@ -2438,7 +2423,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {...Array} others array 객체
@@ -2453,7 +2438,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {...Array} array 대상 객체들
 	 * @returns {Array} 대상 객체들이 합쳐친 array 객체를 반환한다.
@@ -2488,7 +2473,7 @@ module.exports = Asdf;
     }
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
@@ -2511,7 +2496,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {*} item 찾는 값
@@ -2529,7 +2514,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {Array} fns [function1, functio2..]
@@ -2546,7 +2531,7 @@ module.exports = Asdf;
 	}
 	
 	/**
-	 * @memberof A
+	 * @memberof Asdf.A
 	 * @func
 	 * @param {Array} array 대상 객체
 	 * @param {function} fn 실행 함수
@@ -2606,7 +2591,7 @@ module.exports = Asdf;
     }
 
     /**
-     * @memberof A
+     * @memberof Asdf.A
      * @param {Array} array
      * @param {*} item
      * @returns {Array}
@@ -2618,7 +2603,7 @@ module.exports = Asdf;
     }
 
     /**
-     * @memberof A
+     * @memberof Asdf.A
      * @param {Array} array
      * @param {*} item
      * @returns {Array}
@@ -3971,47 +3956,98 @@ module.exports = Asdf;
     });
 })(Asdf);;(function($_) {
     $_.Debug = {};
-    var debug = false;
+    var debug = true;
     function setDebug(d){
         debug = !!d;
     }
-    function validate(fn, paramStr, returnStr){
-        if(!debug) return fn;
-        paramStr = paramStr||'!>>';
-        returnStr = returnStr||'!<<';
-        var self = this;
+
+    function typeOf(value) {
+        var s = typeof value;
+        if (s == 'object') {
+            if (value) {
+                if (value instanceof Array) {
+                    return 'array';
+                } else if (value instanceof Object) {
+                    return s;
+                }
+                var className = Object.prototype.toString.call(
+                    /** @type {Object} */ (value));
+                if (className == '[object Window]') {
+                    return 'object';
+                }
+                if ((className == '[object Array]' ||
+                    typeof value.length == 'number' &&
+                    typeof value.splice != 'undefined' &&
+                    typeof value.propertyIsEnumerable != 'undefined' &&
+                    !value.propertyIsEnumerable('splice')
+                    )) {
+                    return 'array';
+                }
+                if ((className == '[object Function]' ||
+                    typeof value.call != 'undefined' &&
+                    typeof value.propertyIsEnumerable != 'undefined' &&
+                    !value.propertyIsEnumerable('call'))) {
+                    return 'function';
+                }
+            } else {
+                return 'null';
+            }
+
+        } else if (s == 'function' && typeof value.call == 'undefined') {
+            return 'object';
+        }
+        return s;
+    }
+
+    function doctest(fn, startsWith){
+        startsWith = startsWith||'>>>';
         if(!$_.O.isFunction(fn)) throw new TypeError();
         var def = $_.F.getDef(fn);
         var lines = def.comments.join('\n').split('\n');
-        var pfns =  Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,paramStr);
+        return Asdf.A.map($_.A.filter(lines, function(l){
+            return $_.S.startsWith(l,startsWith);
         }), function(exe){
-            return (new Function(def.arguments,'return ' + exe.substring(paramStr.length)));
+            try{
+                return (new Function('return ' + exe.substring(startsWith.length)))();
+            }catch(e){
+                return e;
+            }
         });
-        var rfns =  Asdf.A.map($_.A.filter(lines, function(l){
-            return $_.S.startsWith(l,returnStr);
-        }), function(exe){
-            return (new Function('res','return ' + exe.substring(paramStr.length)));
+    }
+
+    var STRIP_COMMENTS = /(?:\/\*\{([\s\S]+?)\}\*\/)/mg;
+    var rargcomment = /\{(\d+)\}\s*(\w+)/m;
+    function validate(fn){
+        if(!debug) return fn;
+        if(!$_.O.isFunction(fn)) throw new TypeError();
+        var comment = [];
+        var fnText = fn.toString().replace(STRIP_COMMENTS, function(_,p1){
+            return '{'+(comment.push(p1)-1)+'}'
+        }).replace($_.R.STRIP_COMMENTS, '');
+        var m = fnText.match($_.R.FN_DEF);
+        var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
+            return $_.S.trim(arg);
         });
+        var self = this;
+        var argTest = $_.A.reduce(argNames, function(o,v,i){
+            var m =rargcomment.exec(v);
+            if(!m) return o;
+            var index = i;
+            var argName = m[2];
+            var type = comment[m[1]];
+            return $_.A.append(o,function(){
+                var arg = arguments[index], ct;
+                if( (ct = typeOf(arg))=== type)
+                    return true;
+                throw new TypeError(argName +" type must be a " + type + '. current type is '+ct+'.');
+            });
+        }, []);
         return $_.F.wrap(fn, function(ofn){
             var args = Array.prototype.slice.call(arguments,1);
-            var perr = [], rerr = [];
-            $_.A.each(pfns, function(f){
-                if(f.apply(self, args)!==true){
-                    perr.push($_.S.trim($_.F.getDef(f).body).substring(7));
-                }
+            $_.A.each(argTest, function(f){
+                f.apply(self, args);
             });
-            if(perr.length)
-                throw new Error(perr.join('\n'));
-            var res = ofn.apply(this, args);
-            $_.A.each(rfns, function(f){
-                if(f.call(self, res)!==true){
-                    rerr.push($_.S.trim($_.F.getDef(f).body).substring(7));
-                }
-            });
-            if(rerr.length)
-                throw new Error(rerr.join('\n'));
-            return res;
+            return ofn.apply(this, args);
         });
     }
     $_.O.extend($_.Debug, {
@@ -4353,7 +4389,14 @@ module.exports = Asdf;
         pow:pow,
         sqrt:sqrt
     });
-})(Asdf);;(function($_) {
+})(Asdf);;/**
+ * @project Asdf.js
+ */
+(function($_) {
+    /**
+     * @namespace
+     * @name Asdf.Utils
+     */
     var o = $_.Core.namespace($_, 'Utils');
 	function randomMax8HexChars() {
 		return (((1 + Math.random()) * 0x100000000) | 0).toString(16)
