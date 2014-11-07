@@ -60,7 +60,8 @@
     }
 
     var STRIP_COMMENTS = /(?:\/\*\{([\s\S]+?)\}\*\/)/mg;
-    var rargcomment = /\{(\d+)\}\s*(\w+)/m;
+    var rargcomment = /\{(\d+)\}\s*(\w+)/;
+    var rreturncomment = /return\s+\{(\d+)\}/;
     function validate(fn){
         if(!debug) return fn;
         if(!$_.O.isFunction(fn)) throw new TypeError();
@@ -68,30 +69,43 @@
         var fnText = fn.toString().replace(STRIP_COMMENTS, function(_,p1){
             return '{'+(comment.push(p1)-1)+'}'
         }).replace($_.R.STRIP_COMMENTS, '');
-        var m = fnText.match($_.R.FN_DEF);
-        var argNames = $_.A.map(m[2].split($_.R.FN_ARG_SPLIT), function(arg){
+        var mfn = fnText.match($_.R.FN_DEF);
+        var fname = mfn[1]||'{anonymous}';
+        var fbody = mfn[3];
+        var argNames = $_.A.map(mfn[2].split($_.R.FN_ARG_SPLIT), function(arg){
             return $_.S.trim(arg);
         });
         var self = this;
         var argTest = $_.A.reduce(argNames, function(o,v,i){
-            var m =rargcomment.exec(v);
+            var m =v.match(rargcomment);
             if(!m) return o;
             var index = i;
             var argName = m[2];
-            var type = comment[m[1]];
+            var type = comment[m[1]].split('|');
             return $_.A.append(o,function(){
                 var arg = arguments[index], ct;
-                if( (ct = typeOf(arg))=== type)
+                if( Asdf.A.contains(type,(ct = typeOf(arg))))
                     return true;
-                throw new TypeError(argName +" type must be a " + type + '. current type is '+ct+'.');
+                throw new TypeError(fname+' : '+argName +" type must be a " + type.join(' or ') + '. current type is '+ct+'.'+'\n'+fn.toString());
             });
         }, []);
+        var returnTest = function(res){
+            var type, rt, m=fbody.match(rreturncomment);
+            if(m && (type = comment[m[1]].split('|'))){
+                if( Asdf.A.contains(type,(rt = typeOf(res))))
+                    return true;
+                throw new TypeError(fname+' : return type must be a ' + type.join(' or ') + '. current type is '+rt+'.'+'\n'+fn.toString());
+            }
+        };
+
         return $_.F.wrap(fn, function(ofn){
             var args = Array.prototype.slice.call(arguments,1);
             $_.A.each(argTest, function(f){
                 f.apply(self, args);
             });
-            return ofn.apply(this, args);
+            var res = ofn.apply(this, args);
+            returnTest(res);
+            return res;
         });
     }
     $_.O.extend($_.Debug, {
