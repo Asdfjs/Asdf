@@ -4017,7 +4017,7 @@ module.exports = Asdf;
 
     var STRIP_COMMENTS = /(?:\/\*\{([\s\S]+?)\}\*\/)/mg;
     var rargcomment = /\{(\d+)\}\s*(\w+)/;
-    var rreturncomment = /return\s+\{(\d+)\}/;
+    var rreturncomment = /return\s+\{(\d+)\}/g;
     function validate(fn){
         if(!debug) return fn;
         if(!$_.O.isFunction(fn)) throw new TypeError();
@@ -4046,8 +4046,11 @@ module.exports = Asdf;
             });
         }, []);
         var returnTest = function(res){
-            var type, rt, m=fbody.match(rreturncomment);
-            if(m && (type = comment[m[1]].split('|'))){
+            var type = [], rt, m=fbody.match(rreturncomment);
+            fbody.replace(rreturncomment, function(_,t){
+                type.push(comment[t]);
+            });
+            if(m && (type = type.join('|').split('|'))){
                 if( Asdf.A.contains(type,(rt = typeOf(res))))
                     return true;
                 throw new TypeError(fname+' : return type must be a ' + type.join(' or ') + '. current type is '+rt+'.'+'\n'+fn.toString());
