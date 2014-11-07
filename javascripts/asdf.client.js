@@ -4849,14 +4849,14 @@
 			throw new TypeError();
 		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
-
+/*
 	function find(element, selector, results, seed){
 		if(!$_.O.isNode(element))
 			throw new TypeError();
 		results = results||[];
 		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
 	}
-
+*/
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
 	function querySelectorAll(element, selector, results) {
         results = results||[];
@@ -4877,7 +4877,6 @@
 			var nid, old;
 			nid = old = $_.Utils.makeuid();
 			var nel = element;
-			debugger;
 			var nsel = $_.O.isNotElement(element)&&selector;
 			if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
 				var groups = $_.Selector.tokenize(selector);
@@ -5284,7 +5283,7 @@
 		removeClass: removeClass,
 		toggleClass: toggleClass,
 		hasClass: hasClass,
-		find: find,
+		find: querySelectorAll,
 		querySelectorAll: querySelectorAll,
 		matchesSelector:matchesSelector,
 		is: matchesSelector,
@@ -6197,7 +6196,7 @@
 
     var STRIP_COMMENTS = /(?:\/\*\{([\s\S]+?)\}\*\/)/mg;
     var rargcomment = /\{(\d+)\}\s*(\w+)/;
-    var rreturncomment = /return\s+\{(\d+)\}/;
+    var rreturncomment = /return\s+\{(\d+)\}/g;
     function validate(fn){
         if(!debug) return fn;
         if(!$_.O.isFunction(fn)) throw new TypeError();
@@ -6226,8 +6225,11 @@
             });
         }, []);
         var returnTest = function(res){
-            var type, rt, m=fbody.match(rreturncomment);
-            if(m && (type = comment[m[1]].split('|'))){
+            var type = [], rt, m=fbody.match(rreturncomment);
+            fbody.replace(rreturncomment, function(_,t){
+                type.push(comment[t]);
+            });
+            if(m && (type = type.join('|').split('|'))){
                 if( Asdf.A.contains(type,(rt = typeOf(res))))
                     return true;
                 throw new TypeError(fname+' : return type must be a ' + type.join(' or ') + '. current type is '+rt+'.'+'\n'+fn.toString());
