@@ -50,7 +50,7 @@
         var indent = 0;
         var res = {};
         if(typeof console === 'undefined') return null;
-        if( !console.group ){
+        if( !console.group || $_.O.isNotFunction(console.group) ){
             res.log =  function(str){
                 return console.log($_.S.times(' ', indent) + str);
             };

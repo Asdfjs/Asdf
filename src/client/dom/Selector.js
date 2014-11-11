@@ -116,7 +116,7 @@
         rinputs = /^(?:input|select|textarea|button)$/i,
         rheader = /^h\d$/i,
 
-        rnative = /^[^{]+\{\s*\[native \w/,
+        rnative = $_.R.FN_NATIVE,
 
     // Easily-parseable/retrievable ID or TAG or CLASS selectors
         rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,

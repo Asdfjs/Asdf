@@ -1,7 +1,7 @@
 (function($_) {
 	$_.Bom = {};
-    var alwaysFalse = $_.F.toFunction(false);
-    var rnative = /^[^{]+\{\s*\[native \w/;
+    var alwaysFalse = $_.F.alwaysFalse;
+    var rnative = $_.R.FN_NATIVE;
 	var Browser = getBrowser(window);
     function getBrowser(win) {
         var ua = win.navigator.userAgent;
@@ -63,6 +63,45 @@
             return !div.getElementsByTagName('tbody').length;
         }, alwaysFalse, _reset)(div);
         support.qsa = rnative.test(doc.querySelectorAll);
+        support.qsaNotSupport = (function(){
+            if(!support.qsa) return $_.F.alwaysFalse;
+            var rbuggyQSA = [];
+            var whitespace = "[\\x20\\t\\r\\n\\f]";
+            var booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped";
+            $_.F.errorHandler(function(div){
+                div.innerHTML = "<select msallowcapture=''>" +
+                "<option id='d\f]' selected=''></option></select>";
+                if ( div.querySelectorAll("[msallowcapture^='']").length ) {
+                    rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:''|\"\")" );
+                }
+                if ( !div.querySelectorAll("[selected]").length ) {
+                    rbuggyQSA.push( "\\[" + whitespace + "*(?:value|" + booleans + ")" );
+                }
+                if ( !div.querySelectorAll("[id~=d]").length ) {
+                    rbuggyQSA.push("~=");
+                }
+                if ( !div.querySelectorAll(":checked").length ) {
+                    rbuggyQSA.push(":checked");
+                }
+            }, alwaysFalse, _reset)(div);
+            $_.F.errorHandler(function(div){
+                var input = doc.createElement("input");
+                input.setAttribute( "type", "hidden" );
+                div.appendChild( input ).setAttribute( "name", "D" );
+                if ( div.querySelectorAll("[name=d]").length ) {
+                    rbuggyQSA.push( "name" + whitespace + "*[*^$|!~]?=" );
+                }
+                if ( !div.querySelectorAll(":enabled").length ) {
+                    rbuggyQSA.push( ":enabled", ":disabled" );
+                }
+                div.querySelectorAll("*,:x");
+                rbuggyQSA.push(",.*:");
+            }, alwaysFalse, _reset)(div);
+            rbuggyQSA = rbuggyQSA.length && new RegExp( rbuggyQSA.join("|") );
+            return function(selector){
+                return rbuggyQSA&&rbuggyQSA.test(selector);
+            }
+        })();
         support.appendChecked =$_.F.errorHandler(function(div,input, fragment){
             input.type = 'checkbox';
             input.checked = true;

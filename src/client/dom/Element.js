@@ -37,10 +37,10 @@
      */
 	function walk(element, fun, context) {
 		context = context || this;
-		var i, childNodes = $_.A.toArray(element.childNodes);
+		var i, ch = childNodes(element);
 		fun.call(context, element);
-		for (i = 0; i < childNodes.length ; i++) {
-			walk(childNodes[i], fun, context);
+		for (i = 0; i < ch.length ; i++) {
+			walk(ch[i], fun, context);
 		}
 		return element;
 	}
@@ -352,7 +352,7 @@
 	function childNodes(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
-        if(!element.firstChild) return []
+        if(!element.firstChild) return [];
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
     function children(element){
@@ -839,14 +839,7 @@
 			throw new TypeError();
 		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
-/*
-	function find(element, selector, results, seed){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		results = results||[];
-		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
-	}
-*/
+
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
 	function querySelectorAll(element, selector, results) {
         results = results||[];
@@ -863,7 +856,7 @@
 				return $_.A.merge(results,getElementsByClassName(element, m));
 			}
         }
-		if(element.querySelectorAll){
+		if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector)){
 			var nid, old;
 			nid = old = $_.Utils.makeuid();
 			var nel = element;
@@ -893,8 +886,8 @@
 				}
 
 			}
-			throw new Error();
 		}
+		throw new Error('Do not support this browser. please use another selector for example (sizzle, slick)');
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -1231,6 +1224,51 @@
             results.push(query.snapshotItem(i));
         return results;
     }
+	function getOwnerDocument(node){
+		if($_.O.isNotNode(node)) throw new TypeError();
+		return $_.O.isDocument(node)? node : node.ownerDocument||node.document;
+	}
+	function getOwnerWindow(node){
+		if($_.O.isNotNode(node)) throw new TypeError();
+		return getWindow(getOwnerDocument(node));
+	}
+	function getFrameContentDocument(frame){
+		return frame.contentDocument||frame.contentWindow||document
+	}
+	function findNodes(node, p, context){
+		var res = [];
+		walk(node, function(el){
+			if(p.call(context, el))
+				res.push(el);
+		});
+		return res;
+	}
+	var TAGS_TO_IGNORE = {
+		'SCRIPT': 1,
+		'STYLE': 1,
+		'HEAD': 1,
+		'IFRAME': 1,
+		'OBJECT': 1
+	};
+	var PREDEFINED_TAG_VALUES_ = {'IMG': ' ', 'BR': '\n'};
+	function getNodeAtOffset(parent, offset){
+		var stack = [parent], pos = 0, cur = null;
+		while (stack.length > 0 && pos < offset) {
+			cur = stack.pop();
+			if (cur.nodeName in TAGS_TO_IGNORE) {
+			} else if (cur.nodeType == 3) {
+				var text = cur.nodeValue.replace(/(\r\n|\r|\n)/g, '').replace(/ +/g, ' ');
+				pos += text.length;
+			} else if (cur.nodeName in PREDEFINED_TAG_VALUES_) {
+				pos += PREDEFINED_TAG_VALUES_[cur.nodeName].length;
+			} else {
+				for (var i = cur.childNodes.length - 1; i >= 0; i--) {
+					stack.push(cur.childNodes[i]);
+				}
+			}
+		}
+		return {node: cur, remainder:cur ? cur.nodeValue.length + offset - pos - 1 : 0}
+	}
 
 	extend($_.Element,  {
 		walk: walk,
@@ -1288,6 +1326,9 @@
         has: data.has,
         del: data.del,
         getWindow: getWindow,
+		getOwnerDocument:getOwnerDocument,
+		getOwnerWindow:getOwnerWindow,
+		getFrameContentDocument:getFrameContentDocument,
         offsetParent: offsetParent,
         getElementsByClassName:getElementsByClassName,
         contains:contains,
@@ -1297,7 +1338,9 @@
         getElementsByTagName:getElementsByTagName,
         outerHTML:outerHTML,
         getNTH:getNTH,
-		getElementById:getElementById
+		getElementById:getElementById,
+		findNodes:findNodes,
+		getNodeAtOffset:getNodeAtOffset
 	});
     $_.O.each(pseudos, function(v,k){
         $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
