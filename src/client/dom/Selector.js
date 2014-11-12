@@ -12,7 +12,7 @@
     // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
         identifier = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",
     // Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
-        attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
+        attrs = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
             // Operator (capture 2)
             "*([*^$|!~]?=)" + whitespace +
             // "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
@@ -23,7 +23,7 @@
             // 1. quoted (capture 3; capture 4 or capture 5)
             "('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|" +
             // 2. simple (capture 6)
-            "((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|" +
+            "((?:\\\\.|[^\\\\()[\\]]|" + attrs + ")*)|" +
             // 3. anything else (capture 2)
             ".*" +
             ")\\)|)",
@@ -43,7 +43,7 @@
             "ID": new RegExp( "^#(" + identifier + ")" ),
             "CLASS": new RegExp( "^\\.(" + identifier + ")" ),
             "TAG": new RegExp( "^(" + identifier + "|[*])" ),
-            "ATTR": new RegExp( "^" + attributes ),
+            "ATTR": new RegExp( "^" + attrs ),
             "PSEUDO": new RegExp( "^" + pseudos ),
             "CHILD": new RegExp( "^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\(" + whitespace +
                 "*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace +
@@ -140,7 +140,6 @@
                     String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
         };
     var _rbuggyMathches = [];
-    var _rbuggyQSA = [];
 
     var opposite = {
         'parentNode': 'childNode',
@@ -149,9 +148,40 @@
         'nextSibling': 'previousSibling'
     };
     var combinators = {
-        ' ': {dir: 'parentNode', first:true}
+        ' ': function(node, tag, id, classes, attrs, pseudos){
+            if(id){
+            }
+        }
 
     };
+    function _matchSelector(node, tag, id, classes, attrs, pseudos){
+        if (id && node.getAttribute('id') != id) return false;
+        if(tag) {
+            var nodeName = node.nodeName.toUpperCase();
+            if (tag == '*') {
+                if (nodeName < '@') return false; // Fix for comment nodes and closed nodes
+            } else {
+                if (nodeName != tag) return false;
+            }
+        }
+        var i, part, cls;
+        if (classes) for (i = classes.length; i--;){
+            cls = $_.Element.attr(node, 'class');
+            if (!(cls && classes[i].regexp.test(cls))) return false;
+        }
+        if (attrs) for (i = attrs.length; i--;){
+            part = attrs[i];
+            if (part.operator ? !part.test($_.Element.attr(node, 'class')) : !$_.Element.hasAttr(node, 'class')) return false;
+        }
+        if (pseudos) for (i = pseudos.length; i--;){
+            part = pseudos[i];
+            if (!_matchPseudo(node, part.key, part.value)) return false;
+        }
+        return true;
+    }
+    function _matchPseudo(){
+        return true;
+    }
 
     var filter = 'ID,TAG,CLASS,ATTR,CHILD,PSEUDO'.split(',');
     function _tokenize(selector){

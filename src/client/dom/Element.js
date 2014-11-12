@@ -662,6 +662,14 @@
 			return element;
 		}
 	}
+	function hasAttr(element, name){
+		if($_.R.FN_NATIVE.test(element.querySelectorAll)){
+			element.hasAttribute(element, name);
+		}
+		element = element.getAttributeNode(name);
+		return !!(element && (element.specified || element.nodeValue));
+
+	}
 	function removeAttr(element, name) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -1302,6 +1310,7 @@
         eq: eq,
         last:last,
 		attr: attr,
+		hasAttr:hasAttr,
 		removeAttr: removeAttr,
 		prop: prop,
 		removeProp: removeProp,
