@@ -624,11 +624,13 @@
         if(isNotObject(obj)) throw new TypeError();
         var k = isString(key)?key.split('.'):key;
         if(isNotArray(k)) throw new TypeError();
+		var isFalse = false;
         return Asdf.A.reduce(k, function(acc, a){
-            if(acc == defult) return defult;
+            if(isFalse) return defult;
             if(has(acc, a)){
                 return acc[a];
             }
+			isFalse = true;
             return defult;
         }, obj);
     }

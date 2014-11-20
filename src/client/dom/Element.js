@@ -845,7 +845,7 @@
 	function hasClass(element, name) {
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
-		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
+		return !!element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
 
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
@@ -1055,9 +1055,12 @@
         if(element.getElementsByClassName){
             return element.getElementsByClassName(className);
         }else if(element.querySelectorAll){
-            return element.querySelectorAll('.'+className);
+            return element.querySelectorAll('.'+className.replace(/\s+/,'.'));
         }else if(element.getElementsByTagName){
-            return $_.A.filter(element.getElementsByTagName('*'), $_.F.partial(hasClass, undefined, className));
+			var cls = className.split(' ');
+			return $_.A.filter(element.getElementsByTagName('*'), function(el){
+				return $_.A.every($_.A.map(cls, $_.F.curry(hasClass, el)), $_.F.identity);
+			})||[];
         }else {
             throw new Error();
         }
@@ -1066,7 +1069,7 @@
         if(!$_.Bom.features.getElementsByTagName){
             var res = element.getElementsByTagName(tag);
             if(tag==='*'){
-                return $_.A.filter(res, function(e){return e.nodeType === 1});
+                return $_.A.filter(res, function(e){return e.nodeType === 1})||[];
             }
             return res;
         }

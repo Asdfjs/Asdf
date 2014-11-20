@@ -830,11 +830,13 @@
         if(isNotObject(obj)) throw new TypeError();
         var k = isString(key)?key.split('.'):key;
         if(isNotArray(k)) throw new TypeError();
+		var isFalse = false;
         return Asdf.A.reduce(k, function(acc, a){
-            if(acc == defult) return defult;
+            if(isFalse) return defult;
             if(has(acc, a)){
                 return acc[a];
             }
+			isFalse = true;
             return defult;
         }, obj);
     }
@@ -1002,7 +1004,8 @@
     $_.R = {
         FN_DEF: /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)\s*\{([\s\S]*)\}\s*$/m,
         FN_ARG_SPLIT: /,/,
-        STRIP_COMMENTS: /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg
+        STRIP_COMMENTS: /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg,
+        FN_NATIVE: /^[^{]+\{\s*\[native \w/
     };
     $_.O.extend($_.R, {
     });
@@ -3555,6 +3558,10 @@
         return Math.max(min, Math.min(max, n));
     }
 
+    function times(count, fn) {
+        if($_.O.isNotNumber(count)||!$_.O.isFunction(fn)) throw new TypeError();
+        return $_.A.each(range(count), fn);
+    }
 
     $_.O.extend($_.N, {
 		sum: sum,
@@ -3583,7 +3590,8 @@
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
         isFinite:isFinite,
-        clamp:clamp
+        clamp:clamp,
+        times:times
 	});
 })(Asdf);;(function($_) {
 	$_.P = {};
@@ -3674,8 +3682,8 @@
 })(Asdf);
 ;(function($_) {
 	$_.Bom = {};
-    var alwaysFalse = $_.F.toFunction(false);
-    var rnative = /^[^{]+\{\s*\[native \w/;
+    var alwaysFalse = $_.F.alwaysFalse;
+    var rnative = $_.R.FN_NATIVE;
 	var Browser = getBrowser(window);
     function getBrowser(win) {
         var ua = win.navigator.userAgent;
@@ -3737,6 +3745,45 @@
             return !div.getElementsByTagName('tbody').length;
         }, alwaysFalse, _reset)(div);
         support.qsa = rnative.test(doc.querySelectorAll);
+        support.qsaNotSupport = (function(){
+            if(!support.qsa) return $_.F.alwaysFalse;
+            var rbuggyQSA = [];
+            var whitespace = "[\\x20\\t\\r\\n\\f]";
+            var booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped";
+            $_.F.errorHandler(function(div){
+                div.innerHTML = "<select msallowcapture=''>" +
+                "<option id='d\f]' selected=''></option></select>";
+                if ( div.querySelectorAll("[msallowcapture^='']").length ) {
+                    rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:''|\"\")" );
+                }
+                if ( !div.querySelectorAll("[selected]").length ) {
+                    rbuggyQSA.push( "\\[" + whitespace + "*(?:value|" + booleans + ")" );
+                }
+                if ( !div.querySelectorAll("[id~=d]").length ) {
+                    rbuggyQSA.push("~=");
+                }
+                if ( !div.querySelectorAll(":checked").length ) {
+                    rbuggyQSA.push(":checked");
+                }
+            }, alwaysFalse, _reset)(div);
+            $_.F.errorHandler(function(div){
+                var input = doc.createElement("input");
+                input.setAttribute( "type", "hidden" );
+                div.appendChild( input ).setAttribute( "name", "D" );
+                if ( div.querySelectorAll("[name=d]").length ) {
+                    rbuggyQSA.push( "name" + whitespace + "*[*^$|!~]?=" );
+                }
+                if ( !div.querySelectorAll(":enabled").length ) {
+                    rbuggyQSA.push( ":enabled", ":disabled" );
+                }
+                div.querySelectorAll("*,:x");
+                rbuggyQSA.push(",.*:");
+            }, alwaysFalse, _reset)(div);
+            rbuggyQSA = rbuggyQSA.length && new RegExp( rbuggyQSA.join("|") );
+            return function(selector){
+                return rbuggyQSA&&rbuggyQSA.test(selector);
+            }
+        })();
         support.appendChecked =$_.F.errorHandler(function(div,input, fragment){
             input.type = 'checkbox';
             input.checked = true;
@@ -4047,10 +4094,10 @@
      */
 	function walk(element, fun, context) {
 		context = context || this;
-		var i, childNodes = $_.A.toArray(element.childNodes);
+		var i, ch = childNodes(element);
 		fun.call(context, element);
-		for (i = 0; i < childNodes.length ; i++) {
-			walk(childNodes[i], fun, context);
+		for (i = 0; i < ch.length ; i++) {
+			walk(ch[i], fun, context);
 		}
 		return element;
 	}
@@ -4362,7 +4409,7 @@
 	function childNodes(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
-        if(!element.firstChild) return []
+        if(!element.firstChild) return [];
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
     function children(element){
@@ -4672,6 +4719,14 @@
 			return element;
 		}
 	}
+	function hasAttr(element, name){
+		if($_.R.FN_NATIVE.test(element.querySelectorAll)){
+			element.hasAttribute(element, name);
+		}
+		element = element.getAttributeNode(name);
+		return !!(element && (element.specified || element.nodeValue));
+
+	}
 	function removeAttr(element, name) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4847,16 +4902,9 @@
 	function hasClass(element, name) {
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
-		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
+		return !!element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
-/*
-	function find(element, selector, results, seed){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		results = results||[];
-		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
-	}
-*/
+
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
 	function querySelectorAll(element, selector, results) {
         results = results||[];
@@ -4873,7 +4921,7 @@
 				return $_.A.merge(results,getElementsByClassName(element, m));
 			}
         }
-		if(element.querySelectorAll){
+		if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector)){
 			var nid, old;
 			nid = old = $_.Utils.makeuid();
 			var nel = element;
@@ -4903,8 +4951,8 @@
 				}
 
 			}
-			throw new Error();
 		}
+		throw new Error('Do not support this browser. please use another selector for example (sizzle, slick)');
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -5064,9 +5112,12 @@
         if(element.getElementsByClassName){
             return element.getElementsByClassName(className);
         }else if(element.querySelectorAll){
-            return element.querySelectorAll('.'+className);
+            return element.querySelectorAll('.'+className.replace(/\s+/,'.'));
         }else if(element.getElementsByTagName){
-            return $_.A.filter(element.getElementsByTagName('*'), $_.F.partial(hasClass, undefined, className));
+			var cls = className.split(' ');
+			return $_.A.filter(element.getElementsByTagName('*'), function(el){
+				return $_.A.every($_.A.map(cls, $_.F.curry(hasClass, el)), $_.F.identity);
+			})||[];
         }else {
             throw new Error();
         }
@@ -5075,7 +5126,7 @@
         if(!$_.Bom.features.getElementsByTagName){
             var res = element.getElementsByTagName(tag);
             if(tag==='*'){
-                return $_.A.filter(res, function(e){return e.nodeType === 1});
+                return $_.A.filter(res, function(e){return e.nodeType === 1})||[];
             }
             return res;
         }
@@ -5241,6 +5292,51 @@
             results.push(query.snapshotItem(i));
         return results;
     }
+	function getOwnerDocument(node){
+		if($_.O.isNotNode(node)) throw new TypeError();
+		return $_.O.isDocument(node)? node : node.ownerDocument||node.document;
+	}
+	function getOwnerWindow(node){
+		if($_.O.isNotNode(node)) throw new TypeError();
+		return getWindow(getOwnerDocument(node));
+	}
+	function getFrameContentDocument(frame){
+		return frame.contentDocument||frame.contentWindow||document
+	}
+	function findNodes(node, p, context){
+		var res = [];
+		walk(node, function(el){
+			if(p.call(context, el))
+				res.push(el);
+		});
+		return res;
+	}
+	var TAGS_TO_IGNORE = {
+		'SCRIPT': 1,
+		'STYLE': 1,
+		'HEAD': 1,
+		'IFRAME': 1,
+		'OBJECT': 1
+	};
+	var PREDEFINED_TAG_VALUES_ = {'IMG': ' ', 'BR': '\n'};
+	function getNodeAtOffset(parent, offset){
+		var stack = [parent], pos = 0, cur = null;
+		while (stack.length > 0 && pos < offset) {
+			cur = stack.pop();
+			if (cur.nodeName in TAGS_TO_IGNORE) {
+			} else if (cur.nodeType == 3) {
+				var text = cur.nodeValue.replace(/(\r\n|\r|\n)/g, '').replace(/ +/g, ' ');
+				pos += text.length;
+			} else if (cur.nodeName in PREDEFINED_TAG_VALUES_) {
+				pos += PREDEFINED_TAG_VALUES_[cur.nodeName].length;
+			} else {
+				for (var i = cur.childNodes.length - 1; i >= 0; i--) {
+					stack.push(cur.childNodes[i]);
+				}
+			}
+		}
+		return {node: cur, remainder:cur ? cur.nodeValue.length + offset - pos - 1 : 0}
+	}
 
 	extend($_.Element,  {
 		walk: walk,
@@ -5274,6 +5370,7 @@
         eq: eq,
         last:last,
 		attr: attr,
+		hasAttr:hasAttr,
 		removeAttr: removeAttr,
 		prop: prop,
 		removeProp: removeProp,
@@ -5298,6 +5395,9 @@
         has: data.has,
         del: data.del,
         getWindow: getWindow,
+		getOwnerDocument:getOwnerDocument,
+		getOwnerWindow:getOwnerWindow,
+		getFrameContentDocument:getFrameContentDocument,
         offsetParent: offsetParent,
         getElementsByClassName:getElementsByClassName,
         contains:contains,
@@ -5307,7 +5407,9 @@
         getElementsByTagName:getElementsByTagName,
         outerHTML:outerHTML,
         getNTH:getNTH,
-		getElementById:getElementById
+		getElementById:getElementById,
+		findNodes:findNodes,
+		getNodeAtOffset:getNodeAtOffset
 	});
     $_.O.each(pseudos, function(v,k){
         $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
@@ -5326,7 +5428,7 @@
     // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
         identifier = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",
     // Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
-        attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
+        attrs = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
             // Operator (capture 2)
             "*([*^$|!~]?=)" + whitespace +
             // "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
@@ -5337,7 +5439,7 @@
             // 1. quoted (capture 3; capture 4 or capture 5)
             "('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|" +
             // 2. simple (capture 6)
-            "((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|" +
+            "((?:\\\\.|[^\\\\()[\\]]|" + attrs + ")*)|" +
             // 3. anything else (capture 2)
             ".*" +
             ")\\)|)",
@@ -5357,7 +5459,7 @@
             "ID": new RegExp( "^#(" + identifier + ")" ),
             "CLASS": new RegExp( "^\\.(" + identifier + ")" ),
             "TAG": new RegExp( "^(" + identifier + "|[*])" ),
-            "ATTR": new RegExp( "^" + attributes ),
+            "ATTR": new RegExp( "^" + attrs ),
             "PSEUDO": new RegExp( "^" + pseudos ),
             "CHILD": new RegExp( "^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\(" + whitespace +
                 "*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace +
@@ -5430,7 +5532,7 @@
         rinputs = /^(?:input|select|textarea|button)$/i,
         rheader = /^h\d$/i,
 
-        rnative = /^[^{]+\{\s*\[native \w/,
+        rnative = $_.R.FN_NATIVE,
 
     // Easily-parseable/retrievable ID or TAG or CLASS selectors
         rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,
@@ -5454,7 +5556,6 @@
                     String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
         };
     var _rbuggyMathches = [];
-    var _rbuggyQSA = [];
 
     var opposite = {
         'parentNode': 'childNode',
@@ -5463,18 +5564,74 @@
         'nextSibling': 'previousSibling'
     };
     var combinators = {
-        ' ': {dir: 'parentNode', first:true}
-
+        ' ': function(node, tag, id, classes, attrs, pseudos){
+            var item;
+            if(id){
+                item = $_.Element.getElementById(node, id);
+                if(!item|| !_matchSelector(item, tag, id, classes, attrs, pseudos))
+                    return [];
+                return [item];
+            }
+            item = classes? $_.Element.getElementsByClassName(node, classes.join(' ')): tag?$_.Element.getElementsByTagName(node, tag):[];
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                })||[];
+        },
+        '>': function(node, tag, id, classes, attr, pseudos){
+            var item = $_.Element.children(node);
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                })||[];
+        },
+        '+':function(node, tag, id, classes, attr, pseudos){
+            var item = $_.Element.next(node);
+            if(!item|| !_matchSelector(item, tag, id, classes, attrs, pseudos)) return [];
+            return [item];
+        },
+        '~':function(node, tag, id, classes, attr, pseudos){
+            var item = $_.Element.nexts(node);
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                })||[];
+        }
     };
+    function _matchSelector(node, tag, id, classes, attrs, pseudos){
+        if (id && node.getAttribute('id') != id) return false;
+        if(tag) {
+            var nodeName = node.nodeName.toUpperCase();
+            if (tag == '*') {
+                if (nodeName < '@') return false; // Fix for comment nodes and closed nodes
+            } else {
+                if (nodeName != tag.toUpperCase()) return false;
+            }
+        }
+        var i, part;
+        if (classes) for (i = classes.length; i--;){
+            if (!$_.Element.hasClass(node, classes[i])) return false;
+        }
+        if (attrs) for (i = attrs.length; i--;){
+            part = attrs[i];
+            if (part.operator ? !part.test($_.Element.attr(node, 'class')) : !$_.Element.hasAttr(node, 'class')) return false;
+        }
+        if (pseudos) for (i = pseudos.length; i--;){
+            part = pseudos[i];
+            if (!_matchPseudo(node, part.key, part.value)) return false;
+        }
+        return true;
+    }
+    function _matchPseudo(){
+        return true;
+    }
 
     var filter = 'ID,TAG,CLASS,ATTR,CHILD,PSEUDO'.split(',');
     function _tokenize(selector){
         var str = selector,res = [], matched, match, tokens;
         while(str){
-            if(!matched)
+            if(!matched||(match = rcomma.exec(str))) {
+                if (match)
+                    str = str.slice(match[0].length) || str;
                 res.push((tokens = []));
-            else if((match = rcomma.exec(str)))
-                str = str.slice(match[0].length)||str;
+            }
             matched = false;
             if((match = rcombinators.exec(str))){
                 matched = match.shift();
@@ -5490,7 +5647,7 @@
                     tokens.push({
                         value:matched,
                         type:type,
-                        matcheds:match
+                        matches:match
                     });
                     str = str.slice(matched.length);
                 }
@@ -5503,18 +5660,54 @@
         return res;
     }
     var tokenize = $_.F.compose($_.F.memoize(_tokenize, function(str){return str+' '}), $_.O.clone);
-    function select(expression, element, results, seed){
+    function _findMerge(res, o, combinator){
+        $_.N.times(res.length, function(){
+            var node = res.shift();
+            $_.A.merge(res,combinator(node, o.TAG, o.ID, o.CLASS.length?o.CLASS:undefined,  o.ATTR.length?o.ATTR:undefined, o.PSEUDO.length?o.PSEUDO:undefined));
+        });
+    }
+    function select(expression, element, results){
         results = results||[];
         element = element || document;
-        return _select(expression.replace(rtrim, '$1'), element, results, seed);
+        expression = expression.replace(rtrim, '$1');
+        var tokens = tokenize(expression);
+        var types = filter;
+        return $_.A.reduce(tokens, function(res, token){
+            var i = 0;
+            var t, r = [element], combinator = combinators[' '], o = {
+                PSEUDO:[],
+                CLASS:[],
+                ATTR:[]
+            };
+
+            while(t = token[i++]){
+                var value = t.value;
+                var type = t.type
+                if($_.A.include(types, type)){
+                    if(type === 'ID'|| type==='CLASS')
+                        value = value.substring(1);
+                    o[type]? o[type].push(value):(o[type]= value);
+                }
+                else {
+                    _findMerge(r, o, combinator);
+                    o = {
+                        PSEUDO:[],
+                        CLASS:[],
+                        ATTR:[]
+                    }, combinator = combinators[t.type];
+                }
+            }
+            _findMerge(r, o, combinator);
+            return $_.A.unique($_.A.merge(res,r)).sort($_.Element.compareNode);
+        }, results);
     }
-    function _select(expression, element, results, seed){
-    }
+
     function toSelector(tokens){
         return $_.A.reduce(tokens, function(str, i){
             return str+ i.value;
         }, '')
     }
+    /*
     function markFunction(fn){
         fn[expando] = true;
         return fn;
@@ -5693,8 +5886,9 @@
     }
     //Asdf.Selector.ofnToElements(Asdf.Selector.oToOfn([{tagName: 'body'}, {and:{id: 'qunit',tagName:'div'}}]));
 
-
+    */
     $_.O.extend(o, {
+        /*
         descentors: descentors,
         ancestor: ancestor,
         ancestors: ancestors,
@@ -5707,8 +5901,10 @@
         ofnToElements:ofnToElements,
         compositFn:compositFn,
         oToOfn:oToOfn,
+        */
         tokenize:tokenize,
-        toSelector:toSelector
+        toSelector:toSelector,
+        select:select
     })
 })(Asdf);;(function ($_) {
 	$_.Template = {};
@@ -6637,7 +6833,7 @@
         var indent = 0;
         var res = {};
         if(typeof console === 'undefined') return null;
-        if( !console.group ){
+        if( !console.group || $_.O.isNotFunction(console.group) ){
             res.log =  function(str){
                 return console.log($_.S.times(' ', indent) + str);
             };

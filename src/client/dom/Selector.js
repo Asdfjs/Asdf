@@ -149,10 +149,35 @@
     };
     var combinators = {
         ' ': function(node, tag, id, classes, attrs, pseudos){
+            var item;
             if(id){
+                item = $_.Element.getElementById(node, id);
+                if(!item|| !_matchSelector(item, tag, id, classes, attrs, pseudos))
+                    return [];
+                return [item];
             }
+            item = classes? $_.Element.getElementsByClassName(node, classes.join(' ')): tag?$_.Element.getElementsByTagName(node, tag):[];
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                })||[];
+        },
+        '>': function(node, tag, id, classes, attr, pseudos){
+            var item = $_.Element.children(node);
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                })||[];
+        },
+        '+':function(node, tag, id, classes, attr, pseudos){
+            var item = $_.Element.next(node);
+            if(!item|| !_matchSelector(item, tag, id, classes, attrs, pseudos)) return [];
+            return [item];
+        },
+        '~':function(node, tag, id, classes, attr, pseudos){
+            var item = $_.Element.nexts(node);
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                })||[];
         }
-
     };
     function _matchSelector(node, tag, id, classes, attrs, pseudos){
         if (id && node.getAttribute('id') != id) return false;
@@ -161,13 +186,12 @@
             if (tag == '*') {
                 if (nodeName < '@') return false; // Fix for comment nodes and closed nodes
             } else {
-                if (nodeName != tag) return false;
+                if (nodeName != tag.toUpperCase()) return false;
             }
         }
-        var i, part, cls;
+        var i, part;
         if (classes) for (i = classes.length; i--;){
-            cls = $_.Element.attr(node, 'class');
-            if (!(cls && classes[i].regexp.test(cls))) return false;
+            if (!$_.Element.hasClass(node, classes[i])) return false;
         }
         if (attrs) for (i = attrs.length; i--;){
             part = attrs[i];
@@ -187,10 +211,11 @@
     function _tokenize(selector){
         var str = selector,res = [], matched, match, tokens;
         while(str){
-            if(!matched)
+            if(!matched||(match = rcomma.exec(str))) {
+                if (match)
+                    str = str.slice(match[0].length) || str;
                 res.push((tokens = []));
-            else if((match = rcomma.exec(str)))
-                str = str.slice(match[0].length)||str;
+            }
             matched = false;
             if((match = rcombinators.exec(str))){
                 matched = match.shift();
@@ -206,7 +231,7 @@
                     tokens.push({
                         value:matched,
                         type:type,
-                        matcheds:match
+                        matches:match
                     });
                     str = str.slice(matched.length);
                 }
@@ -219,18 +244,54 @@
         return res;
     }
     var tokenize = $_.F.compose($_.F.memoize(_tokenize, function(str){return str+' '}), $_.O.clone);
-    function select(expression, element, results, seed){
+    function _findMerge(res, o, combinator){
+        $_.N.times(res.length, function(){
+            var node = res.shift();
+            $_.A.merge(res,combinator(node, o.TAG, o.ID, o.CLASS.length?o.CLASS:undefined,  o.ATTR.length?o.ATTR:undefined, o.PSEUDO.length?o.PSEUDO:undefined));
+        });
+    }
+    function select(expression, element, results){
         results = results||[];
         element = element || document;
-        return _select(expression.replace(rtrim, '$1'), element, results, seed);
+        expression = expression.replace(rtrim, '$1');
+        var tokens = tokenize(expression);
+        var types = filter;
+        return $_.A.reduce(tokens, function(res, token){
+            var i = 0;
+            var t, r = [element], combinator = combinators[' '], o = {
+                PSEUDO:[],
+                CLASS:[],
+                ATTR:[]
+            };
+
+            while(t = token[i++]){
+                var value = t.value;
+                var type = t.type
+                if($_.A.include(types, type)){
+                    if(type === 'ID'|| type==='CLASS')
+                        value = value.substring(1);
+                    o[type]? o[type].push(value):(o[type]= value);
+                }
+                else {
+                    _findMerge(r, o, combinator);
+                    o = {
+                        PSEUDO:[],
+                        CLASS:[],
+                        ATTR:[]
+                    }, combinator = combinators[t.type];
+                }
+            }
+            _findMerge(r, o, combinator);
+            return $_.A.unique($_.A.merge(res,r)).sort($_.Element.compareNode);
+        }, results);
     }
-    function _select(expression, element, results, seed){
-    }
+
     function toSelector(tokens){
         return $_.A.reduce(tokens, function(str, i){
             return str+ i.value;
         }, '')
     }
+    /*
     function markFunction(fn){
         fn[expando] = true;
         return fn;
@@ -409,8 +470,9 @@
     }
     //Asdf.Selector.ofnToElements(Asdf.Selector.oToOfn([{tagName: 'body'}, {and:{id: 'qunit',tagName:'div'}}]));
 
-
+    */
     $_.O.extend(o, {
+        /*
         descentors: descentors,
         ancestor: ancestor,
         ancestors: ancestors,
@@ -423,7 +485,9 @@
         ofnToElements:ofnToElements,
         compositFn:compositFn,
         oToOfn:oToOfn,
+        */
         tokenize:tokenize,
-        toSelector:toSelector
+        toSelector:toSelector,
+        select:select
     })
 })(Asdf);

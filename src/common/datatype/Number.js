@@ -137,6 +137,10 @@
         return Math.max(min, Math.min(max, n));
     }
 
+    function times(count, fn) {
+        if($_.O.isNotNumber(count)||!$_.O.isFunction(fn)) throw new TypeError();
+        return $_.A.each(range(count), fn);
+    }
 
     $_.O.extend($_.N, {
 		sum: sum,
@@ -165,6 +169,7 @@
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
         isFinite:isFinite,
-        clamp:clamp
+        clamp:clamp,
+        times:times
 	});
 })(Asdf);

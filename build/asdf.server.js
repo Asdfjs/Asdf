@@ -823,11 +823,13 @@ module.exports = Asdf;
         if(isNotObject(obj)) throw new TypeError();
         var k = isString(key)?key.split('.'):key;
         if(isNotArray(k)) throw new TypeError();
+		var isFalse = false;
         return Asdf.A.reduce(k, function(acc, a){
-            if(acc == defult) return defult;
+            if(isFalse) return defult;
             if(has(acc, a)){
                 return acc[a];
             }
+			isFalse = true;
             return defult;
         }, obj);
     }
@@ -3540,6 +3542,10 @@ module.exports = Asdf;
         return Math.max(min, Math.min(max, n));
     }
 
+    function times(count, fn) {
+        if($_.O.isNotNumber(count)||!$_.O.isFunction(fn)) throw new TypeError();
+        return $_.A.each(range(count), fn);
+    }
 
     $_.O.extend($_.N, {
 		sum: sum,
@@ -3568,7 +3574,8 @@ module.exports = Asdf;
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
         isFinite:isFinite,
-        clamp:clamp
+        clamp:clamp,
+        times:times
 	});
 })(Asdf);;(function($_) {
 	$_.P = {};
@@ -4458,7 +4465,7 @@ module.exports = Asdf;
         var indent = 0;
         var res = {};
         if(typeof console === 'undefined') return null;
-        if( !console.group ){
+        if( !console.group || $_.O.isNotFunction(console.group) ){
             res.log =  function(str){
                 return console.log($_.S.times(' ', indent) + str);
             };
