@@ -895,7 +895,8 @@
 
 			}
 		}
-		throw new Error('Do not support this browser. please use another selector for example (sizzle, slick)');
+		return $_.Selector.select(selector, element, results)
+		//throw new Error('Do not support this browser. please use another selector for example (sizzle, slick)');
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -1088,15 +1089,13 @@
             if(el && el.parentNode){
                 if(el.id === id)
                     return el;
-            }else{
-                return null;
             }
         } else {
             if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
                 return el;
             }
         }
-		throw new Error();
+		return null;
     }
     function _isParent(p, c){
         if (c) do {

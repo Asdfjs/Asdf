@@ -4952,7 +4952,8 @@
 
 			}
 		}
-		throw new Error('Do not support this browser. please use another selector for example (sizzle, slick)');
+		return $_.Selector.select(selector, element, results)
+		//throw new Error('Do not support this browser. please use another selector for example (sizzle, slick)');
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -5145,15 +5146,13 @@
             if(el && el.parentNode){
                 if(el.id === id)
                     return el;
-            }else{
-                return null;
             }
         } else {
             if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
                 return el;
             }
         }
-		throw new Error();
+		return null;
     }
     function _isParent(p, c){
         if (c) do {
@@ -5682,7 +5681,7 @@
 
             while(t = token[i++]){
                 var value = t.value;
-                var type = t.type
+                var type = t.type;
                 if($_.A.include(types, type)){
                     if(type === 'ID'|| type==='CLASS')
                         value = value.substring(1);
@@ -5698,7 +5697,7 @@
                 }
             }
             _findMerge(r, o, combinator);
-            return $_.A.unique($_.A.merge(res,r)).sort($_.Element.compareNode);
+            return $_.A.unique($_.A.merge(res,r));
         }, results);
     }
 

@@ -266,7 +266,7 @@
 
             while(t = token[i++]){
                 var value = t.value;
-                var type = t.type
+                var type = t.type;
                 if($_.A.include(types, type)){
                     if(type === 'ID'|| type==='CLASS')
                         value = value.substring(1);
@@ -282,7 +282,7 @@
                 }
             }
             _findMerge(r, o, combinator);
-            return $_.A.unique($_.A.merge(res,r)).sort($_.Element.compareNode);
+            return $_.A.unique($_.A.merge(res,r));
         }, results);
     }
 
