@@ -855,6 +855,7 @@
         if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
             return results;
         }
+		selector = $_.S.trim(selector);
         if(nodeType !== 11 && (match = rquickExpr.exec(selector))){
             if(m = match[1]){
                 return $_.A.append(results,getElementById(element, m));

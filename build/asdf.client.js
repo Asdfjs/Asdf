@@ -4912,6 +4912,7 @@
         if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
             return results;
         }
+		selector = $_.S.trim(selector);
         if(nodeType !== 11 && (match = rquickExpr.exec(selector))){
             if(m = match[1]){
                 return $_.A.append(results,getElementById(element, m));
@@ -5576,18 +5577,18 @@
                     return _matchSelector(el, tag, id, classes, attrs, pseudos);
                 })||[];
         },
-        '>': function(node, tag, id, classes, attr, pseudos){
+        '>': function(node, tag, id, classes, attrs, pseudos){
             var item = $_.Element.children(node);
             return $_.A.filter(item, function(el) {
                     return _matchSelector(el, tag, id, classes, attrs, pseudos);
                 })||[];
         },
-        '+':function(node, tag, id, classes, attr, pseudos){
+        '+':function(node, tag, id, classes, attrs, pseudos){
             var item = $_.Element.next(node);
             if(!item|| !_matchSelector(item, tag, id, classes, attrs, pseudos)) return [];
             return [item];
         },
-        '~':function(node, tag, id, classes, attr, pseudos){
+        '~':function(node, tag, id, classes, attrs, pseudos){
             var item = $_.Element.nexts(node);
             return $_.A.filter(item, function(el) {
                     return _matchSelector(el, tag, id, classes, attrs, pseudos);
@@ -5697,7 +5698,7 @@
                 }
             }
             _findMerge(r, o, combinator);
-            return $_.A.unique($_.A.merge(res,r));
+            return $_.A.unique($_.A.merge(res,r)).sort($_.Element.compareNode);
         }, results);
     }
 
