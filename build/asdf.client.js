@@ -4905,10 +4905,40 @@
 		return !!element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
 
+	function _findByQSA(element, selector){
+		var nid, old;
+		nid = old = $_.Utils.makeuid();
+		var nel = element;
+		var nsel = $_.O.isDocument(element)&&selector;
+		if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
+			var groups = $_.Selector.tokenize(selector);
+			if((old = attr(element,'id'))) {
+				nid = old.replace(/'|\\/g, "\\$&");
+			} else {
+				attr(element,'id', nid);
+			}
+			nid = "[id='"+nid+"'] ";
+			groups =  $_.A.map(groups, function(v){
+				return nid + $_.Selector.toSelector(v);
+			});
+			nel = /[+~]/.test(selector) && parent(element)||element;
+			nsel = groups.join(',');
+		}
+		if(nsel){
+			try{
+				return  nel.querySelectorAll(nsel);
+			} catch(e){
+			}finally{
+				if(!old){
+					removeAttr(element, 'id');
+				}
+			}
+		}
+	}
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
 	function querySelectorAll(element, selector, results) {
         results = results||[];
-        var match,m, nodeType = element.nodeType;
+        var match,m, nodeType = element.nodeType, els;
         if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
             return results;
         }
@@ -4922,39 +4952,10 @@
 				return $_.A.merge(results,getElementsByClassName(element, m));
 			}
         }
-		if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector)){
-			var nid, old;
-			nid = old = $_.Utils.makeuid();
-			var nel = element;
-			var nsel = $_.O.isNotElement(element)&&selector;
-			if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
-				var groups = $_.Selector.tokenize(selector);
-				if((old = attr(element,'id'))) {
-					nid = old.replace(/'|\\/g, "\\$&");
-				} else {
-					attr(element,'id', nid);
-				}
-				nid = "[id='"+nid+"'] ";
-				groups =  $_.A.map(groups, function(v){
-					return nid + $_.Selector.toSelector(v);
-				});
-				nel = /[+~]/.test(selector) && parent(element)||element;
-				nsel = groups.join(',');
-			}
-			if(nsel){
-				try{
-					return $_.A.merge(results, nel.querySelectorAll(nsel));
-				} catch(e){
-				}finally{
-					if(!old){
-						removeAttr(element, 'id');
-					}
-				}
-
-			}
+		if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector) && (els = _findByQSA(element, selector))){
+			return $_.A.merge(results,els);
 		}
-		return $_.Selector.select(selector, element, results)
-		//throw new Error('Do not support this browser. please use another selector for example (sizzle, slick)');
+		return $_.Selector.select(selector, element, results);
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -5114,7 +5115,7 @@
         if(element.getElementsByClassName){
             return element.getElementsByClassName(className);
         }else if(element.querySelectorAll){
-            return element.querySelectorAll('.'+className.replace(/\s+/,'.'));
+			return _findByQSA(element, '.'+className.replace(/\s+/,'.'))||[];
         }else if(element.getElementsByTagName){
 			var cls = className.split(' ');
 			return $_.A.filter(element.getElementsByTagName('*'), function(el){
