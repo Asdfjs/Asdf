@@ -521,7 +521,7 @@
             },
             autoNumber: true
         };
-        $_.A.each(['O','S','F','A','N'], function(v){
+        $_.A.each(['O','F','A','N','S'], function(v){
             $_.O.extend(conf.functions, $_[v]);
         });
         $_.O.extend(conf, c);

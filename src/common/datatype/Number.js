@@ -139,7 +139,9 @@
 
     function times(count, fn) {
         if($_.O.isNotNumber(count)||!$_.O.isFunction(fn)) throw new TypeError();
-        return $_.A.each(range(count), fn);
+        for(var i = 0; i < count; i++){
+            fn(i);
+        }
     }
 
     $_.O.extend($_.N, {

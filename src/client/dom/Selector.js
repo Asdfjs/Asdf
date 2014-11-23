@@ -148,66 +148,106 @@
         'nextSibling': 'previousSibling'
     };
     var combinators = {
-        ' ': function(node, tag, id, classes, attrs, pseudos){
-            var item;
-            if(id){
-                item = $_.Element.getElementById(node, id);
-                if(!item|| !_matchSelector(item, tag, id, classes, attrs, pseudos))
+        ' ': function(node, token){
+            var item, i=0;
+            var type = token[0].type;
+            if(type === 'ID'){
+                item = $_.Element.getElementById(node, token[0].matches[0]);
+                if(!item|| !_matchSelector(item, _matchFn(token.slice(1))))
                     return [];
                 return [item];
             }
-            item = classes? $_.Element.getElementsByClassName(node, classes.join(' ')): tag?$_.Element.getElementsByTagName(node, tag):[];
+            item = (type === 'CLASS')? ($_.Element.getElementsByClassName(node, $_.A.reduce(token, function(acc, v){
+                if(v.type === 'CLASS') {acc.push(v.matches[0]);i++;}
+                return acc;
+            },[]).join(' '))): type==='TAG'?$_.Element.getElementsByTagName(node, token[0].matches[0]):[];
             return $_.A.filter(item, function(el) {
-                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                    return _matchSelector(el, _matchFn(token.slice(i||1)));
                 })||[];
         },
-        '>': function(node, tag, id, classes, attrs, pseudos){
+        '>': function(node, token){
             var item = $_.Element.children(node);
             return $_.A.filter(item, function(el) {
-                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                    return _matchSelector(el, _matchFn(token));
                 })||[];
         },
-        '+':function(node, tag, id, classes, attrs, pseudos){
+        '+':function(node, token){
             var item = $_.Element.next(node);
-            if(!item|| !_matchSelector(item, tag, id, classes, attrs, pseudos)) return [];
+            if(!item|| !_matchSelector(item, _matchFn(token))) return [];
             return [item];
         },
-        '~':function(node, tag, id, classes, attrs, pseudos){
+        '~':function(node, token){
             var item = $_.Element.nexts(node);
             return $_.A.filter(item, function(el) {
-                    return _matchSelector(el, tag, id, classes, attrs, pseudos);
+                    return _matchSelector(el, _matchFn(token));
                 })||[];
         }
     };
-    function _matchSelector(node, tag, id, classes, attrs, pseudos){
-        if (id && node.getAttribute('id') != id) return false;
-        if(tag) {
-            var nodeName = node.nodeName.toUpperCase();
-            if (tag == '*') {
-                if (nodeName < '@') return false; // Fix for comment nodes and closed nodes
-            } else {
-                if (nodeName != tag.toUpperCase()) return false;
+    var filters = {
+        'ID': function(id){
+            var attrId = id.replace( runescape, funescape );
+            return $_.Bom.features.getById? function(elem){
+                return elem.getAttribute("id") === attrId;
+            }:function(elem){
+                var node = typeof elem.getAttributeNode !== "undefined" && elem.getAttributeNode("id");
+                return node && node.value === attrId;
             }
-        }
-        var i, part;
-        if (classes) for (i = classes.length; i--;){
-            if (!$_.Element.hasClass(node, classes[i])) return false;
-        }
-        if (attrs) for (i = attrs.length; i--;){
-            part = attrs[i];
-            if (part.operator ? !part.test($_.Element.attr(node, 'class')) : !$_.Element.hasAttr(node, 'class')) return false;
-        }
-        if (pseudos) for (i = pseudos.length; i--;){
-            part = pseudos[i];
-            if (!_matchPseudo(node, part.key, part.value)) return false;
-        }
-        return true;
-    }
-    function _matchPseudo(){
-        return true;
-    }
+        },
+        'TAG': function(tag){
+            var nodeName = tag.replace( runescape, funescape ).toLowerCase();
+            return tag === "*" ?
+                function() { return true; } :
+                function( elem ) {
+                    return elem.nodeName && elem.nodeName.toLowerCase() === nodeName;
+                };
+        },
+        'CLASS': $_.F.memoize(function(className){
+            var pattern = new RegExp( "(^|" + whitespace + ")" + className + "(" + whitespace + "|$)" );
+            return function( elem ){
+                return pattern.test( typeof elem.className === "string" && elem.className || typeof elem.getAttribute !== "undefined" && elem.getAttribute("class") || "" );
+            }
+        }, function(c){return c+ ' '}),
+        'ATTR': function(name, op, value){
+            return function(elem) {
+                var res = $_.Element.attr(elem, name);
+                if (res == null) {
+                    return op === '!='
+                }
+                if(!op) return true;
+                return op === "=" ? res === value :
+                    op === "!=" ? res !== value :
+                        op === "^=" ? value && res.indexOf( value ) === 0 :
+                            op === "*=" ? value && res.indexOf( value ) > -1 :
+                                op === "$=" ? value && res.slice( -value.length ) === value :
+                                    op === "~=" ? ( " " + res.replace( rwhitespace, " " ) + " " ).indexOf( value ) > -1 :
+                                        op === "|=" ? res === value || res.slice( 0, value.length + 1 ) === value + "-" :
+                                            false;
+            }
+        },
+        'CHILD':function(){
 
-    var filter = 'ID,TAG,CLASS,ATTR,CHILD,PSEUDO'.split(',');
+        },
+        'PSEUDO':function(pseudo, argument){
+
+        }
+
+
+    };
+    var _matchFn = $_.F.memoize(function (tokens){
+        return $_.A.map(tokens, function(token){
+            return filters[token.type].apply(null, token.matches);
+        });
+    }, function(tokens){
+        return toSelector(tokens);
+    });
+    function _matchSelector(node, fns) {
+        for (var i = 0; i < fns.length; i++) {
+            var fn = fns[i];
+            if (!fn(node)) return false;
+        }
+        return true;
+    }
+    var filter = $_.O.keys(filters);
     function _tokenize(selector){
         var str = selector,res = [], matched, match, tokens;
         while(str){
@@ -244,11 +284,28 @@
         return res;
     }
     var tokenize = $_.F.compose($_.F.memoize(_tokenize, function(str){return str+' '}), $_.O.clone);
-    function _findMerge(res, o, combinator){
+    function _findMerge(res, combinator, token){
         $_.N.times(res.length, function(){
             var node = res.shift();
-            $_.A.merge(res,combinator(node, o.TAG, o.ID, o.CLASS.length?o.CLASS:undefined,  o.ATTR.length?o.ATTR:undefined, o.PSEUDO.length?o.PSEUDO:undefined));
+            $_.A.merge(res,combinator(node, token));
         });
+    }
+    function compareToken(t1,t2) {
+        var m = {
+            'ID':0,
+            'TAG':2,
+            'CLASS':1,
+            'ATTR':3,
+            'PSEUDO':4
+        };
+        var res = m[t1.type] - m[t2.type];
+        if(res === 0){
+            if(t1.value < t2.value) return -1;
+            else if(t1.value > t2.value) return 1;
+            return 0;
+        }
+        return res;
+
     }
     function select(expression, element, results){
         results = results||[];
@@ -256,34 +313,20 @@
         expression = expression.replace(rtrim, '$1');
         var tokens = tokenize(expression);
         var types = filter;
-        return $_.A.reduce(tokens, function(res, token){
-            var i = 0;
-            var t, r = [element], combinator = combinators[' '], o = {
-                PSEUDO:[],
-                CLASS:[],
-                ATTR:[]
-            };
-
-            while(t = token[i++]){
-                var value = t.value;
+        results =  $_.A.reduce(tokens, function(res, token){
+            var i = 0,j = 0, t, combinator= combinators[' '],r = [element];
+            while(t=token[i++]){
                 var type = t.type;
-                if($_.A.include(types, type)){
-                    if(type === 'ID'|| type==='CLASS')
-                        value = value.substring(1);
-                    o[type]? o[type].push(value):(o[type]= value);
-                }
-                else {
-                    _findMerge(r, o, combinator);
-                    o = {
-                        PSEUDO:[],
-                        CLASS:[],
-                        ATTR:[]
-                    }, combinator = combinators[t.type];
+                if(!$_.A.include(types, type)){
+                    _findMerge(r, combinator, token.slice(j, i-1).sort(compareToken));
+                    combinator = combinators[type];
+                    j = i;
                 }
             }
-            _findMerge(r, o, combinator);
-            return $_.A.unique($_.A.merge(res,r)).sort($_.Element.compareNode);
+            _findMerge(r, combinator, token.slice(j).sort(compareToken));
+            return $_.A.unique($_.A.merge(res,r));
         }, results);
+        return results.sort($_.Element.compareNode);
     }
 
     function toSelector(tokens){

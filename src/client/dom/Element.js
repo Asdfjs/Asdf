@@ -1088,9 +1088,8 @@
         var el;
         if($_.O.isDocument(element)){
             el = element.getElementById(id);
-            if(el && el.parentNode){
-                if(el.id === id)
-                    return el;
+            if(el && el.parentNode && el.id === id){
+				return el;
             }
         } else {
             if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
@@ -1224,7 +1223,11 @@
         },
         'selected': function(element){
             return element.selected;
-        }
+        },
+		'target': function(element){
+			var hash = window.location && window.location.hash;
+			return hash && hash.slice( 1 ) === element.id;
+		}
 
     };
     function getElementsByXPath(element, expression){

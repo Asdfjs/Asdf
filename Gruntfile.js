@@ -74,7 +74,7 @@ module.exports = function(grunt) {
             qunit: ['test/test.html']
         },
         jshint: {
-            files: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
+            files: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js', '!test/speed/**/*.js'],
             options: {
                 // options here to override JSHint defaults
                 globals: {

@@ -137,6 +137,10 @@
 	function merge( first, second ) {
 		if ($_.O.isNotCollection(first)||$_.O.isNotCollection(second))
 			throw new TypeError();
+		if(first.push){
+			first.push.apply(first, second);
+			return first;
+		}
 		var fl = first.length, l = fl + second.length;
 		each(second, function (value, key,list){
 			first[fl+key] = value;

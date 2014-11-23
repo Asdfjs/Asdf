@@ -1900,6 +1900,10 @@ module.exports = Asdf;
 	function merge( first, second ) {
 		if ($_.O.isNotCollection(first)||$_.O.isNotCollection(second))
 			throw new TypeError();
+		if(first.push){
+			first.push.apply(first, second);
+			return first;
+		}
 		var fl = first.length, l = fl + second.length;
 		each(second, function (value, key,list){
 			first[fl+key] = value;
@@ -3203,7 +3207,7 @@ module.exports = Asdf;
             },
             autoNumber: true
         };
-        $_.A.each(['O','S','F','A','N'], function(v){
+        $_.A.each(['O','F','A','N','S'], function(v){
             $_.O.extend(conf.functions, $_[v]);
         });
         $_.O.extend(conf, c);
@@ -3544,7 +3548,9 @@ module.exports = Asdf;
 
     function times(count, fn) {
         if($_.O.isNotNumber(count)||!$_.O.isFunction(fn)) throw new TypeError();
-        return $_.A.each(range(count), fn);
+        for(var i = 0; i < count; i++){
+            fn(i);
+        }
     }
 
     $_.O.extend($_.N, {
