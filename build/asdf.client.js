@@ -4942,6 +4942,11 @@
 		}
 	}
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
+	function _merge(a, b){
+		if(a.length === 0)
+			return b;
+		return $_.A.merge(a,b);
+	}
 	function querySelectorAll(element, selector, results) {
         results = results||[];
         var match,m, nodeType = element.nodeType, els;
@@ -4953,13 +4958,13 @@
             if(m = match[1]){
                 return $_.A.append(results,getElementById(element, m));
             }else if(match[2]){
-				return $_.A.merge(results, getElementsByTagName(element, selector));
+				return _merge(results, getElementsByTagName(element, selector));
 			}else if((m = match[3])){
-				return $_.A.merge(results,getElementsByClassName(element, m));
+				return _merge(results,getElementsByClassName(element, m));
 			}
         }
 		if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector) && (els = _findByQSA(element, selector))){
-			return $_.A.merge(results,els);
+			return _merge(results,els);
 		}
 		return $_.Selector.select(selector, element, results);
 	}
@@ -5654,7 +5659,10 @@
 
         },
         'PSEUDO':function(pseudo, argument){
-
+            var fn = $_.Element['is'+$_.S.capitalize(pseudo)];
+            if(!fn)
+                throw new Error('unsupported pseudo:'+pseudo);
+            return $_.O.isUndefined(argument)?fn:$_.F.partial(fn, undefined, argument);
         }
 
 
@@ -5758,7 +5766,7 @@
     function toSelector(tokens){
         return $_.A.reduce(tokens, function(str, i){
             return str+ i.value;
-        }, '')
+        }, '');
     }
     /*
     function markFunction(fn){

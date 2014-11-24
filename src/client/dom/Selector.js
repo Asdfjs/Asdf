@@ -228,7 +228,10 @@
 
         },
         'PSEUDO':function(pseudo, argument){
-
+            var fn = $_.Element['is'+$_.S.capitalize(pseudo)];
+            if(!fn)
+                throw new Error('unsupported pseudo:'+pseudo);
+            return $_.O.isUndefined(argument)?fn:$_.F.partial(fn, undefined, argument);
         }
 
 
@@ -332,7 +335,7 @@
     function toSelector(tokens){
         return $_.A.reduce(tokens, function(str, i){
             return str+ i.value;
-        }, '')
+        }, '');
     }
     /*
     function markFunction(fn){
