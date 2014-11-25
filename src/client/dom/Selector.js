@@ -224,7 +224,11 @@
                                             false;
             }
         },
-        'CHILD':function(){
+        'CHILD':function(type, what, argument, first, last){
+            var fn = $_.Element['is'+$_.S.capitalize(type)+$_.S.capitalize(what)];
+            if(!fn)
+                throw new Error('unsupported pseudo:'+type+'_'+what);
+            return $_.F.partial(fn, undefined, argument);
 
         },
         'PSEUDO':function(pseudo, argument){
