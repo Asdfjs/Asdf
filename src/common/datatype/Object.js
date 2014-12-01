@@ -11,16 +11,27 @@
 	hasOwnProperty = ObjProto.hasOwnProperty, slice = ArrayProto.slice ;
 	
 	var objectType = {
-			FUNCTION_CLASS : '[object Function]', 
-			BOOLEAN_CLASS : '[object Boolean]', 
-			NUMBER_CLASS : '[object Number]', 
-			STRING_CLASS : '[object String]', 
-			ARRAY_CLASS : '[object Array]', 
-			DATE_CLASS : '[object Date]', 
+			FUNCTION_CLASS : '[object Function]',
+			BOOLEAN_CLASS : '[object Boolean]',
+			NUMBER_CLASS : '[object Number]',
+			STRING_CLASS : '[object String]',
+			ARRAY_CLASS : '[object Array]',
+			DATE_CLASS : '[object Date]',
 			REGEXP_CLASS : '[object RegExp]',
-			ARGUMENTS_CLASS : '[object Arguments]'
+			ARGUMENTS_CLASS : '[object Arguments]',
+			ERROR_CLASS:'[object Error]'
 	};
-	
+	var cloneableClasses = {
+		'[object Function]':false,
+		'[object Boolean]':true,
+		'[object Number]':true,
+		'[object String]':true,
+		'[object Array]':true,
+		'[object Date]':true,
+		'[object RegExp]':true,
+		'[object Arguments]':true
+	};
+
 	var partial = $_.Core.combine.partial;
 	var curry = $_.Core.combine.curry;
 	var compose = $_.Core.behavior.compose;
