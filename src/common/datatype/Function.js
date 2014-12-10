@@ -425,18 +425,10 @@
      * @param {...Function} fn
      * @returns {Function}
      */
-	/*function asyncThen(func, after, async, stop){
-        if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
-		return function(){ 
-			var res = func.apply(this, arguments); 
-			if(!res && stop) return res; 
-			return async(after) 
-		}
-	}*/
 	function asyncThen(func, after/*fns*/){
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = fns.shift();
-		return Asdf.F.wrap(fn, function(f){
+		return wrap(fn, function(f){
 			var isDone = false;
 			var arg = slice.call(arguments,1);
 			return f.apply(this, $_.A.map(fns, function(f,i){
@@ -461,6 +453,54 @@
 		return $_.A.reduceRight(fns, function(f1, f2){
 			return asyncThen(f1,f2);
 		});
+	}
+	function promise(func){
+		var su = function(o){
+			return function(){
+				if(o._status !== 'pending') return;
+				o._status = 'resolved';
+				o.arg = slice.call(arguments);
+				sequence.apply(this,$_.A.pluck(o._next,0)).apply(this, arguments);
+			}
+		};
+		var fa = function(o){
+			return function(){
+				if(o._status !== 'pending') return;
+				o._status = 'rejected';
+				o.arg = slice.call(arguments);
+				sequence.apply(this,$_.A.pluck(o._next,1)).apply(this, arguments);
+			}
+		};
+		function f(obj){
+			obj._next = [];
+			obj._status = 'pending';
+			function next(succ, fail){
+				var o = {};
+				var n = f(o);
+				if(obj._status == 'resolved'&&succ){
+					return succ.apply(this, o.arg);
+				}else if(obj._status == 'rejected'&&fail){
+					return fail.apply(this, o.arg);
+				}
+				obj._next.push([function(){
+					o.arg = slice.call(arguments);
+					succ(su(o),fa(o));
+				},function(){
+					o.arg = slice.call(arguments);
+					fail(su(o),fa(o));
+				}]);
+				return n;
+			}
+			return next;
+		}
+		function run(func){
+			var o = {};
+			var res = f(o);
+			func(su(o),fa(o));
+			return res;
+		}
+
+		return run(func);
 	}
 
     /**
@@ -791,7 +831,8 @@
         nAry:nAry,
         complement:complement,
 		alwaysFalse: toFunction(false),
-		alwaysTrue:  toFunction(true)
+		alwaysTrue:  toFunction(true),
+		promise:promise
 	}, true);
 
 })(Asdf);
