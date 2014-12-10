@@ -159,14 +159,26 @@ test("Asdf.F.trys", function(){
 });
 asyncTest("Asdf.F.asyncThen", function(){
     var b = false;
-    var f = Asdf.F.asyncThen(function(){}, function(){
+    var f = Asdf.F.asyncThen(function(f){
+        setTimeout(f, 20);
+    }, function(){
         b=true;
         ok(b, 'asyncThen ok');
         start();
-    }, function(f){
-        setTimeout(f, 200);
     });
     f();
+});
+asyncTest("Asdf.F.asyncCompose", function(){
+    var b = false;
+    function s(cb){
+        setTimeout(function(){cb(2)}, 20);
+    }
+    var f = Asdf.F.asyncCompose(s,s,s,s);
+    f(function(){
+        b=true;
+        ok(b, 'asyncCompose ok');
+        start();
+    });
 });
 asyncTest("Asdf.F.when", function(){
     Asdf.F.when(

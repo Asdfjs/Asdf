@@ -422,17 +422,45 @@
      * @memberof Asdf.F
      * @param {Function} func
      * @param {Function} after
-     * @param {Function} async
-     * @param {boolean} stop
+     * @param {...Function} fn
      * @returns {Function}
      */
-	function asyncThen(func, after, async, stop){
+	/*function asyncThen(func, after, async, stop){
         if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
 		return function(){ 
 			var res = func.apply(this, arguments); 
 			if(!res && stop) return res; 
 			return async(after) 
 		}
+	}*/
+	function asyncThen(func, after/*fns*/){
+		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+		var fn = fns.shift();
+		return Asdf.F.wrap(fn, function(f){
+			var isDone = false;
+			var arg = slice.call(arguments,1);
+			return f.apply(this, $_.A.map(fns, function(f,i){
+				if(i === 0) {
+					return function () {
+						if (isDone) return;
+						isDone = true;
+						return f.apply(this, $_.A.merge(arg, arguments))
+					};
+				}
+				return function(){
+					if(isDone) return;
+					isDone = true;
+					return f.apply(this, arguments)
+				};
+			}));
+		});
+	}
+
+	function asyncCompose(/*fns*/){
+		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+		return $_.A.reduceRight(fns, function(f1, f2){
+			return asyncThen(f1,f2);
+		});
 	}
 
     /**
@@ -746,6 +774,7 @@
         errorHandler:errorHandler,
         trys:trys,
 		asyncThen:asyncThen,
+		asyncCompose:asyncCompose,
 		toFunction:toFunction,
 		async:async,
 		when:when,
