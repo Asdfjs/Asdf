@@ -532,18 +532,19 @@
 				var n = f(o);
 				var snext = su(o);
 				var fnext = fa(o);
-				if(obj._status == 'resolved'&&succ){
-					return succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				}else if(obj._status == 'rejected'&&fail){
-					return fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				}
-				obj._next.push([function(){
-					o.arg = slice.call(arguments);
+				if(obj._status == 'resolved'){
 					succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				},function(){
-					o.arg = slice.call(arguments);
+				}else if(obj._status == 'rejected'){
 					fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				}]);
+				}else {
+					obj._next.push([function () {
+						o.arg = slice.call(arguments);
+						succ.apply(this, $_.A.merge([snext, fnext], o.arg || []));
+					}, function () {
+						o.arg = slice.call(arguments);
+						fail.apply(this, $_.A.merge([snext, fnext], o.arg || []));
+					}]);
+				}
 				return n;
 			}
 			return next;
