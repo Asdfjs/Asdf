@@ -1655,18 +1655,10 @@ module.exports = Asdf;
      * @param {...Function} fn
      * @returns {Function}
      */
-	/*function asyncThen(func, after, async, stop){
-        if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
-		return function(){ 
-			var res = func.apply(this, arguments); 
-			if(!res && stop) return res; 
-			return async(after) 
-		}
-	}*/
 	function asyncThen(func, after/*fns*/){
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = fns.shift();
-		return Asdf.F.wrap(fn, function(f){
+		return wrap(fn, function(f){
 			var isDone = false;
 			var arg = slice.call(arguments,1);
 			return f.apply(this, $_.A.map(fns, function(f,i){
@@ -1691,6 +1683,109 @@ module.exports = Asdf;
 		return $_.A.reduceRight(fns, function(f1, f2){
 			return asyncThen(f1,f2);
 		});
+	}
+
+	/**
+	 * @memberof Asdf.F
+	 * @param func
+	 * @returns {*}
+	 * @example
+	 *
+	 */
+
+	/*
+
+	var p1 = Asdf.F.promise(
+		function(s,f){
+			console.log(1);
+			setTimeout(s.bind(this, 1,2), 1000);
+		}
+	)(
+		function(s,f){
+			console.log(2);
+			console.log(arguments)
+			setTimeout(s,1000)
+		}
+	)(
+		function(s,f){
+			console.log(3);
+			setTimeout(s,1000);
+		}
+	);
+	p1(
+		function(s,f){
+			console.log(4);
+			f();
+			setTimeout(s,1000);
+		}
+	)(
+		function(s,f){
+			console.log(5);
+		},function(){
+			console.log('fail');
+		}
+	);
+	p1(
+		function(s,f){
+			console.log(6);
+			setTimeout(s,1000);
+		}
+	)(
+		function(s,f){
+			console.log(7);
+			s();
+		}
+	);
+	*/
+	function promise(func){
+		var su = function(o){
+			return function(){
+				if(o._status !== 'pending') return;
+				o._status = 'resolved';
+				o.arg = slice.call(arguments);
+				sequence.apply(this,$_.A.pluck(o._next,0)).apply(this, arguments);
+			}
+		};
+		var fa = function(o){
+			return function(){
+				if(o._status !== 'pending') return;
+				o._status = 'rejected';
+				o.arg = slice.call(arguments);
+				sequence.apply(this,$_.A.pluck(o._next,1)).apply(this, arguments);
+			}
+		};
+		function f(obj){
+			obj._next = [];
+			obj._status = 'pending';
+			function next(succ, fail){
+				var o = {};
+				var n = f(o);
+				var snext = su(o);
+				var fnext = fa(o);
+				if(obj._status == 'resolved'&&succ){
+					return succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				}else if(obj._status == 'rejected'&&fail){
+					return fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				}
+				obj._next.push([function(){
+					o.arg = slice.call(arguments);
+					succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				},function(){
+					o.arg = slice.call(arguments);
+					fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				}]);
+				return n;
+			}
+			return next;
+		}
+		function run(func){
+			var o = {};
+			var res = f(o);
+			func(su(o),fa(o));
+			return res;
+		}
+
+		return run(func);
 	}
 
     /**
@@ -2021,7 +2116,8 @@ module.exports = Asdf;
         nAry:nAry,
         complement:complement,
 		alwaysFalse: toFunction(false),
-		alwaysTrue:  toFunction(true)
+		alwaysTrue:  toFunction(true),
+		promise:promise
 	}, true);
 
 })(Asdf);

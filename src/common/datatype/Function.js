@@ -454,6 +454,59 @@
 			return asyncThen(f1,f2);
 		});
 	}
+
+	/**
+	 * @memberof Asdf.F
+	 * @param func
+	 * @returns {*}
+	 * @example
+	 *
+	 */
+
+	/*
+
+	var p1 = Asdf.F.promise(
+		function(s,f){
+			console.log(1);
+			setTimeout(s.bind(this, 1,2), 1000);
+		}
+	)(
+		function(s,f){
+			console.log(2);
+			console.log(arguments)
+			setTimeout(s,1000)
+		}
+	)(
+		function(s,f){
+			console.log(3);
+			setTimeout(s,1000);
+		}
+	);
+	p1(
+		function(s,f){
+			console.log(4);
+			f();
+			setTimeout(s,1000);
+		}
+	)(
+		function(s,f){
+			console.log(5);
+		},function(){
+			console.log('fail');
+		}
+	);
+	p1(
+		function(s,f){
+			console.log(6);
+			setTimeout(s,1000);
+		}
+	)(
+		function(s,f){
+			console.log(7);
+			s();
+		}
+	);
+	*/
 	function promise(func){
 		var su = function(o){
 			return function(){
@@ -477,17 +530,19 @@
 			function next(succ, fail){
 				var o = {};
 				var n = f(o);
+				var snext = su(o);
+				var fnext = fa(o);
 				if(obj._status == 'resolved'&&succ){
-					return succ.apply(this, o.arg);
+					return succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
 				}else if(obj._status == 'rejected'&&fail){
-					return fail.apply(this, o.arg);
+					return fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
 				}
 				obj._next.push([function(){
 					o.arg = slice.call(arguments);
-					succ(su(o),fa(o));
+					succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
 				},function(){
 					o.arg = slice.call(arguments);
-					fail(su(o),fa(o));
+					fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
 				}]);
 				return n;
 			}
