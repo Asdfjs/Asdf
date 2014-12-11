@@ -9,13 +9,35 @@
 	window.Asdf = {};
 });;(function($_) {
 	var core = $_.Core = {};
-	var nativeSlice = Array.prototype.slice, hasOwnProperty = Object.prototype.hasOwnProperty;
-	var breaker = {};
+	var nativeSlice = Array.prototype.slice;
+	var errorProto = Error.prototype,
+		objectProto = Object.prototype,
+		stringProto = String.prototype,
+		arrayProto = Array.prototype;
+	var nativeToString = objectProto.toString,
+		nativePropertyIsEnumerable = objectProto.propertyIsEnumerable,
+		nativeHasOwnProperty = objectProto.hasOwnProperty;
 	function each(object, initialization, termination, increment,statement, context) {
 		while(termination(object[initialization], initialization, object)) {
 			statement.call(context, object[initialization], initialization, object);
 			initialization = increment(initialization);
 		}
+	}
+	function namespace(/*[parent], ns_string*/) {
+		var parts, i, parent;
+		var args = Array.prototype.slice.call(arguments);
+		if (typeof args[0] === 'object') {
+			parent = args.shift();
+		}
+		parent = parent || window;
+		parts = args[0].split('.');
+		for (i = 0; i < parts.length; i++) {
+			if (typeof parent[parts[i]] === 'undefined') {
+				parent[parts[i]] = {};
+			}
+			parent = parent[parts[i]];
+		}
+		return parent;
 	}
 	var op = {
 		"+": function (a, b) {
@@ -41,7 +63,7 @@
 			function f(a, b) {
 				var key, res;
 				for(key in a){
-					if(hasOwnProperty.call(a, key))
+					if(nativeHasOwnProperty.call(a, key))
 						res = equals(a[key],b[key]);
 					if(!res) return false;
 				}
@@ -148,56 +170,258 @@
         };
     }
 	};
-    function namespace(/*[parent], ns_string*/) {
-        var parts, i, parent;
-        var args = Array.prototype.slice.call(arguments);
-        if (typeof args[0] === 'object') {
-            parent = args.shift();
-        }
-        parent = parent || window;
-        parts = args[0].split('.');
-        for (i = 0; i < parts.length; i++) {
-            if (typeof parent[parts[i]] === 'undefined') {
-                parent[parts[i]] = {};
-            }
-            parent = parent[parts[i]];
-        }
-        return parent;
-    }
-/*
-	var reg = {
-		"number": /^\d+$/,
-		"whitespace": /^\s+$/,
-		"empty": /^$/,
-		"email": /^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
+	var whitespace = (
+		// whitespace
+	' \t\x0B\f\xA0\ufeff' +
+		// line terminators
+	'\n\r\u2028\u2029' +
+		// unicode category "Zs" space separators
+	'\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000'
+	);
+	var regexp = {
+		NUMBER: /^\d+$/,
+		FN_NATIVE: RegExp('^' +
+			String(nativeToString)
+				.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+				.replace(/toString| for [^\]]+/g, '.*?') + '$'
+		),
+		"WHITESPACE": RegExp('^'+whitespace+'$'),
+		"EMPTY": /(^$)/,
+		"THIS":/\bthis\b/
 	};
-	
+
 	var objectType = {
-		FUNCTION_CLASS : '[object Function]', 
-		BOOLEAN_CLASS : '[object Boolean]', 
-		NUMBER_CLASS : '[object Number]', 
-		STRING_CLASS : '[object String]', 
-		ARRAY_CLASS : '[object Array]', 
-		DATE_CLASS : '[object Date]', 
+		FUNCTION_CLASS : '[object Function]',
+		BOOLEAN_CLASS : '[object Boolean]',
+		NUMBER_CLASS : '[object Number]',
+		STRING_CLASS : '[object String]',
+		ARRAY_CLASS : '[object Array]',
+		DATE_CLASS : '[object Date]',
+		OBJECT_CLASS: '[object Object]',
 		REGEXP_CLASS : '[object RegExp]',
 		ARGUMENTS_CLASS : '[object Arguments]',
+		ERROR_CLASS:'[object Error]'
 	};
-	
-	var nodeType = {
-		ELEMENT_NODE : 1,
-		ATTRIBUTE_NODE : 2,
-		TEXT_NODE : 3,
-		CDATA_SECTION_NODE : 4,
-		ENTITY_REFERENCE_NODE : 5,
-		ENTITY_NODE: 6,
-		PROCESSING_INSTRUCTION_NODE: 7,
-		COMMENT_NODE: 8,
-		DOCUMENT_NODE: 9,
-		DOCUMENT_TYPE_NODE: 10,
-		DOCUMENT_FRAGMENT_NODE: 11,
-		NOTATION_NODE: 12
+
+	var shadowedProps = [
+		'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+		'toLocaleString', 'toString', 'valueOf'
+	];
+	var nonEnumProps = {};
+	nonEnumProps[objectType.ARRAY_CLASS] = nonEnumProps[objectType.DATE_CLASS] = nonEnumProps[objectType.NUMBER_CLASS] = { 'constructor': true, 'toLocaleString': true, 'toString': true, 'valueOf': true };
+	nonEnumProps[objectType.BOOLEAN_CLASS] = nonEnumProps[objectType.STRING_CLASS] = { 'constructor': true, 'toString': true, 'valueOf': true };
+	nonEnumProps[objectType.ERROR_CLASS] = nonEnumProps[objectType.FUNCTION_CLASS] = nonEnumProps[objectType.REGEXP_CLASS] = { 'constructor': true, 'toString': true };
+	nonEnumProps[objectType.OBJECT_CLASS] = { 'constructor': true };
+	(function() {
+		var length = shadowedProps.length;
+		while (length--) {
+			var key = shadowedProps[length];
+			for (var className in nonEnumProps) {
+				if (nativeHasOwnProperty.call(nonEnumProps, className) && !nativeHasOwnProperty.call(nonEnumProps[className], key)) {
+					nonEnumProps[className][key] = false;
+				}
+			}
+		}
+	}());
+
+	var root = (typeof window === 'object' && window)||this;
+	var support = (function(){
+		var ctor = function() { this.x = 1; },
+			object = { '0': 1, 'length': 1 },
+			props = [];
+
+		ctor.prototype = { 'valueOf': 1, 'y': 1 };
+		for (var key in new ctor) { props.push(key); }
+		for (key in arguments) { }
+		return {
+			ArgumentsClass: nativeToString.call(arguments) === objectType.ARGUMENTS_CLASS,
+			ArgumentsObject: arguments.constructor === Object && !(arguments instanceof Array),
+			EnumErrorProps: nativePropertyIsEnumerable.call(errorProto, 'message') || nativePropertyIsEnumerable.call(errorProto, 'name'),
+			EnumPrototypes:nativePropertyIsEnumerable.call(ctor, 'prototype'),
+			FunctionToString: regexp.FN_NATIVE.test(nativeToString),
+			FunctionName: typeof Function.name === 'string',
+			EnumArguments: key === 0,
+			EnumShadows: /valueOf/.test(props),
+			EnumOwnFirst: props[0] === 'x',
+			SpliceObjects: (arrayProto.splice.call(object,0,1), !object[0]),
+			IndexedChars: ('x'[0] + Object('x')[0]) === 'xx'
+		}
+	})(1);
+
+
+	var iteratorTemplate = function(obj) {
+		var __p = 'var index, iterable = ' +
+			(obj.firstArg) +
+			', result = ' +
+			(obj.init) +
+			';\nif (!iterable) return result;\n' +
+			(obj.top) +
+			';';
+		if (obj.array) {
+			__p += '\nvar length = iterable.length; index = -1;\nif (' +
+			(obj.array) +
+			') {  ';
+			if (!support.IndexedChars) {
+				__p += '\n  if (isString(iterable)) {\n    iterable = iterable.split(\'\')\n  }  ';
+			}
+			__p += '\n  while (++index < length) {\n    ' +
+			(obj.loop) +
+			';\n  }\n}\nelse {  ';
+		} else if (!support.EnumArguments) {
+			__p += '\n  var length = iterable.length; index = -1;\n  if (length && isArguments(iterable)) {\n    while (++index < length) {\n      index += \'\';\n      ' +
+			(obj.loop) +
+			';\n    }\n  } else {  ';
+		}
+
+		if (support.EnumPrototypes) {
+			__p += '\n  var skipProto = typeof iterable == \'function\';\n  ';
+		}
+
+		if (support.EnumErrorProps) {
+			__p += '\n  var skipErrorProps = iterable === errorProto || iterable instanceof Error;\n  ';
+		}
+
+		var conditions = [];    if (support.EnumPrototypes) { conditions.push('!(skipProto && index == "prototype")'); }    if (support.EnumErrorProps)  { conditions.push('!(skipErrorProps && (index == "message" || index == "name"))'); }
+
+		if (obj.useHas && obj.keys) {
+			__p += '\n  var ownIndex = -1,\n      ownProps = isObject(iterable) && keys(iterable),\n      length = ownProps ? ownProps.length : 0;\n\n  while (++ownIndex < length) {\n    index = ownProps[ownIndex];\n';
+			if (conditions.length) {
+				__p += '    if (' +
+				(conditions.join(' && ')) +
+				') {\n  ';
+			}
+			__p +=
+				(obj.loop) +
+				';    ';
+			if (conditions.length) {
+				__p += '\n    }';
+			}
+			__p += '\n  }  ';
+		} else {
+			__p += '\n  for (index in iterable) {\n';
+			if (obj.useHas) { conditions.push("hasOwnProperty.call(iterable, index)"); }    if (conditions.length) {
+				__p += '    if (' +
+				(conditions.join(' && ')) +
+				') {\n  ';
+			}
+			__p +=
+				(obj.loop) +
+				';    ';
+			if (conditions.length) {
+				__p += '\n    }';
+			}
+			__p += '\n  }    ';
+			if (!support.EnumShadows) {
+				__p += '\n\n  if (iterable !== objectProto) {\n    var ctor = iterable.constructor,\n        isProto = iterable === (ctor && ctor.prototype),\n        className = iterable === stringProto ? stringClass : iterable === errorProto ? errorClass : toString.call(iterable),\n        nonEnum = nonEnumProps[className];\n      ';
+				for (k = 0; k < 7; k++) {
+					__p += '\n    index = \'' +
+					(obj.shadowedProps[k]) +
+					'\';\n    if ((!(isProto && nonEnum[index]) && hasOwnProperty.call(iterable, index))';
+					if (!obj.useHas) {
+						__p += ' || (!nonEnum[index] && iterable[index] !== objectProto[index])';
+					}
+					__p += ') {\n      ' +
+					(obj.loop) +
+					';\n    }      ';
+				}
+				__p += '\n  }    ';
+			}
+
+		}
+
+		if (obj.array || !support.EnumArguments) {
+			__p += '\n}';
+		}
+		__p +=
+			(obj.bottom) +
+			';\nreturn result';
+
+		return __p
 	};
-*/
+	function isNative(value) {
+		return typeof value == 'function' && regexp.FN_NATIVE.test(value);
+	}
+	function isArguments(value){
+		return value && typeof value === 'object' && typeof value.length === 'number' &&
+			((support.ArgumentsClass)? nativeToString.call(value) === objectType.ARGUMENTS_CLASS:
+			nativeHasOwnProperty.call(value, 'callee') && !nativePropertyIsEnumerable.call(value, 'callee')) ||
+			false;
+	}
+	var nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray,
+		nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys;
+	var isArray = nativeIsArray || function(value) {
+			return value && typeof value == 'object' && typeof value.length == 'number' &&
+				nativeToString.call(value) == objectType.ARRAY_CLASS || false;
+		};
+	function isString(value) {
+		return typeof value == 'string' ||
+			value && typeof value == 'object' && nativeToString.call(value) == objectType.STRING_CLASS || false;
+	}
+	function isObject(value) {
+		return value === Object(value);
+	}
+
+	function createIterator() {
+		// data properties
+		var iteratorData = {};
+		iteratorData.shadowedProps = shadowedProps;
+
+		// iterator options
+		iteratorData.array = iteratorData.bottom = iteratorData.loop = iteratorData.top = '';
+		iteratorData.init = 'iterable';
+		iteratorData.useHas = true;
+
+		// merge options into a template data object
+		for (var object, index = 0; object = arguments[index]; index++) {
+			for (var key in object) {
+				iteratorData[key] = object[key];
+			}
+		}
+		var args = iteratorData.args;
+		iteratorData.firstArg = /^[^,]+/.exec(args)[0];
+
+		// create the function factory
+		var factory = Function(
+			'errorClass, errorProto, hasOwnProperty, ' +
+			'isArguments, isArray, isString, keys, objectProto, ' +
+			'isObject, nonEnumProps, stringClass, stringProto, toString',
+			'return function(' + args + ') {\n' + iteratorTemplate(iteratorData) + '\n}'
+		);
+
+		// return the compiled function
+		return factory(
+			objectType.ERROR_CLASS, errorProto, nativeHasOwnProperty,
+			isArguments, isArray, isString, iteratorData.keys, objectProto,
+			isObject, nonEnumProps, objectType.STRING_CLASS, stringProto, nativeToString
+		);
+	}
+
+	var shimKeys = createIterator({
+		'args': 'object',
+		'init': '[]',
+		'top': 'if (!(isObject(object))) return result',
+		'loop': 'result.push(index)'
+	});
+	var keys = !nativeKeys ? shimKeys : function(object) {
+		if (!isObject(object)) {
+			return [];
+		}
+		if ((support.enumPrototypes && typeof object == 'function') ||
+			(support.nonEnumArgs && object.length && isArguments(object))) {
+			return shimKeys(object);
+		}
+		return nativeKeys(object);
+	};
+	var eachIteratorOptions = {
+	 'args': 'collection, callback, thisArg',
+	 'top': '',
+	 'array': "typeof length == 'number'",
+	 'keys': keys,
+	 'loop': 'if (callback(iterable[index], index, collection) === false) return result'
+	 };
+	baseEach = createIterator(eachIteratorOptions);
+
+	core.support = support;
 	core.op = op;
 	core.behavior = behavior;
 	core.returnType = returnType;
@@ -217,16 +441,27 @@
 	hasOwnProperty = ObjProto.hasOwnProperty, slice = ArrayProto.slice ;
 	
 	var objectType = {
-			FUNCTION_CLASS : '[object Function]', 
-			BOOLEAN_CLASS : '[object Boolean]', 
-			NUMBER_CLASS : '[object Number]', 
-			STRING_CLASS : '[object String]', 
-			ARRAY_CLASS : '[object Array]', 
-			DATE_CLASS : '[object Date]', 
+			FUNCTION_CLASS : '[object Function]',
+			BOOLEAN_CLASS : '[object Boolean]',
+			NUMBER_CLASS : '[object Number]',
+			STRING_CLASS : '[object String]',
+			ARRAY_CLASS : '[object Array]',
+			DATE_CLASS : '[object Date]',
 			REGEXP_CLASS : '[object RegExp]',
-			ARGUMENTS_CLASS : '[object Arguments]'
+			ARGUMENTS_CLASS : '[object Arguments]',
+			ERROR_CLASS:'[object Error]'
 	};
-	
+	var cloneableClasses = {
+		'[object Function]':false,
+		'[object Boolean]':true,
+		'[object Number]':true,
+		'[object String]':true,
+		'[object Array]':true,
+		'[object Date]':true,
+		'[object RegExp]':true,
+		'[object Arguments]':true
+	};
+
 	var partial = $_.Core.combine.partial;
 	var curry = $_.Core.combine.curry;
 	var compose = $_.Core.behavior.compose;
@@ -830,11 +1065,13 @@
         if(isNotObject(obj)) throw new TypeError();
         var k = isString(key)?key.split('.'):key;
         if(isNotArray(k)) throw new TypeError();
+		var isFalse = false;
         return Asdf.A.reduce(k, function(acc, a){
-            if(acc == defult) return defult;
+            if(isFalse) return defult;
             if(has(acc, a)){
                 return acc[a];
             }
+			isFalse = true;
             return defult;
         }, obj);
     }
@@ -1002,7 +1239,8 @@
     $_.R = {
         FN_DEF: /^function\s*([^\(\s]*)\s*\(\s*([^\)]*)\)\s*\{([\s\S]*)\}\s*$/m,
         FN_ARG_SPLIT: /,/,
-        STRIP_COMMENTS: /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg
+        STRIP_COMMENTS: /(?:(?:\/\/(.*)$)|(?:\/\*([\s\S]*?)\*\/))/mg,
+        FN_NATIVE: /^[^{]+\{\s*\[native \w/
     };
     $_.O.extend($_.R, {
     });
@@ -1430,17 +1668,140 @@
      * @memberof Asdf.F
      * @param {Function} func
      * @param {Function} after
-     * @param {Function} async
-     * @param {boolean} stop
+     * @param {...Function} fn
      * @returns {Function}
      */
-	function asyncThen(func, after, async, stop){
-        if(!$_.O.isFunction(func)||!$_.O.isFunction(after)||!$_.O.isFunction(async)) throw new TypeError();
-		return function(){ 
-			var res = func.apply(this, arguments); 
-			if(!res && stop) return res; 
-			return async(after) 
+	function asyncThen(func, after/*fns*/){
+		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+		var fn = fns.shift();
+		return wrap(fn, function(f){
+			var isDone = false;
+			var arg = slice.call(arguments,1);
+			return f.apply(this, $_.A.map(fns, function(f,i){
+				if(i === 0) {
+					return function () {
+						if (isDone) return;
+						isDone = true;
+						return f.apply(this, $_.A.merge(arg, arguments))
+					};
+				}
+				return function(){
+					if(isDone) return;
+					isDone = true;
+					return f.apply(this, arguments)
+				};
+			}));
+		});
+	}
+
+	function asyncCompose(/*fns*/){
+		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
+		return $_.A.reduceRight(fns, function(f1, f2){
+			return asyncThen(f1,f2);
+		});
+	}
+
+	/**
+	 * @memberof Asdf.F
+	 * @param func
+	 * @returns {*}
+	 * @example
+	 *
+	 */
+
+	/*
+
+	var p1 = Asdf.F.promise(
+		function(s,f){
+			console.log(1);
+			setTimeout(s.bind(this, 1,2), 1000);
 		}
+	)(
+		function(s,f){
+			console.log(2);
+			console.log(arguments)
+			setTimeout(s,1000)
+		}
+	)(
+		function(s,f){
+			console.log(3);
+			setTimeout(s,1000);
+		}
+	);
+	p1(
+		function(s,f){
+			console.log(4);
+			f();
+			setTimeout(s,1000);
+		}
+	)(
+		function(s,f){
+			console.log(5);
+		},function(){
+			console.log('fail');
+		}
+	);
+	p1(
+		function(s,f){
+			console.log(6);
+			setTimeout(s,1000);
+		}
+	)(
+		function(s,f){
+			console.log(7);
+			s();
+		}
+	);
+	*/
+	function promise(func){
+		var su = function(o){
+			return function(){
+				if(o._status !== 'pending') return;
+				o._status = 'resolved';
+				o.arg = slice.call(arguments);
+				sequence.apply(this,$_.A.pluck(o._next,0)).apply(this, arguments);
+			}
+		};
+		var fa = function(o){
+			return function(){
+				if(o._status !== 'pending') return;
+				o._status = 'rejected';
+				o.arg = slice.call(arguments);
+				sequence.apply(this,$_.A.pluck(o._next,1)).apply(this, arguments);
+			}
+		};
+		function f(obj){
+			obj._next = [];
+			obj._status = 'pending';
+			function next(succ, fail){
+				var o = {};
+				var n = f(o);
+				var snext = su(o);
+				var fnext = fa(o);
+				if(obj._status == 'resolved'&&succ){
+					return succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				}else if(obj._status == 'rejected'&&fail){
+					return fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				}
+				obj._next.push([function(){
+					o.arg = slice.call(arguments);
+					succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				},function(){
+					o.arg = slice.call(arguments);
+					fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+				}]);
+				return n;
+			}
+			return next;
+		}
+		function run(func){
+			var o = {};
+			var res = f(o);
+			func(su(o),fa(o));
+			return res;
+		}
+
+		return run(func);
 	}
 
     /**
@@ -1754,6 +2115,7 @@
         errorHandler:errorHandler,
         trys:trys,
 		asyncThen:asyncThen,
+		asyncCompose:asyncCompose,
 		toFunction:toFunction,
 		async:async,
 		when:when,
@@ -1770,7 +2132,8 @@
         nAry:nAry,
         complement:complement,
 		alwaysFalse: toFunction(false),
-		alwaysTrue:  toFunction(true)
+		alwaysTrue:  toFunction(true),
+		promise:promise
 	}, true);
 
 })(Asdf);
@@ -1913,6 +2276,10 @@
 	function merge( first, second ) {
 		if ($_.O.isNotCollection(first)||$_.O.isNotCollection(second))
 			throw new TypeError();
+		if(first.push){
+			first.push.apply(first, second);
+			return first;
+		}
 		var fl = first.length, l = fl + second.length;
 		each(second, function (value, key,list){
 			first[fl+key] = value;
@@ -3216,7 +3583,7 @@
             },
             autoNumber: true
         };
-        $_.A.each(['O','S','F','A','N'], function(v){
+        $_.A.each(['O','F','A','N','S'], function(v){
             $_.O.extend(conf.functions, $_[v]);
         });
         $_.O.extend(conf, c);
@@ -3555,6 +3922,12 @@
         return Math.max(min, Math.min(max, n));
     }
 
+    function times(count, fn) {
+        if($_.O.isNotNumber(count)||!$_.O.isFunction(fn)) throw new TypeError();
+        for(var i = 0; i < count; i++){
+            fn(i);
+        }
+    }
 
     $_.O.extend($_.N, {
 		sum: sum,
@@ -3583,7 +3956,8 @@
 		isUntil: isLessThan,
 		isNotUntil: isNotLessThan,
         isFinite:isFinite,
-        clamp:clamp
+        clamp:clamp,
+        times:times
 	});
 })(Asdf);;(function($_) {
 	$_.P = {};
@@ -3674,8 +4048,8 @@
 })(Asdf);
 ;(function($_) {
 	$_.Bom = {};
-    var alwaysFalse = $_.F.toFunction(false);
-    var rnative = /^[^{]+\{\s*\[native \w/;
+    var alwaysFalse = $_.F.alwaysFalse;
+    var rnative = $_.R.FN_NATIVE;
 	var Browser = getBrowser(window);
     function getBrowser(win) {
         var ua = win.navigator.userAgent;
@@ -3737,6 +4111,45 @@
             return !div.getElementsByTagName('tbody').length;
         }, alwaysFalse, _reset)(div);
         support.qsa = rnative.test(doc.querySelectorAll);
+        support.qsaNotSupport = (function(){
+            if(!support.qsa) return $_.F.alwaysFalse;
+            var rbuggyQSA = [];
+            var whitespace = "[\\x20\\t\\r\\n\\f]";
+            var booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped";
+            $_.F.errorHandler(function(div){
+                div.innerHTML = "<select msallowcapture=''>" +
+                "<option id='d\f]' selected=''></option></select>";
+                if ( div.querySelectorAll("[msallowcapture^='']").length ) {
+                    rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:''|\"\")" );
+                }
+                if ( !div.querySelectorAll("[selected]").length ) {
+                    rbuggyQSA.push( "\\[" + whitespace + "*(?:value|" + booleans + ")" );
+                }
+                if ( !div.querySelectorAll("[id~=d]").length ) {
+                    rbuggyQSA.push("~=");
+                }
+                if ( !div.querySelectorAll(":checked").length ) {
+                    rbuggyQSA.push(":checked");
+                }
+            }, alwaysFalse, _reset)(div);
+            $_.F.errorHandler(function(div){
+                var input = doc.createElement("input");
+                input.setAttribute( "type", "hidden" );
+                div.appendChild( input ).setAttribute( "name", "D" );
+                if ( div.querySelectorAll("[name=d]").length ) {
+                    rbuggyQSA.push( "name" + whitespace + "*[*^$|!~]?=" );
+                }
+                if ( !div.querySelectorAll(":enabled").length ) {
+                    rbuggyQSA.push( ":enabled", ":disabled" );
+                }
+                div.querySelectorAll("*,:x");
+                rbuggyQSA.push(",.*:");
+            }, alwaysFalse, _reset)(div);
+            rbuggyQSA = rbuggyQSA.length && new RegExp( rbuggyQSA.join("|") );
+            return function(selector){
+                return rbuggyQSA&&rbuggyQSA.test(selector);
+            }
+        })();
         support.appendChecked =$_.F.errorHandler(function(div,input, fragment){
             input.type = 'checkbox';
             input.checked = true;
@@ -4014,6 +4427,20 @@
  * @namespace Asdf.Element
  */
 (function($_) {
+	var NODETYPE = {
+		ELEMENT_NODE : 1,
+		ATTRIBUTE_NODE : 2,
+		TEXT_NODE : 3,
+		CDATA_SECTION_NODE : 4,
+		ENTITY_REFERENCE_NODE : 5,
+		ENTITY_NODE: 6,
+		PROCESSING_INSTRUCTION_NODE: 7,
+		COMMENT_NODE: 8,
+		DOCUMENT_NODE: 9,
+		DOCUMENT_TYPE_NODE: 10,
+		DOCUMENT_FRAGMENT_NODE: 11,
+		NOTATION_NODE: 12
+	};
 	var nativeSlice = Array.prototype.slice, extend = $_.O.extend, isString = $_.O.isString;
 	var tempParent = document.createElement('div');
 	$_.Element = {};
@@ -4047,10 +4474,10 @@
      */
 	function walk(element, fun, context) {
 		context = context || this;
-		var i, childNodes = $_.A.toArray(element.childNodes);
+		var i, ch = childNodes(element);
 		fun.call(context, element);
-		for (i = 0; i < childNodes.length ; i++) {
-			walk(childNodes[i], fun, context);
+		for (i = 0; i < ch.length ; i++) {
+			walk(ch[i], fun, context);
 		}
 		return element;
 	}
@@ -4362,7 +4789,7 @@
 	function childNodes(element) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
-        if(!element.firstChild) return []
+        if(!element.firstChild) return [];
 		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
 	}
     function children(element){
@@ -4672,6 +5099,14 @@
 			return element;
 		}
 	}
+	function hasAttr(element, name){
+		if($_.R.FN_NATIVE.test(element.querySelectorAll)){
+			element.hasAttribute(element, name);
+		}
+		element = element.getAttributeNode(name);
+		return !!(element && (element.specified || element.nodeValue));
+
+	}
 	function removeAttr(element, name) {
 		if(!$_.O.isNode(element))
 			throw new TypeError();
@@ -4847,64 +5282,65 @@
 	function hasClass(element, name) {
 		if(!$_.O.isNode(element)||!$_.O.isString(name))
 			throw new TypeError();
-		return element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
+		return !!element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
 	}
-/*
-	function find(element, selector, results, seed){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		results = results||[];
-		return $_.A.toArray(querySelectorAll(element, selector)).concat(results);
+
+	function _findByQSA(element, selector){
+		var nid, old;
+		nid = old = $_.Utils.makeuid();
+		var nel = element;
+		var nsel = $_.O.isDocument(element)&&selector;
+		if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
+			var groups = $_.Selector.tokenize(selector);
+			if((old = attr(element,'id'))) {
+				nid = old.replace(/'|\\/g, "\\$&");
+			} else {
+				attr(element,'id', nid);
+			}
+			nid = "[id='"+nid+"'] ";
+			groups =  $_.A.map(groups, function(v){
+				return nid + $_.Selector.toSelector(v);
+			});
+			nel = /[+~]/.test(selector) && parent(element)||element;
+			nsel = groups.join(',');
+		}
+		if(nsel){
+			try{
+				return  nel.querySelectorAll(nsel);
+			} catch(e){
+			}finally{
+				if(!old){
+					removeAttr(element, 'id');
+				}
+			}
+		}
 	}
-*/
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
+	function _merge(a, b){
+		if(a.length === 0)
+			return b;
+		return $_.A.merge(a,b);
+	}
 	function querySelectorAll(element, selector, results) {
         results = results||[];
-        var match,m, nodeType = element.nodeType;
+        var match,m, nodeType = element.nodeType, els;
         if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
             return results;
         }
+		selector = $_.S.trim(selector);
         if(nodeType !== 11 && (match = rquickExpr.exec(selector))){
             if(m = match[1]){
                 return $_.A.append(results,getElementById(element, m));
             }else if(match[2]){
-				return $_.A.merge(results, getElementsByTagName(element, selector));
+				return _merge(results, getElementsByTagName(element, selector));
 			}else if((m = match[3])){
-				return $_.A.merge(results,getElementsByClassName(element, m));
+				return _merge(results,getElementsByClassName(element, m));
 			}
         }
-		if(element.querySelectorAll){
-			var nid, old;
-			nid = old = $_.Utils.makeuid();
-			var nel = element;
-			var nsel = $_.O.isNotElement(element)&&selector;
-			if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
-				var groups = $_.Selector.tokenize(selector);
-				if((old = attr(element,'id'))) {
-					nid = old.replace(/'|\\/g, "\\$&");
-				} else {
-					attr(element,'id', nid);
-				}
-				nid = "[id='"+nid+"'] ";
-				groups =  $_.A.map(groups, function(v){
-					return nid + $_.Selector.toSelector(v);
-				});
-				nel = /[+~]/.test(selector) && parent(element)||element;
-				nsel = groups.join(',');
-			}
-			if(nsel){
-				try{
-					return $_.A.merge(results, nel.querySelectorAll(nsel));
-				} catch(e){
-				}finally{
-					if(!old){
-						removeAttr(element, 'id');
-					}
-				}
-
-			}
-			throw new Error();
+		if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector) && (els = _findByQSA(element, selector))){
+			return _merge(results,els);
 		}
+		return $_.Selector.select(selector, element, results);
 	}
 	function closest(element, selector, context){
 		if(!$_.O.isNode(element))
@@ -5064,9 +5500,12 @@
         if(element.getElementsByClassName){
             return element.getElementsByClassName(className);
         }else if(element.querySelectorAll){
-            return element.querySelectorAll('.'+className);
+			return _findByQSA(element, '.'+className.replace(/\s+/,'.'))||[];
         }else if(element.getElementsByTagName){
-            return $_.A.filter(element.getElementsByTagName('*'), $_.F.partial(hasClass, undefined, className));
+			var cls = className.split(' ');
+			return $_.A.filter(element.getElementsByTagName('*'), function(el){
+				return $_.A.every($_.A.map(cls, $_.F.curry(hasClass, el)), $_.F.identity);
+			})||[];
         }else {
             throw new Error();
         }
@@ -5075,7 +5514,7 @@
         if(!$_.Bom.features.getElementsByTagName){
             var res = element.getElementsByTagName(tag);
             if(tag==='*'){
-                return $_.A.filter(res, function(e){return e.nodeType === 1});
+                return $_.A.filter(res, function(e){return e.nodeType === 1})||[];
             }
             return res;
         }
@@ -5091,18 +5530,15 @@
         var el;
         if($_.O.isDocument(element)){
             el = element.getElementById(id);
-            if(el && el.parentNode){
-                if(el.id === id)
-                    return el;
-            }else{
-                return null;
+            if(el && el.parentNode && el.id === id){
+				return el;
             }
         } else {
             if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
                 return el;
             }
         }
-		throw new Error();
+		return null;
     }
     function _isParent(p, c){
         if (c) do {
@@ -5229,7 +5665,11 @@
         },
         'selected': function(element){
             return element.selected;
-        }
+        },
+		'target': function(element){
+			var hash = window.location && window.location.hash;
+			return hash && hash.slice( 1 ) === element.id;
+		}
 
     };
     function getElementsByXPath(element, expression){
@@ -5241,6 +5681,51 @@
             results.push(query.snapshotItem(i));
         return results;
     }
+	function getOwnerDocument(node){
+		if($_.O.isNotNode(node)) throw new TypeError();
+		return $_.O.isDocument(node)? node : node.ownerDocument||node.document;
+	}
+	function getOwnerWindow(node){
+		if($_.O.isNotNode(node)) throw new TypeError();
+		return getWindow(getOwnerDocument(node));
+	}
+	function getFrameContentDocument(frame){
+		return frame.contentDocument||frame.contentWindow||document
+	}
+	function findNodes(node, p, context){
+		var res = [];
+		walk(node, function(el){
+			if(p.call(context, el))
+				res.push(el);
+		});
+		return res;
+	}
+	var TAGS_TO_IGNORE = {
+		'SCRIPT': 1,
+		'STYLE': 1,
+		'HEAD': 1,
+		'IFRAME': 1,
+		'OBJECT': 1
+	};
+	var PREDEFINED_TAG_VALUES_ = {'IMG': ' ', 'BR': '\n'};
+	function getNodeAtOffset(parent, offset){
+		var stack = [parent], pos = 0, cur = null;
+		while (stack.length > 0 && pos < offset) {
+			cur = stack.pop();
+			if (cur.nodeName in TAGS_TO_IGNORE) {
+			} else if (cur.nodeType == 3) {
+				var text = cur.nodeValue.replace(/(\r\n|\r|\n)/g, '').replace(/ +/g, ' ');
+				pos += text.length;
+			} else if (cur.nodeName in PREDEFINED_TAG_VALUES_) {
+				pos += PREDEFINED_TAG_VALUES_[cur.nodeName].length;
+			} else {
+				for (var i = cur.childNodes.length - 1; i >= 0; i--) {
+					stack.push(cur.childNodes[i]);
+				}
+			}
+		}
+		return {node: cur, remainder:cur ? cur.nodeValue.length + offset - pos - 1 : 0}
+	}
 
 	extend($_.Element,  {
 		walk: walk,
@@ -5274,6 +5759,7 @@
         eq: eq,
         last:last,
 		attr: attr,
+		hasAttr:hasAttr,
 		removeAttr: removeAttr,
 		prop: prop,
 		removeProp: removeProp,
@@ -5298,6 +5784,9 @@
         has: data.has,
         del: data.del,
         getWindow: getWindow,
+		getOwnerDocument:getOwnerDocument,
+		getOwnerWindow:getOwnerWindow,
+		getFrameContentDocument:getFrameContentDocument,
         offsetParent: offsetParent,
         getElementsByClassName:getElementsByClassName,
         contains:contains,
@@ -5307,7 +5796,10 @@
         getElementsByTagName:getElementsByTagName,
         outerHTML:outerHTML,
         getNTH:getNTH,
-		getElementById:getElementById
+		getElementById:getElementById,
+		findNodes:findNodes,
+		getNodeAtOffset:getNodeAtOffset,
+		NODETYPE:NODETYPE
 	});
     $_.O.each(pseudos, function(v,k){
         $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
@@ -5326,7 +5818,7 @@
     // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
         identifier = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",
     // Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
-        attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
+        attrs = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
             // Operator (capture 2)
             "*([*^$|!~]?=)" + whitespace +
             // "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
@@ -5337,7 +5829,7 @@
             // 1. quoted (capture 3; capture 4 or capture 5)
             "('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|" +
             // 2. simple (capture 6)
-            "((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|" +
+            "((?:\\\\.|[^\\\\()[\\]]|" + attrs + ")*)|" +
             // 3. anything else (capture 2)
             ".*" +
             ")\\)|)",
@@ -5357,7 +5849,7 @@
             "ID": new RegExp( "^#(" + identifier + ")" ),
             "CLASS": new RegExp( "^\\.(" + identifier + ")" ),
             "TAG": new RegExp( "^(" + identifier + "|[*])" ),
-            "ATTR": new RegExp( "^" + attributes ),
+            "ATTR": new RegExp( "^" + attrs ),
             "PSEUDO": new RegExp( "^" + pseudos ),
             "CHILD": new RegExp( "^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\(" + whitespace +
                 "*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace +
@@ -5430,7 +5922,7 @@
         rinputs = /^(?:input|select|textarea|button)$/i,
         rheader = /^h\d$/i,
 
-        rnative = /^[^{]+\{\s*\[native \w/,
+        rnative = $_.R.FN_NATIVE,
 
     // Easily-parseable/retrievable ID or TAG or CLASS selectors
         rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,
@@ -5454,7 +5946,6 @@
                     String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
         };
     var _rbuggyMathches = [];
-    var _rbuggyQSA = [];
 
     var opposite = {
         'parentNode': 'childNode',
@@ -5463,18 +5954,121 @@
         'nextSibling': 'previousSibling'
     };
     var combinators = {
-        ' ': {dir: 'parentNode', first:true}
+        ' ': function(node, token){
+            var item, i=0;
+            var type = token[0].type;
+            if(type === 'ID'){
+                item = $_.Element.getElementById(node, token[0].matches[0]);
+                if(!item|| !_matchSelector(item, _matchFn(token.slice(1))))
+                    return [];
+                return [item];
+            }
+            item = (type === 'CLASS')? ($_.Element.getElementsByClassName(node, $_.A.reduce(token, function(acc, v){
+                if(v.type === 'CLASS') {acc.push(v.matches[0]);i++;}
+                return acc;
+            },[]).join(' '))): type==='TAG'?$_.Element.getElementsByTagName(node, token[0].matches[0]):[];
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, _matchFn(token.slice(i||1)));
+                })||[];
+        },
+        '>': function(node, token){
+            var item = $_.Element.children(node);
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, _matchFn(token));
+                })||[];
+        },
+        '+':function(node, token){
+            var item = $_.Element.next(node);
+            if(!item|| !_matchSelector(item, _matchFn(token))) return [];
+            return [item];
+        },
+        '~':function(node, token){
+            var item = $_.Element.nexts(node);
+            return $_.A.filter(item, function(el) {
+                    return _matchSelector(el, _matchFn(token));
+                })||[];
+        }
+    };
+    var filters = {
+        'ID': function(id){
+            var attrId = id.replace( runescape, funescape );
+            return $_.Bom.features.getById? function(elem){
+                return elem.getAttribute("id") === attrId;
+            }:function(elem){
+                var node = typeof elem.getAttributeNode !== "undefined" && elem.getAttributeNode("id");
+                return node && node.value === attrId;
+            }
+        },
+        'TAG': function(tag){
+            var nodeName = tag.replace( runescape, funescape ).toLowerCase();
+            return tag === "*" ?
+                function() { return true; } :
+                function( elem ) {
+                    return elem.nodeName && elem.nodeName.toLowerCase() === nodeName;
+                };
+        },
+        'CLASS': $_.F.memoize(function(className){
+            var pattern = new RegExp( "(^|" + whitespace + ")" + className + "(" + whitespace + "|$)" );
+            return function( elem ){
+                return pattern.test( typeof elem.className === "string" && elem.className || typeof elem.getAttribute !== "undefined" && elem.getAttribute("class") || "" );
+            }
+        }, function(c){return c+ ' '}),
+        'ATTR': function(name, op, value){
+            return function(elem) {
+                var res = $_.Element.attr(elem, name);
+                if (res == null) {
+                    return op === '!='
+                }
+                if(!op) return true;
+                return op === "=" ? res === value :
+                    op === "!=" ? res !== value :
+                        op === "^=" ? value && res.indexOf( value ) === 0 :
+                            op === "*=" ? value && res.indexOf( value ) > -1 :
+                                op === "$=" ? value && res.slice( -value.length ) === value :
+                                    op === "~=" ? ( " " + res.replace( rwhitespace, " " ) + " " ).indexOf( value ) > -1 :
+                                        op === "|=" ? res === value || res.slice( 0, value.length + 1 ) === value + "-" :
+                                            false;
+            }
+        },
+        'CHILD':function(type, what, argument, first, last){
+            var fn = $_.Element['is'+$_.S.capitalize(type)+$_.S.capitalize(what)];
+            if(!fn)
+                throw new Error('unsupported pseudo:'+type+'_'+what);
+            return $_.F.partial(fn, undefined, argument);
+
+        },
+        'PSEUDO':function(pseudo, argument){
+            var fn = $_.Element['is'+$_.S.capitalize(pseudo)];
+            if(!fn)
+                throw new Error('unsupported pseudo:'+pseudo);
+            return $_.O.isUndefined(argument)?fn:$_.F.partial(fn, undefined, argument);
+        }
+
 
     };
-
-    var filter = 'ID,TAG,CLASS,ATTR,CHILD,PSEUDO'.split(',');
+    var _matchFn = $_.F.memoize(function (tokens){
+        return $_.A.map(tokens, function(token){
+            return filters[token.type].apply(null, token.matches);
+        });
+    }, function(tokens){
+        return toSelector(tokens);
+    });
+    function _matchSelector(node, fns) {
+        for (var i = 0; i < fns.length; i++) {
+            var fn = fns[i];
+            if (!fn(node)) return false;
+        }
+        return true;
+    }
+    var filter = $_.O.keys(filters);
     function _tokenize(selector){
         var str = selector,res = [], matched, match, tokens;
         while(str){
-            if(!matched)
+            if(!matched||(match = rcomma.exec(str))) {
+                if (match)
+                    str = str.slice(match[0].length) || str;
                 res.push((tokens = []));
-            else if((match = rcomma.exec(str)))
-                str = str.slice(match[0].length)||str;
+            }
             matched = false;
             if((match = rcombinators.exec(str))){
                 matched = match.shift();
@@ -5490,7 +6084,7 @@
                     tokens.push({
                         value:matched,
                         type:type,
-                        matcheds:match
+                        matches:match
                     });
                     str = str.slice(matched.length);
                 }
@@ -5503,18 +6097,57 @@
         return res;
     }
     var tokenize = $_.F.compose($_.F.memoize(_tokenize, function(str){return str+' '}), $_.O.clone);
-    function select(expression, element, results, seed){
+    function _findMerge(res, combinator, token){
+        $_.N.times(res.length, function(){
+            var node = res.shift();
+            $_.A.merge(res,combinator(node, token));
+        });
+    }
+    function compareToken(t1,t2) {
+        var m = {
+            'ID':0,
+            'TAG':2,
+            'CLASS':1,
+            'ATTR':3,
+            'PSEUDO':4
+        };
+        var res = m[t1.type] - m[t2.type];
+        if(res === 0){
+            if(t1.value < t2.value) return -1;
+            else if(t1.value > t2.value) return 1;
+            return 0;
+        }
+        return res;
+
+    }
+    function select(expression, element, results){
         results = results||[];
         element = element || document;
-        return _select(expression.replace(rtrim, '$1'), element, results, seed);
+        expression = expression.replace(rtrim, '$1');
+        var tokens = tokenize(expression);
+        var types = filter;
+        results =  $_.A.reduce(tokens, function(res, token){
+            var i = 0,j = 0, t, combinator= combinators[' '],r = [element];
+            while(t=token[i++]){
+                var type = t.type;
+                if(!$_.A.include(types, type)){
+                    _findMerge(r, combinator, token.slice(j, i-1).sort(compareToken));
+                    combinator = combinators[type];
+                    j = i;
+                }
+            }
+            _findMerge(r, combinator, token.slice(j).sort(compareToken));
+            return $_.A.unique($_.A.merge(res,r));
+        }, results);
+        return results.sort($_.Element.compareNode);
     }
-    function _select(expression, element, results, seed){
-    }
+
     function toSelector(tokens){
         return $_.A.reduce(tokens, function(str, i){
             return str+ i.value;
-        }, '')
+        }, '');
     }
+    /*
     function markFunction(fn){
         fn[expando] = true;
         return fn;
@@ -5693,8 +6326,9 @@
     }
     //Asdf.Selector.ofnToElements(Asdf.Selector.oToOfn([{tagName: 'body'}, {and:{id: 'qunit',tagName:'div'}}]));
 
-
+    */
     $_.O.extend(o, {
+        /*
         descentors: descentors,
         ancestor: ancestor,
         ancestors: ancestors,
@@ -5707,8 +6341,10 @@
         ofnToElements:ofnToElements,
         compositFn:compositFn,
         oToOfn:oToOfn,
+        */
         tokenize:tokenize,
-        toSelector:toSelector
+        toSelector:toSelector,
+        select:select
     })
 })(Asdf);;(function ($_) {
 	$_.Template = {};
@@ -6637,7 +7273,7 @@
         var indent = 0;
         var res = {};
         if(typeof console === 'undefined') return null;
-        if( !console.group ){
+        if( !console.group || $_.O.isNotFunction(console.group) ){
             res.log =  function(str){
                 return console.log($_.S.times(' ', indent) + str);
             };
