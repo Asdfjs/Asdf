@@ -420,35 +420,41 @@
 
     /**
      * @memberof Asdf.F
-     * @param {Function} func
-     * @param {Function} after
-     * @param {...Function} fn
-     * @returns {Function}
+     * @param {function} func
+     * @param {function} success
+     * @param {function=} fail
+	 * @param {...function=} notify
+     * @returns {function} callback Function
      */
-	function asyncThen(func, after/*fns*/){
+	function asyncThen(func, success, fail, notify){
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		var fn = fns.shift();
 		return wrap(fn, function(f){
-			var isDone = false;
+			var status = 'pending';
 			var arg = slice.call(arguments,1);
 			return f.apply(this, $_.A.map(fns, function(f,i){
 				if(i === 0) {
 					return function () {
-						if (isDone) return;
-						isDone = true;
+						if (status !== 'pending') return;
+						status = 'resolved';
 						return f.apply(this, $_.A.merge(arg, arguments))
 					};
 				}
+				else if(i === 1) {
+					return function () {
+						if (status !== 'pending') return;
+						status = 'rejected';
+						return f.apply(this, arguments)
+					};
+				}
 				return function(){
-					if(isDone) return;
-					isDone = true;
-					return f.apply(this, arguments)
+					return f.apply(this, $_.A.merge([status],arguments))
 				};
 			}));
 		});
 	}
 
-	function asyncCompose(/*fns*/){
+	function asyncSequence(/*fns*/){
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		return $_.A.reduceRight(fns, function(f1, f2){
 			return asyncThen(f1,f2);
@@ -458,13 +464,12 @@
 	/**
 	 * @memberof Asdf.F
 	 * @param func
-	 * @returns {*}
+	 * @returns {function}
 	 * @example
 	 *
 	 */
 
 	/*
-
 	var p1 = Asdf.F.promise(
 		function(s,f){
 			console.log(1);
@@ -870,7 +875,7 @@
         errorHandler:errorHandler,
         trys:trys,
 		asyncThen:asyncThen,
-		asyncCompose:asyncCompose,
+		asyncSequence:asyncSequence,
 		toFunction:toFunction,
 		async:async,
 		when:when,
