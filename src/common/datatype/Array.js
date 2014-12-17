@@ -802,7 +802,7 @@
     }
 
     function concat(array){
-        return arrayProto.concat.apply(arrayProto, arguments);
+        return arrayProto.concat.apply(array, slice.call(arguments,1));
     }
 
     function count(array, fn, context){

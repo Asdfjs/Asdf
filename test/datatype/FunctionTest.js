@@ -175,15 +175,15 @@ asyncTest("Asdf.F.promise", function(){
         ok(true, 'promise ok');
     })
 });
-asyncTest("Asdf.F.asyncCompose", function(){
+asyncTest("Asdf.F.asyncSequence", function(){
     var b = false;
     function s(cb){
         setTimeout(function(){cb(2)}, 20);
     }
-    var f = Asdf.F.asyncCompose(s,s,s,s);
+    var f = Asdf.F.asyncSequence(s,s,s,s);
     f(function(){
         b=true;
-        ok(b, 'asyncCompose ok');
+        ok(b, 'asyncSequence ok');
         start();
     });
 });

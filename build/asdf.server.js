@@ -1650,35 +1650,19 @@ module.exports = Asdf;
 
     /**
      * @memberof Asdf.F
-     * @param {Function} func
-     * @param {Function} after
-     * @param {...Function} fn
-     * @returns {Function}
+     * @param {function} func
+     * @param {function} success
+     * @param {function=} fail
+	 * @param {...function=} notify
+     * @returns {function} callback Function
      */
-	function asyncThen(func, after/*fns*/){
-		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-		var fn = fns.shift();
-		return wrap(fn, function(f){
-			var isDone = false;
-			var arg = slice.call(arguments,1);
-			return f.apply(this, $_.A.map(fns, function(f,i){
-				if(i === 0) {
-					return function () {
-						if (isDone) return;
-						isDone = true;
-						return f.apply(this, $_.A.merge(arg, arguments))
-					};
-				}
-				return function(){
-					if(isDone) return;
-					isDone = true;
-					return f.apply(this, arguments)
-				};
-			}));
-		});
+	function asyncThen(func, success, fail, notify){
+		return function(){
+			return async.apply(this, $_.A.merge([func],arguments))(success, fail, notify);
+		};
 	}
 
-	function asyncCompose(/*fns*/){
+	function asyncSequence(/*fns*/){
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		return $_.A.reduceRight(fns, function(f1, f2){
 			return asyncThen(f1,f2);
@@ -1688,13 +1672,12 @@ module.exports = Asdf;
 	/**
 	 * @memberof Asdf.F
 	 * @param func
-	 * @returns {*}
+	 * @returns {function}
 	 * @example
 	 *
 	 */
 
 	/*
-
 	var p1 = Asdf.F.promise(
 		function(s,f){
 			console.log(1);
@@ -1812,9 +1795,30 @@ module.exports = Asdf;
 
 	function async(asyncfn){
         if(!$_.O.isFunction(asyncfn)) throw new TypeError();
-		return function(cb) {
-            asyncfn.call(this,cb);
-        }
+		var args = slice.call(arguments,1);
+		return wrap(asyncfn, function(f){
+			var status = 'pending';
+			var arg = slice.call(arguments,1);
+			return f.apply(this, $_.A.map(arg, function(f,i){
+				if(i === 0) {
+					return function () {
+						if (status !== 'pending') return;
+						status = 'resolved';
+						return f.apply(this, Asdf.A.concat(args, slice.call(arguments)));
+					};
+				}
+				else if(i === 1) {
+					return function () {
+						if (status !== 'pending') return;
+						status = 'rejected';
+						return f.apply(this, arguments)
+					};
+				}
+				return function(){
+					return f.apply(this, $_.A.merge([status],arguments))
+				};
+			}));
+		});
 	}
 
     /**
@@ -1828,25 +1832,65 @@ module.exports = Asdf;
      * function(cb){setTimeout(function(){cb(2)}, 25)},
      * function(cb){setTimeout(function(){cb(3)}, 70)},
      * function(cb){setTimeout(function(){cb(4)}, 10)}
-     * )(function(){console.log(arguments}) //[1,2,3,4]
+     * )(function(){console.log(arguments)}) //[1,2,3,4]
      */
-	function when(/*async*/){
+	function when(/*async, options*/){
 		var asyncs = slice.call(arguments);
+		var options = $_.O.isPlainObject(asyncs[asyncs.length-1])?asyncs.pop():{};
+		options =  $_.O.extend({resolveOnFirstSuccess:false, rejectOnFirstError:true}, options);
         if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw new TypeError();
-		var l = asyncs.length-1;
-		return function(cb){
-            if(!$_.O.isFunction(cb)) throw new TypeError();
-            var res = [];
-			function r(index, value){
-                res[index] = value;
-				if(l === 0)
-					return cb.apply(this, res);
-				l--;
-			}
-			$_.A.each(asyncs, function(v, k){
-				v(curry(r, k));
+		return function(){
+			var cl, fl;
+			cl = fl = asyncs.length-1;
+			var status = 'pending';
+			var arg = slice.call(arguments,0);
+			var res = [];
+			var callbacks = $_.A.map(arg, function(f,i){
+				if(i === 0) {
+					return function (index, value) {
+						if (status !== 'pending') return;
+						if(options.resolveOnFirstSuccess){
+							status = 'resolved';
+							return f(index, value);
+						}else {
+							res[index] = value;
+							if (cl === 0) {
+								status = 'resolved';
+								return f.apply(this, res);
+							}
+							cl--;
+						}
+					};
+				}
+				else if(i === 1) {
+					return function (index, value) {
+						if (status !== 'pending') return;
+						if(options.rejectOnFirstError){
+							status = 'rejected';
+							return f(index, value);
+						}else {
+							res[index] = value;
+							if (fl === 0) {
+								status = 'rejected';
+								return f.apply(this, res);
+							}
+							fl--;
+						}
+						status = 'rejected';
+						return f.apply(this, arguments)
+					};
+				}
+				return function(){
+					return f.apply(this, $_.A.merge([status],arguments))
+				};
 			});
-		}
+			$_.A.each(asyncs, function(f,index){
+				var c = slice.call(callbacks,0);
+				c[0] = curry(c[0],index);
+				async(f).apply(this, c);
+			});
+
+		};
 	}
 
     /**
@@ -2100,7 +2144,7 @@ module.exports = Asdf;
         errorHandler:errorHandler,
         trys:trys,
 		asyncThen:asyncThen,
-		asyncCompose:asyncCompose,
+		asyncSequence:asyncSequence,
 		toFunction:toFunction,
 		async:async,
 		when:when,
@@ -2926,7 +2970,7 @@ module.exports = Asdf;
     }
 
     function concat(array){
-        return arrayProto.concat.apply(arrayProto, arguments);
+        return arrayProto.concat.apply(array, slice.call(arguments,1));
     }
 
     function count(array, fn, context){
