@@ -1840,8 +1840,7 @@ module.exports = Asdf;
 		options =  $_.O.extend({resolveOnFirstSuccess:false, rejectOnFirstError:true}, options);
         if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw new TypeError();
 		return function(){
-			var cl, fl;
-			cl = fl = asyncs.length-1;
+			var l = asyncs.length-1;
 			var status = 'pending';
 			var arg = slice.call(arguments,0);
 			var res = [];
@@ -1854,11 +1853,11 @@ module.exports = Asdf;
 							return f(index, value);
 						}else {
 							res[index] = value;
-							if (cl === 0) {
+							if (l === 0) {
 								status = 'resolved';
 								return f.apply(this, res);
 							}
-							cl--;
+							l--;
 						}
 					};
 				}
@@ -1870,11 +1869,11 @@ module.exports = Asdf;
 							return f(index, value);
 						}else {
 							res[index] = value;
-							if (fl === 0) {
+							if (l === 0) {
 								status = 'rejected';
 								return f.apply(this, res);
 							}
-							fl--;
+							l--;
 						}
 						status = 'rejected';
 						return f.apply(this, arguments)
