@@ -4946,7 +4946,7 @@ module.exports = Asdf;
             con.groupEnd();
         }
         function print(name,o){
-            groupStart(name+ '{')
+            groupStart(name+ '{');
             if($_.O.isArray(o)){
                 $_.A.each(o, function(v){
                     log(isDir?v:('  ' + stringifyData(v)));
@@ -5063,6 +5063,38 @@ module.exports = Asdf;
         }, function(e){return e.stack});
         return e.stack?nomalizer($_.Bom.browser,e).slice(startIdx):other(arguments.callee);
     }
+    var pathLog = (function(){
+        var _path={};
+        return {
+            start: function(key){
+                _path[key] = [];
+            },
+            end:function(key){
+                delete _path[key];
+            },
+            add: function(key, value){
+                var arg = Array.prototype.slice.call(arguments, 1),p;
+                if(!(p = _path[key])) return;
+                p.push(arg);
+            },
+            log: function(key){
+                var p;
+                if(!(p = _path[key])) return;
+                con.group('path:'+ key + ' {');
+                $_.A.each(p,function (arg){
+                    con.log.apply(this, arg)
+                });
+                con.log('}');
+                con.groupEnd();
+            },
+            test: function(key, fn){
+                var p = _path[key];
+                return fn(p);
+            }
+
+        }
+    })();
+
     var now = Date.now || function() { return new Date().getTime(); };
 	$_.O.extend(o, {
 		makeuid : makeuid,
@@ -5070,7 +5102,8 @@ module.exports = Asdf;
         time:time,
         spy: spy,
         trace:trace,
-        now:now
+        now:now,
+        pathLog:pathLog
 	});
 })(Asdf);;(function ($_) {
 	$_.Base = {};
