@@ -78,3 +78,8 @@ test("Asdf.S.interpreter", function(){
     var f = Asdf.S.interpreter('capitalize(truncate (times(%a0, 20),8))');
     equal(f('ab'), 'Ababa...', 'interpreter ok');
 });
+
+test("Asdf.S.lambda", function(){
+	equal(Asdf.S.lambda('s => s.length')('asdfasdf'), 8, 's => s.length ok');
+	equal(Asdf.S.lambda("(num1, num2) => { return num1 + num2; }")(1,2),3, '(num1, num2) => { return num1 + num2; } ok');
+});

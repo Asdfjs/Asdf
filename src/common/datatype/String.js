@@ -650,6 +650,15 @@
 
     var split = Asdf.F.functionize(String.prototype.split);
 
+	function lambda(str){
+		if($_.O.isNotString(str)) throw new TypeError();
+		var expr = str.match(/^[(\s]*([^()]*?)[)\s]*=>(.*)/);
+		if(!expr) throw new TypeError();
+		var body = trim(expr[2]);
+		var isBlock = /\{.*\}/.test(body);
+		return new Function(expr[1], (isBlock?"":"return ") + body);
+	}
+
     $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
@@ -682,6 +691,7 @@
         match:match,
         toUpperCase:toUpperCase,
         toLowerCase:toLowerCase,
-        split:split
+        split:split,
+		lambda:lambda
 	});
 })(Asdf);
