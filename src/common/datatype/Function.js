@@ -887,26 +887,6 @@
 
     var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
-
-	function enumerator(init, next){
-		var arg = slice.call(arguments, 2);
-		var state = 0; //0:running, 1:finished
-		var current = init.apply(this, arg);
-		return function(n){
-			if(n){
-				return enumerator(toFunction(current), partial(next, undefined, n));
-			}else if(state === 1){
-				return false
-			}
-			next(current, function(res){
-				current = res;
-			},function() {
-				state = 1;
-			});
-			return true;
-		}
-	}
-
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -951,8 +931,7 @@
         complement:complement,
 		alwaysFalse: toFunction(false),
 		alwaysTrue:  toFunction(true),
-		promise:promise,
-		enumerator:enumerator
+		promise:promise
 	}, true);
 
 })(Asdf);
