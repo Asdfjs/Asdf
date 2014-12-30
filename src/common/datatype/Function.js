@@ -887,6 +887,16 @@
 
     var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
+	/*function enumerator(init, next, dispose){
+		var state = 'before';
+		var current;
+		return function(){
+			if(state === 'before')
+				current = init();
+			return next.apply(initValue, su);
+		}
+	}*/
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
