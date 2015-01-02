@@ -887,15 +887,29 @@
 
     var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
-	/*function enumerator(init, next, dispose){
-		var state = 'before';
-		var current;
-		return function(){
-			if(state === 'before')
-				current = init();
-			return next.apply(initValue, su);
+	function enumerator(init, next, callback){
+		var arg = slice.call(arguments, 2);
+		var state = 0; //0:running, 1:done
+		var current = init.apply(this, arg);
+		function stop(){
+			state = 1;
 		}
-	}*/
+		return function(){
+			if(state === 1){
+				return false
+			}
+
+			callback(current,stop);
+
+			if(state === 1){
+				return false
+			}
+
+			current = next(current);
+			return true;
+		}
+	}
+
 
 	$_.O.extend($_.F, {
 		identity: identity,
@@ -941,7 +955,8 @@
         complement:complement,
 		alwaysFalse: toFunction(false),
 		alwaysTrue:  toFunction(true),
-		promise:promise
+		promise:promise,
+		enumerator:enumerator
 	}, true);
 
 })(Asdf);
