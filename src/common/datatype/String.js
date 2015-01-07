@@ -35,9 +35,21 @@
 	 * Asdf.S.trim('  ab c   '); // return 'ab c'
 	 * 
 	 */
-	function trim(str) {
+	function trim(str, removestr) {
 		if(!$_.O.isString(str)) throw new TypeError();
-		return str.replace(/^\s+/, '').replace(/\s+$/, '');
+		return rtrim(ltrim(str, removestr), removestr);
+	}
+
+	function ltrim(str, removestr){
+		if(!$_.O.isString(str)) throw new TypeError();
+		var re = (removestr != null)? new RegExp('^'+toRegExp(removestr)+'+'):/^\s+/;
+		return str.replace(re, '');
+	}
+
+	function rtrim(str, removestr){
+		if(!$_.O.isString(str)) throw new TypeError();
+		var re = (removestr != null)? new RegExp(toRegExp(removestr)+'+$'):/\s+$/;
+		return str.replace(re, '');
 	}
 	
 	/**
@@ -587,7 +599,7 @@
      * @returns {string}
      */
     function toRegExp(str){
-        return str.replace(/([\\^$()[\]])/g,'\\$1');
+        return '(?:'+str.replace(/([\\^$()+*.[\]])/g, '\\$1')+')';
     }
 
     function tokenizer(c, o){
@@ -659,9 +671,19 @@
 		return new Function(expr[1], (isBlock?"":"return ") + body);
 	}
 
+	function translate(str, obj){
+		$_.O.each(obj, function(v,k){
+			var re = new RegExp(toRegExp(k), 'g');
+			str = str.replace(re,v);
+		});
+		return str;
+	}
+
     $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
+		ltrim:ltrim,
+		rtrim:rtrim,
 		stripTags: stripTags,
 		stripScripts: stripScripts,
 		escapeHTML: escapeHTML,
@@ -692,6 +714,7 @@
         toUpperCase:toUpperCase,
         toLowerCase:toLowerCase,
         split:split,
-		lambda:lambda
+		lambda:lambda,
+		translate:translate
 	});
 })(Asdf);

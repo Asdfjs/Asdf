@@ -83,3 +83,11 @@ test("Asdf.S.lambda", function(){
 	equal(Asdf.S.lambda('s => s.length')('asdfasdf'), 8, 's => s.length ok');
 	equal(Asdf.S.lambda("(num1, num2) => { return num1 + num2; }")(1,2),3, '(num1, num2) => { return num1 + num2; } ok');
 });
+test("Asdf.S.translate", function(){
+	equal(Asdf.S.translate('asdfasdf', {a:1,s:2,d:3,f:4}), '12341234', 'translate ok');
+});
+test("Asdf.S.trim", function(){
+	equal(Asdf.S.trim('    hello    '), 'hello', '두번째 인자가 없는 경우');
+	equal(Asdf.S.trim('---hello----', '-'), 'hello', '두번째 인자가 있는 경우');
+	equal(Asdf.S.trim('+-+-hello+-+-','+-'), 'hello', '+- 인 경우');
+});
