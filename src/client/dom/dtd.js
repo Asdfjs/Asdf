@@ -5,17 +5,24 @@
     var dtd;
     $_.Element.dtd = dtd = {};
 
-    var extend = $_.O.extend,
-        substract = function( source, removed ) {
-            var clone = $_.O.clone( source );
-            removed = Array.prototype.slice.call(arguments, 1);
-            $_.A.each(removed, function(r){
-               $_.O.each(r, function(v){
-                   delete clone[v];
-               })
-            });
-            return clone
-        };
+    var extend = $_.O.extend;
+    function substract( source, removed ) {
+        var clone = $_.O.clone( source );
+        removed = Array.prototype.slice.call(arguments, 1);
+        $_.A.each(removed, function(r){
+           $_.O.each(r, function(v){
+               delete clone[v];
+           })
+        });
+        return clone
+    }
+    function makeMap(arr){
+        var obj = {};
+        $_.A.each(arr, function(v){
+            obj[v] = true;
+        });
+        return obj;
+    }
 
     // Phrasing elements.
     // P = { a: 1, em: 1, strong: 1, small: 1, abbr: 1, dfn: 1, i: 1, b: 1, s: 1,
@@ -37,6 +44,13 @@
     // X( P, T );
     // Flow elements set consists of phrasing elements set.
     // X( F, P );
+
+    var phrase = ('a,em,strong,small,abbr,dfn,i,b,s,u,code,var,samp,kbd,sup,sub,q,cite1,span,bdo,bdi,br,wbr,' +
+        'ins,del,img,embed,object,iframe,map,area,script,noscript,ruby,video,audio,input,textarea,select,' +
+        'button,label,output,keygen,progress,command,canvas,time,meter,detalist').split(',');
+    var flow = ('a,p,hr,pre,ul,ol,dl,div,h1,h2,h3,h4,h5,h6,hgroup,address,blockquote,ins,del,object,map,' +
+        'noscript,section,nav,article,aside,header,footer,video,audio,figure,table,form,fieldset,menu,' +
+        'canvas,details').split(',');
 
     var P = {}, F = {},
     // Intersection of flow elements set and phrasing elements set.
