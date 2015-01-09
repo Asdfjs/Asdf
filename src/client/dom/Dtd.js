@@ -3,23 +3,8 @@
  */
 ( function($_) {
     var extend = $_.O.extend;
-    function substract( source, removed ) {
-        var clone = $_.O.clone( source );
-        removed = Array.prototype.slice.call(arguments, 1);
-        $_.A.each(removed, function(r){
-           $_.O.each(r, function(v){
-               delete clone[v];
-           })
-        });
-        return clone
-    }
-    function makeMap(arr){
-        var obj = {};
-        $_.A.each(arr, function(v){
-            obj[v] = true;
-        });
-        return obj;
-    }
+    var makeMap = $_.F.partial($_.A.toMap, undefined, $_.F.identity, $_.F.alwaysTrue);
+
     var globalAttribute = ("id,accesskey,class,dir,lang,style,tabindex,title").split(',');
     var eventAttribute = ("onabort,onblur,oncancel,oncanplay,oncanplaythrough,onchange,onclick,onclose,oncontextmenu,oncuechange," +
     "ondblclick,ondrag,ondragend,ondragenter,ondragleave,ondragover,ondragstart,ondrop,ondurationchange,onemptied,onended," +
@@ -240,7 +225,7 @@
             $tableContent: makeMap("caption,col,colgroup,tbody,td,tfoot,th,thead,tr".split(',')),
             $transparent: makeMap("a,audio,canvas,del,ins,map,noscript,object,video".split(',')),
             $intermediate: makeMap("caption,colgroup,dd,dt,figcaption,legend,li,optgroup,option,rp,rt,summary,tbody,td,tfoot,th,thead,tr".split(',')),
-            $boolAttrMap: makeMap(('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,' +
+            $boolAttr: makeMap(('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,' +
             'noshade,nowrap,readonly,selected,autoplay,loop,controls').split(',')),
             $textBlock: makeMap(('h1,h2,h3,h4,h5,h6,p,div,address,pre,form,' +
             'blockquote,center,dir,fieldset,header,footer,article,section,hgroup,aside,nav,figure').split(',')),

@@ -869,6 +869,14 @@
         return slice.call(array, 0, Math.min(n, array.length));
     }
 
+	function toMap(arr, keyFn, valueFn){
+		if($_.O.isNotArray(arr)||$_.O.isNotFunction(keyFn)||$_.O.isNotFunction(valueFn)) throw new TypeError();
+		return reduce(arr, function(acc, item, index){
+			acc[keyFn(item, index)] = valueFn(item, index);
+			return acc;
+		}, {});
+	}
+
 	$_.O.extend($_.A, {
 		each: each,
 		map: map,
@@ -919,6 +927,7 @@
         append:append,
         ap:ap,
         take:take,
-        xprod:xprod
+        xprod:xprod,
+		toMap:toMap
 	}, true);
 })(Asdf);
