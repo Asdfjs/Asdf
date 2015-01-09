@@ -40,7 +40,7 @@
 
     var globalAttributesHtml5 = ("contenteditable,contextmenu,draggable,dropzone,hidden,spellcheck,translate").split(',');
 
-    var blockContentHtml5 = ("article aside details dialog figure header footer hgroup section nav").split(',');
+    var blockContentHtml5 = ("article,aside,details,dialog,figure,header,footer,hgroup,section,nav").split(',');
 
     var phrasingContentHtml4 = ("acronym,applet,basefont,big,font,strike,tt").split(',');
 
@@ -229,7 +229,7 @@
             add("iframe", "sandbox,seamless,allowfullscreen".split(','),[]);
         }
         extend(dtd, {
-            $block: makeMap(b),
+            $block: makeMap(concat(["tbody", "thead", "tfoot", "th", "tr", "td", "li", "caption", "dt", "dd", "noscript", "option", "datalist", "select", "optgroup"],b)),
             $cdata: makeMap(['script', 'style']),
             $empty: makeMap("area,base,basefont,br,col,command,dialog,embed,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr".split(',')),
             $inline: makeMap(p),
