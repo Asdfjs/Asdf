@@ -887,26 +887,23 @@
 
     var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
-	function enumerator(init, next, callback){
-		var arg = slice.call(arguments, 2);
+	function iterator(initFn, nextFn, returnFn){
 		var state = 0; //0:running, 1:done
-		var current = init.apply(this, arg);
+		var current = initFn.call(this);
+		returnFn = returnFn||identity;
 		function stop(){
 			state = 1;
 		}
 		return function(){
 			if(state === 1){
-				return false
+				return {done:true}
 			}
-
-			callback(current,stop);
-
+			var val = returnFn(current);
+			current = nextFn(current, stop);
 			if(state === 1){
-				return false
+				return {done:true}
 			}
-
-			current = next(current);
-			return true;
+			return {value:val, done:false};
 		}
 	}
 
@@ -956,7 +953,7 @@
 		alwaysFalse: toFunction(false),
 		alwaysTrue:  toFunction(true),
 		promise:promise,
-		enumerator:enumerator
+		iterator:iterator
 	}, true);
 
 })(Asdf);

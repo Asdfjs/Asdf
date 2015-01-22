@@ -679,6 +679,35 @@
 		return str;
 	}
 
+	function wildcard(pattern, str){
+		if($_.O.isNotString(pattern)||$_.O.isNotString(str)) throw new TypeError();
+		function match(pp, sp){
+			while(sp < str.length){
+				if(matchHere(pp,sp)) return true;
+				sp++;
+			}
+			return false;
+		}
+		function matchHere(pp, sp){
+			while(sp < str.length){
+				if(pattern[pp]==='?'|| pattern[pp] === str[sp]){
+					pp++;
+					sp++;
+					continue;
+				}else if(pattern[pp] === '*'){
+					if(pattern[pp+1]=== undefined)
+						return true;
+					else {
+						return match(pp+1,sp);
+					}
+				}
+				return false;
+			}
+			return /^\**$/.test(pattern.substring(pp));
+		}
+		return matchHere(0,0);
+	}
+
     $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
@@ -715,6 +744,7 @@
         toLowerCase:toLowerCase,
         split:split,
 		lambda:lambda,
-		translate:translate
+		translate:translate,
+		wildcard:wildcard
 	});
 })(Asdf);
