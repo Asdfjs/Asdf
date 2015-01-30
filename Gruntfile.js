@@ -17,6 +17,7 @@ module.exports = function(grunt) {
                     'src/common/datatype/Argument.js',
                     'src/common/datatype/Number.js',
                     'src/common/datatype/Prototype.js',
+                    'src/common/datatype/Generator.js',
                     'src/client/datatype/*.js',
                     'src/client/bom/*.js',
                     'src/client/event/*.js',
@@ -45,12 +46,13 @@ module.exports = function(grunt) {
                     'src/common/datatype/Argument.js',
                     'src/common/datatype/Number.js',
                     'src/common/datatype/Prototype.js',
+                    'src/common/datatype/Generator.js',
                     'src/common/util/*.js',
                     'src/common/base/base.js',
                     'src/common/base/Callbacks.js',
                     'src/common/base/Events.js',
                     'src/common/base/Store.js',
-                    'src/common/base/Chain.js',
+                    'src/common/base/Chain.js'
                 ],
                 dest: 'build/<%= pkg.name %>.server.js'
             }
