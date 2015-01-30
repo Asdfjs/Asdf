@@ -887,25 +887,7 @@
 
     var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
-	function iterator(initFn, nextFn, returnFn){
-		var state = 0; //0:running, 1:done
-		var current = initFn.call(this);
-		returnFn = returnFn||identity;
-		function stop(){
-			state = 1;
-		}
-		return function(){
-			if(state === 1){
-				return {done:true}
-			}
-			var val = returnFn(current);
-			current = nextFn(current, stop);
-			if(state === 1){
-				return {done:true}
-			}
-			return {value:val, done:false};
-		}
-	}
+
 
 
 	$_.O.extend($_.F, {
@@ -952,8 +934,7 @@
         complement:complement,
 		alwaysFalse: toFunction(false),
 		alwaysTrue:  toFunction(true),
-		promise:promise,
-		iterator:iterator
+		promise:promise
 	}, true);
 
 })(Asdf);
