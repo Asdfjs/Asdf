@@ -1650,35 +1650,19 @@ module.exports = Asdf;
 
     /**
      * @memberof Asdf.F
-     * @param {Function} func
-     * @param {Function} after
-     * @param {...Function} fn
-     * @returns {Function}
+     * @param {function} func
+     * @param {function} success
+     * @param {function=} fail
+	 * @param {...function=} notify
+     * @returns {function} callback Function
      */
-	function asyncThen(func, after/*fns*/){
-		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
-		var fn = fns.shift();
-		return wrap(fn, function(f){
-			var isDone = false;
-			var arg = slice.call(arguments,1);
-			return f.apply(this, $_.A.map(fns, function(f,i){
-				if(i === 0) {
-					return function () {
-						if (isDone) return;
-						isDone = true;
-						return f.apply(this, $_.A.merge(arg, arguments))
-					};
-				}
-				return function(){
-					if(isDone) return;
-					isDone = true;
-					return f.apply(this, arguments)
-				};
-			}));
-		});
+	function asyncThen(func, success, fail, notify){
+		return function(){
+			return async.apply(this, $_.A.merge([func],arguments))(success, fail, notify);
+		};
 	}
 
-	function asyncCompose(/*fns*/){
+	function asyncSequence(/*fns*/){
 		var fns = $_.A.filter(slice.call(arguments), $_.O.isFunction);
 		return $_.A.reduceRight(fns, function(f1, f2){
 			return asyncThen(f1,f2);
@@ -1688,13 +1672,12 @@ module.exports = Asdf;
 	/**
 	 * @memberof Asdf.F
 	 * @param func
-	 * @returns {*}
+	 * @returns {function}
 	 * @example
 	 *
 	 */
 
 	/*
-
 	var p1 = Asdf.F.promise(
 		function(s,f){
 			console.log(1);
@@ -1762,18 +1745,19 @@ module.exports = Asdf;
 				var n = f(o);
 				var snext = su(o);
 				var fnext = fa(o);
-				if(obj._status == 'resolved'&&succ){
-					return succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				}else if(obj._status == 'rejected'&&fail){
-					return fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				}
-				obj._next.push([function(){
-					o.arg = slice.call(arguments);
+				if(obj._status == 'resolved'){
 					succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				},function(){
-					o.arg = slice.call(arguments);
+				}else if(obj._status == 'rejected'){
 					fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
-				}]);
+				}else {
+					obj._next.push([function () {
+						o.arg = slice.call(arguments);
+						succ.apply(this, $_.A.merge([snext, fnext], o.arg || []));
+					}, function () {
+						o.arg = slice.call(arguments);
+						fail.apply(this, $_.A.merge([snext, fnext], o.arg || []));
+					}]);
+				}
 				return n;
 			}
 			return next;
@@ -1811,9 +1795,30 @@ module.exports = Asdf;
 
 	function async(asyncfn){
         if(!$_.O.isFunction(asyncfn)) throw new TypeError();
-		return function(cb) {
-            asyncfn.call(this,cb);
-        }
+		var args = slice.call(arguments,1);
+		return wrap(asyncfn, function(f){
+			var status = 'pending';
+			var arg = slice.call(arguments,1);
+			return f.apply(this, $_.A.map(arg, function(f,i){
+				if(i === 0) {
+					return function () {
+						if (status !== 'pending') return;
+						status = 'resolved';
+						return f.apply(this, Asdf.A.concat(args, slice.call(arguments)));
+					};
+				}
+				else if(i === 1) {
+					return function () {
+						if (status !== 'pending') return;
+						status = 'rejected';
+						return f.apply(this, arguments)
+					};
+				}
+				return function(){
+					return f.apply(this, $_.A.merge([status],arguments))
+				};
+			}));
+		});
 	}
 
     /**
@@ -1827,25 +1832,64 @@ module.exports = Asdf;
      * function(cb){setTimeout(function(){cb(2)}, 25)},
      * function(cb){setTimeout(function(){cb(3)}, 70)},
      * function(cb){setTimeout(function(){cb(4)}, 10)}
-     * )(function(){console.log(arguments}) //[1,2,3,4]
+     * )(function(){console.log(arguments)}) //[1,2,3,4]
      */
-	function when(/*async*/){
+	function when(/*async, options*/){
 		var asyncs = slice.call(arguments);
+		var options = $_.O.isPlainObject(asyncs[asyncs.length-1])?asyncs.pop():{};
+		options =  $_.O.extend({resolveOnFirstSuccess:false, rejectOnFirstError:true}, options);
         if(asyncs.length < 2 || $_.A.any(asyncs, $_.O.isNotFunction)) throw new TypeError();
-		var l = asyncs.length-1;
-		return function(cb){
-            if(!$_.O.isFunction(cb)) throw new TypeError();
-            var res = [];
-			function r(index, value){
-                res[index] = value;
-				if(l === 0)
-					return cb.apply(this, res);
-				l--;
-			}
-			$_.A.each(asyncs, function(v, k){
-				v(curry(r, k));
+		return function(){
+			var l = asyncs.length-1;
+			var status = 'pending';
+			var arg = slice.call(arguments,0);
+			var res = [];
+			var callbacks = $_.A.map(arg, function(f,i){
+				if(i === 0) {
+					return function (index, value) {
+						if (status !== 'pending') return;
+						if(options.resolveOnFirstSuccess){
+							status = 'resolved';
+							return f(index, value);
+						}else {
+							res[index] = value;
+							if (l === 0) {
+								status = 'resolved';
+								return f.apply(this, res);
+							}
+							l--;
+						}
+					};
+				}
+				else if(i === 1) {
+					return function (index, value) {
+						if (status !== 'pending') return;
+						if(options.rejectOnFirstError){
+							status = 'rejected';
+							return f(index, value);
+						}else {
+							res[index] = value;
+							if (l === 0) {
+								status = 'rejected';
+								return f.apply(this, res);
+							}
+							l--;
+						}
+						status = 'rejected';
+						return f.apply(this, arguments)
+					};
+				}
+				return function(){
+					return f.apply(this, $_.A.merge([status],arguments))
+				};
 			});
-		}
+			$_.A.each(asyncs, function(f,index){
+				var c = slice.call(callbacks,0);
+				c[0] = curry(c[0],index);
+				async(f).apply(this, c);
+			});
+
+		};
 	}
 
     /**
@@ -2073,6 +2117,9 @@ module.exports = Asdf;
 
     var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
+
+
+
 	$_.O.extend($_.F, {
 		identity: identity,
 		bind: bind,
@@ -2099,7 +2146,7 @@ module.exports = Asdf;
         errorHandler:errorHandler,
         trys:trys,
 		asyncThen:asyncThen,
-		asyncCompose:asyncCompose,
+		asyncSequence:asyncSequence,
 		toFunction:toFunction,
 		async:async,
 		when:when,
@@ -2925,7 +2972,7 @@ module.exports = Asdf;
     }
 
     function concat(array){
-        return arrayProto.concat.apply(arrayProto, arguments);
+        return arrayProto.concat.apply(array, slice.call(arguments,1));
     }
 
     function count(array, fn, context){
@@ -2992,6 +3039,14 @@ module.exports = Asdf;
         return slice.call(array, 0, Math.min(n, array.length));
     }
 
+	function toMap(arr, keyFn, valueFn){
+		if($_.O.isNotArray(arr)||$_.O.isNotFunction(keyFn)||$_.O.isNotFunction(valueFn)) throw new TypeError();
+		return reduce(arr, function(acc, item, index){
+			acc[keyFn(item, index)] = valueFn(item, index);
+			return acc;
+		}, {});
+	}
+
 	$_.O.extend($_.A, {
 		each: each,
 		map: map,
@@ -3042,7 +3097,8 @@ module.exports = Asdf;
         append:append,
         ap:ap,
         take:take,
-        xprod:xprod
+        xprod:xprod,
+		toMap:toMap
 	}, true);
 })(Asdf);;/**
  * @project Asdf.js
@@ -3081,9 +3137,21 @@ module.exports = Asdf;
 	 * Asdf.S.trim('  ab c   '); // return 'ab c'
 	 * 
 	 */
-	function trim(str) {
+	function trim(str, removestr) {
 		if(!$_.O.isString(str)) throw new TypeError();
-		return str.replace(/^\s+/, '').replace(/\s+$/, '');
+		return rtrim(ltrim(str, removestr), removestr);
+	}
+
+	function ltrim(str, removestr){
+		if(!$_.O.isString(str)) throw new TypeError();
+		var re = (removestr != null)? new RegExp('^'+toRegExp(removestr)+'+'):/^\s+/;
+		return str.replace(re, '');
+	}
+
+	function rtrim(str, removestr){
+		if(!$_.O.isString(str)) throw new TypeError();
+		var re = (removestr != null)? new RegExp(toRegExp(removestr)+'+$'):/\s+$/;
+		return str.replace(re, '');
 	}
 	
 	/**
@@ -3633,7 +3701,7 @@ module.exports = Asdf;
      * @returns {string}
      */
     function toRegExp(str){
-        return str.replace(/([\\^$()[\]])/g,'\\$1');
+        return '(?:'+str.replace(/([\\^$()+*.[\]])/g, '\\$1')+')';
     }
 
     function tokenizer(c, o){
@@ -3696,9 +3764,57 @@ module.exports = Asdf;
 
     var split = Asdf.F.functionize(String.prototype.split);
 
+	function lambda(str){
+		if($_.O.isNotString(str)) throw new TypeError();
+		var expr = str.match(/^[(\s]*([^()]*?)[)\s]*=>(.*)/);
+		if(!expr) throw new TypeError();
+		var body = trim(expr[2]);
+		var isBlock = /\{.*\}/.test(body);
+		return new Function(expr[1], (isBlock?"":"return ") + body);
+	}
+
+	function translate(str, obj){
+		$_.O.each(obj, function(v,k){
+			var re = new RegExp(toRegExp(k), 'g');
+			str = str.replace(re,v);
+		});
+		return str;
+	}
+
+	function wildcard(pattern, str){
+		if($_.O.isNotString(pattern)||$_.O.isNotString(str)) throw new TypeError();
+		function match(pp, sp){
+			while(sp < str.length){
+				if(matchHere(pp,sp)) return true;
+				sp++;
+			}
+			return false;
+		}
+		function matchHere(pp, sp){
+			while(sp < str.length){
+				if(pattern[pp]==='?'|| pattern[pp] === str[sp]){
+					pp++;
+					sp++;
+					continue;
+				}else if(pattern[pp] === '*'){
+					if(pattern[pp+1]=== undefined)
+						return true;
+					else {
+						return match(pp+1,sp);
+					}
+				}
+				return false;
+			}
+			return /^\**$/.test(pattern.substring(pp));
+		}
+		return matchHere(0,0);
+	}
+
     $_.O.extend(o, {
 		truncate: truncate,
 		trim: trim,
+		ltrim:ltrim,
+		rtrim:rtrim,
 		stripTags: stripTags,
 		stripScripts: stripScripts,
 		escapeHTML: escapeHTML,
@@ -3728,7 +3844,10 @@ module.exports = Asdf;
         match:match,
         toUpperCase:toUpperCase,
         toLowerCase:toLowerCase,
-        split:split
+        split:split,
+		lambda:lambda,
+		translate:translate,
+		wildcard:wildcard
 	});
 })(Asdf);
 ;(function($_) {
@@ -4902,7 +5021,7 @@ module.exports = Asdf;
             con.groupEnd();
         }
         function print(name,o){
-            groupStart(name+ '{')
+            groupStart(name+ '{');
             if($_.O.isArray(o)){
                 $_.A.each(o, function(v){
                     log(isDir?v:('  ' + stringifyData(v)));
@@ -5019,6 +5138,38 @@ module.exports = Asdf;
         }, function(e){return e.stack});
         return e.stack?nomalizer($_.Bom.browser,e).slice(startIdx):other(arguments.callee);
     }
+    var pathLog = (function(){
+        var _path={};
+        return {
+            start: function(key){
+                _path[key] = [];
+            },
+            end:function(key){
+                delete _path[key];
+            },
+            add: function(key, value){
+                var arg = Array.prototype.slice.call(arguments, 1),p;
+                if(!(p = _path[key])) return;
+                p.push(arg);
+            },
+            log: function(key){
+                var p;
+                if(!(p = _path[key])) return;
+                con.group('path:'+ key + ' {');
+                $_.A.each(p,function (arg){
+                    con.log.apply(this, arg)
+                });
+                con.log('}');
+                con.groupEnd();
+            },
+            test: function(key, fn){
+                var p = _path[key];
+                return fn(p);
+            }
+
+        }
+    })();
+
     var now = Date.now || function() { return new Date().getTime(); };
 	$_.O.extend(o, {
 		makeuid : makeuid,
@@ -5026,7 +5177,8 @@ module.exports = Asdf;
         time:time,
         spy: spy,
         trace:trace,
-        now:now
+        now:now,
+        pathLog:pathLog
 	});
 })(Asdf);;(function ($_) {
 	$_.Base = {};
