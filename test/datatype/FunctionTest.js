@@ -158,15 +158,34 @@ test("Asdf.F.trys", function(){
 
 });
 asyncTest("Asdf.F.asyncThen", function(){
-    var b = false;
-    var f = Asdf.F.asyncThen(function(){}, function(){
-        b=true;
-        ok(b, 'asyncThen ok');
+    var f = Asdf.F.asyncThen(function(f){
+        setTimeout(f, 20);
+    }, function(){
+        ok(true, 'asyncThen ok');
         start();
-    }, function(f){
-        setTimeout(f, 200);
     });
     f();
+});
+asyncTest("Asdf.F.promise", function(){
+    var f = Asdf.F.promise(function(cb){
+        setTimeout(cb,20);
+    });
+    f(function(){
+        start();
+        ok(true, 'promise ok');
+    })
+});
+asyncTest("Asdf.F.asyncSequence", function(){
+    var b = false;
+    function s(cb){
+        setTimeout(function(){cb(2)}, 20);
+    }
+    var f = Asdf.F.asyncSequence(s,s,s,s);
+    f(function(){
+        b=true;
+        ok(b, 'asyncSequence ok');
+        start();
+    });
 });
 asyncTest("Asdf.F.when", function(){
     Asdf.F.when(
