@@ -153,7 +153,7 @@
      * @param {Collection} col
      * @returns {Function}
      */
-    function toGenerator(col){
+    function collectionToGenerator(col){
         if($_.O.isNotCollection(col)) throw new TypeError();
         return generator($_.F.toFunction({arr:col, index:0}),
             function(c,s){
@@ -164,6 +164,32 @@
             },function(c){
                 return c.arr[c.index]
             });
+    }
+    function treeToGenerator(tree){
+        if(!$_.Tree.isTree(tree)) throw new TypeError();
+        return generator($_.F.toFunction({node:tree,q:$_.A.toArray(tree.children)}),
+            function(c,s){
+                if(c.q.length === 0) return s();
+                c.node = c.q.shift();
+                var children = c.node.children;
+                var i = children.length;
+                while(i--){
+                    c.q.unshift(children[i]);
+                }
+                return c;
+            }, function(c){
+                return c.node;
+            }
+        )
+    }
+    function toGenerator(obj){
+        if($_.O.isCollection(obj)){
+            return collectionToGenerator(obj);
+        }else if($_.Tree.isTree(obj)){
+            return treeToGenerator(obj);
+        }else {
+            throw new TypeError();
+        }
     }
 
 /*
@@ -190,6 +216,8 @@
         take:take,
         drop:drop,
         reduce:reduce,
+        collectionToGenerator:collectionToGenerator,
+        treeToGenerator:treeToGenerator,
         toGenerator:toGenerator
     });
 })(Asdf);
