@@ -4265,13 +4265,16 @@
                 return c.arr[c.index]
             });
     }
-    function treeToGenerator(tree){
-        if(!$_.Tree.isTree(tree)) throw new TypeError();
-        return generator($_.F.toFunction({node:tree,q:$_.A.toArray(tree.children)}),
+    function treeToGenerator(tree, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        if(!$_.Tree.isTree(tree, conf)) throw new TypeError();
+        return generator($_.F.toFunction({node:tree,q:$_.A.toArray(tree[conf.children])}),
             function(c,s){
                 if(c.q.length === 0) return s();
                 c.node = c.q.shift();
-                var children = c.node.children;
+                var children = c.node[conf.children];
                 var i = children.length;
                 while(i--){
                     c.q.unshift(children[i]);
