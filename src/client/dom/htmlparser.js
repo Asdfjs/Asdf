@@ -2,13 +2,7 @@
     var htmlPartsRegex = /<(?:(?:\/([^>]+)>)|(?:!--([\S|\s]*?)-->)|(?:([^\/\s>]+)((?:\s+[\w\-:.]+(?:\s*=\s*?(?:(?:"[^"]*")|(?:'[^']*')|[^\s"'\/>]+))?)*)[\S\s]*?(\/?)>))/g;
     var attribsRegex = /([\w\-:.]+)(?:(?:\s*=\s*(?:(?:"([^"]*)")|(?:'([^']*)')|([^\s>]+)))|(?=\s|$))/g;
     var dtd = $_.Dtd.getDtd('html5');
-    function makeMap(str){
-        var obj = {};
-        $_.A.each(str.split(","), function(v){
-            obj[v] = true;
-        });
-        return obj;
-    }
+
     function _tokenizer(html, callback){
         var emptyAttr = dtd.$boolAttr;
         var cd = dtd.$cdata;

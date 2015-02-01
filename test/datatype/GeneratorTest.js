@@ -35,3 +35,14 @@ test('Asdf.Gen.reduce', function(){
     equal(gr().value, 3, 'reduce');
     equal(gr().value, 6, 'reduce');
 });
+test('Asdf.Gen.treeToGenerator', function(){
+    var root = Asdf.Tree.Node(0);
+    var n1 = Asdf.Tree.Node(1);
+    var n2 = Asdf.Tree.Node(2);
+    root.append(n1);
+    root.append(n2);
+    var g = Asdf.Gen.treeToGenerator(root);
+    equal(g().value, root, 'treeToGenerator');
+    equal(g().value, n1, 'treeToGenerator');
+    equal(g().value, n2, 'treeToGenerator');
+});

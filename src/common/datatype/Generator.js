@@ -23,7 +23,7 @@
             if(state === 2){
                 return {done:true}
             }else {
-                current = state==0?(state=1,initFn.call(this, stop)):nextFn(current, stop);
+                current = state===0?(state=1,initFn.call(this, stop)):nextFn(current, stop);
                 if (state === 2) {
                     return {done: true}
                 }
@@ -73,8 +73,9 @@
     function filter(genFn, fn){
         if($_.O.isNotFunction(fn)) throw new TypeError();
         var f = function(_,s){
+            var v;
             do {
-                var v = genFn();
+                v = genFn();
             }while(!v.done && !fn(v.value));
             if(v.done) return s();
             return v;
@@ -116,7 +117,7 @@
         return generator(genFn,
             function(c,s){
                 var v=genFn();
-                if(v.done || n == 0) return s();
+                if(v.done || n === 0) return s();
                 n--;
                 return v;
             },
@@ -132,8 +133,9 @@
      */
     function drop(genFn, n){
         return generator(function(s){
+                var v;
                 do {
-                    var v = genFn();
+                    v = genFn();
                 }while(!v.done && n-->0);
                 if(v.done) return s();
                 return v;

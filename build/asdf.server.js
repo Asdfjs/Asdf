@@ -4086,6 +4086,13 @@ module.exports = Asdf;
      * @name Asdf.Gen
      */
     $_.Gen = {};
+    /**
+     * @member Asdf.Gen
+     * @param {Function} initFn
+     * @param {Function} nextFn
+     * @param {Function=} returnFn
+     * @returns {Function}
+     */
     function generator(initFn, nextFn, returnFn){
         if($_.O.isNotFunction(initFn)||$_.O.isNotFunction(nextFn)||$_.O.isNotFunction(returnFn)) throw new TypeError();
         var state = 0; //0:pending, 1:running, 2:done
@@ -4098,7 +4105,7 @@ module.exports = Asdf;
             if(state === 2){
                 return {done:true}
             }else {
-                current = state==0?(state=1,initFn.call(this, stop)):nextFn(current, stop);
+                current = state===0?(state=1,initFn.call(this, stop)):nextFn(current, stop);
                 if (state === 2) {
                     return {done: true}
                 }
@@ -4106,6 +4113,12 @@ module.exports = Asdf;
             }
         }
     }
+
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     */
     function consumer(genFn, fn){
         if($_.O.isNotFunction(genFn)||$_.O.isNotFunction(fn)) throw new TypeError();
         for(var v =genFn(); !v.done;v=genFn()){
@@ -4113,6 +4126,12 @@ module.exports = Asdf;
         }
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     * @returns {Function}
+     */
     function map(genFn, fn){
         if($_.O.isNotFunction(fn)) throw new TypeError();
         return generator(genFn,
@@ -4127,11 +4146,18 @@ module.exports = Asdf;
         )
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     * @returns {Function}
+     */
     function filter(genFn, fn){
         if($_.O.isNotFunction(fn)) throw new TypeError();
         var f = function(_,s){
+            var v;
             do {
-                var v = genFn();
+                v = genFn();
             }while(!v.done && !fn(v.value));
             if(v.done) return s();
             return v;
@@ -4142,6 +4168,13 @@ module.exports = Asdf;
 
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     * @param {*} memo
+     * @returns {Function}
+     */
     function reduce(genFn, fn, memo){
         return generator(genFn,
             function(c,s){
@@ -4155,12 +4188,18 @@ module.exports = Asdf;
         )
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {number} n
+     * @returns {Function}
+     */
     function take(genFn, n){
         n = n-1;
         return generator(genFn,
             function(c,s){
                 var v=genFn();
-                if(v.done || n == 0) return s();
+                if(v.done || n === 0) return s();
                 n--;
                 return v;
             },
@@ -4168,10 +4207,17 @@ module.exports = Asdf;
         )
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {number} n
+     * @returns {Function}
+     */
     function drop(genFn, n){
         return generator(function(s){
+                var v;
                 do {
-                    var v = genFn();
+                    v = genFn();
                 }while(!v.done && n-->0);
                 if(v.done) return s();
                 return v;
@@ -4186,7 +4232,12 @@ module.exports = Asdf;
         )
     }
 
-    function toGenerator(col){
+    /**
+     * @member Asdf.Gen
+     * @param {Collection} col
+     * @returns {Function}
+     */
+    function collectionToGenerator(col){
         if($_.O.isNotCollection(col)) throw new TypeError();
         return generator($_.F.toFunction({arr:col, index:0}),
             function(c,s){
@@ -4197,6 +4248,32 @@ module.exports = Asdf;
             },function(c){
                 return c.arr[c.index]
             });
+    }
+    function treeToGenerator(tree){
+        if(!$_.Tree.isTree(tree)) throw new TypeError();
+        return generator($_.F.toFunction({node:tree,q:$_.A.toArray(tree.children)}),
+            function(c,s){
+                if(c.q.length === 0) return s();
+                c.node = c.q.shift();
+                var children = c.node.children;
+                var i = children.length;
+                while(i--){
+                    c.q.unshift(children[i]);
+                }
+                return c;
+            }, function(c){
+                return c.node;
+            }
+        )
+    }
+    function toGenerator(obj){
+        if($_.O.isCollection(obj)){
+            return collectionToGenerator(obj);
+        }else if($_.Tree.isTree(obj)){
+            return treeToGenerator(obj);
+        }else {
+            throw new TypeError();
+        }
     }
 
 /*
@@ -4223,6 +4300,8 @@ module.exports = Asdf;
         take:take,
         drop:drop,
         reduce:reduce,
+        collectionToGenerator:collectionToGenerator,
+        treeToGenerator:treeToGenerator,
         toGenerator:toGenerator
     });
 })(Asdf);;/**
@@ -5441,14 +5520,17 @@ module.exports = Asdf;
         }
     };
 
-    function dfs(tree, fn, isAll){
-        if(!isTree(tree)||$_.O.isNotFunction(fn)) throw new TypeError();
+    function dfs(tree, fn, isAll, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        if(!isTree(tree, conf)||$_.O.isNotFunction(fn)) throw new TypeError();
         var arr = [tree];
         var n;
         while(arr.length){
             n = arr.shift();
             if(fn(n)&&!isAll) return;
-            var c = n.children;
+            var c = n[conf.children];
             var i = c.length;
             while(i--){
                 arr.unshift(c[i]);
@@ -5456,14 +5538,17 @@ module.exports = Asdf;
         }
     }
 
-    function bfs(tree, fn, isAll){
-        if(!isTree(tree)||$_.O.isNotFunction(fn)) throw new TypeError();
+    function bfs(tree, fn, isAll, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        if(!isTree(tree, conf)||$_.O.isNotFunction(fn)) throw new TypeError();
         var arr = [tree];
         var n;
         while(arr.length){
             n = arr.shift();
             if(fn(n)&&!isAll) return;
-            var c = n.children;
+            var c = n[conf.children];
             var i = 0;
             while(i< c.length){
                 arr.push(c[i++]);
@@ -5471,12 +5556,11 @@ module.exports = Asdf;
         }
     }
 
-    function walk(tree, fn, sfn){
-        sfn = sfn||dfs;
-        sfn(tree, fn);
-    }
-
-    function find(tree, fn, isAll, sfn){
+    function find(tree, fn, isAll, sfn, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        if(!isTree(tree, conf)||$_.O.isNotFunction(fn)) throw new TypeError();
         sfn = sfn||dfs;
         var res = [];
         fn = $_.F.wrap(fn, function(ofn, node){
@@ -5490,19 +5574,21 @@ module.exports = Asdf;
             }
             return r;
         });
-        sfn(tree, fn, isAll);
+        sfn(tree, fn, isAll,conf);
         return res;
     }
-    function isTree(tree){
-        return !($_.O.isNotObject(tree)||$_.O.isNotCollection(tree.children));
+    function isTree(tree, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        return !($_.O.isNotObject(tree)||$_.O.isNotCollection(tree[conf.children]));
     }
     $_.O.extend($_.Tree, {
         Node:Node,
         isTree:isTree,
         dfs:dfs,
         bfs:bfs,
-        find:find,
-        walk:walk
+        find:find
     })
 
 })(Asdf);;(function($_) {

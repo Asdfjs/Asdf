@@ -52,14 +52,17 @@
         }
     };
 
-    function dfs(tree, fn, isAll){
-        if(!isTree(tree)||$_.O.isNotFunction(fn)) throw new TypeError();
+    function dfs(tree, fn, isAll, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        if(!isTree(tree, conf)||$_.O.isNotFunction(fn)) throw new TypeError();
         var arr = [tree];
         var n;
         while(arr.length){
             n = arr.shift();
             if(fn(n)&&!isAll) return;
-            var c = n.children;
+            var c = n[conf.children];
             var i = c.length;
             while(i--){
                 arr.unshift(c[i]);
@@ -67,14 +70,17 @@
         }
     }
 
-    function bfs(tree, fn, isAll){
-        if(!isTree(tree)||$_.O.isNotFunction(fn)) throw new TypeError();
+    function bfs(tree, fn, isAll, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        if(!isTree(tree, conf)||$_.O.isNotFunction(fn)) throw new TypeError();
         var arr = [tree];
         var n;
         while(arr.length){
             n = arr.shift();
             if(fn(n)&&!isAll) return;
-            var c = n.children;
+            var c = n[conf.children];
             var i = 0;
             while(i< c.length){
                 arr.push(c[i++]);
@@ -82,12 +88,11 @@
         }
     }
 
-    function walk(tree, fn, sfn){
-        sfn = sfn||dfs;
-        sfn(tree, fn);
-    }
-
-    function find(tree, fn, isAll, sfn){
+    function find(tree, fn, isAll, sfn, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        if(!isTree(tree, conf)||$_.O.isNotFunction(fn)) throw new TypeError();
         sfn = sfn||dfs;
         var res = [];
         fn = $_.F.wrap(fn, function(ofn, node){
@@ -101,19 +106,21 @@
             }
             return r;
         });
-        sfn(tree, fn, isAll);
+        sfn(tree, fn, isAll,conf);
         return res;
     }
-    function isTree(tree){
-        return !($_.O.isNotObject(tree)||$_.O.isNotCollection(tree.children));
+    function isTree(tree, conf){
+        conf = $_.O.extend({
+            children: 'children'
+        },conf);
+        return !($_.O.isNotObject(tree)||$_.O.isNotCollection(tree[conf.children]));
     }
     $_.O.extend($_.Tree, {
         Node:Node,
         isTree:isTree,
         dfs:dfs,
         bfs:bfs,
-        find:find,
-        walk:walk
+        find:find
     })
 
 })(Asdf);
