@@ -4,6 +4,13 @@
      * @name Asdf.Gen
      */
     $_.Gen = {};
+    /**
+     * @member Asdf.Gen
+     * @param {Function} initFn
+     * @param {Function} nextFn
+     * @param {Function=} returnFn
+     * @returns {Function}
+     */
     function generator(initFn, nextFn, returnFn){
         if($_.O.isNotFunction(initFn)||$_.O.isNotFunction(nextFn)||$_.O.isNotFunction(returnFn)) throw new TypeError();
         var state = 0; //0:pending, 1:running, 2:done
@@ -24,6 +31,12 @@
             }
         }
     }
+
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     */
     function consumer(genFn, fn){
         if($_.O.isNotFunction(genFn)||$_.O.isNotFunction(fn)) throw new TypeError();
         for(var v =genFn(); !v.done;v=genFn()){
@@ -31,6 +44,12 @@
         }
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     * @returns {Function}
+     */
     function map(genFn, fn){
         if($_.O.isNotFunction(fn)) throw new TypeError();
         return generator(genFn,
@@ -45,6 +64,12 @@
         )
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     * @returns {Function}
+     */
     function filter(genFn, fn){
         if($_.O.isNotFunction(fn)) throw new TypeError();
         var f = function(_,s){
@@ -60,6 +85,13 @@
 
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {Function} fn
+     * @param {*} memo
+     * @returns {Function}
+     */
     function reduce(genFn, fn, memo){
         return generator(genFn,
             function(c,s){
@@ -73,6 +105,12 @@
         )
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {number} n
+     * @returns {Function}
+     */
     function take(genFn, n){
         n = n-1;
         return generator(genFn,
@@ -86,6 +124,12 @@
         )
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Function} genFn
+     * @param {number} n
+     * @returns {Function}
+     */
     function drop(genFn, n){
         return generator(function(s){
                 do {
@@ -104,6 +148,11 @@
         )
     }
 
+    /**
+     * @member Asdf.Gen
+     * @param {Collection} col
+     * @returns {Function}
+     */
     function toGenerator(col){
         if($_.O.isNotCollection(col)) throw new TypeError();
         return generator($_.F.toFunction({arr:col, index:0}),
