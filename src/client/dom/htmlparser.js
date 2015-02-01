@@ -47,7 +47,8 @@
             }
             if((tagName = p[3])){
                 tagName = tagName.toLowerCase();
-                var attrs = {}, ap = p[4], selfClosing = !!p[5];
+                if(/="/.test(tagName)) return;
+                var attrs = {}, ap = p[4], selfClosing = !!p[5]||dtd.$empty[tagName];
                 if(ap){
                     ap.replace(attribsRegex, function(m){
                         var am = $_.A.toArray(arguments);
@@ -80,5 +81,38 @@
         });
         return res;
     });
-    $_.htmlParser={tokenizer :tokenizer}
+    function vaildate(str){
+
+    }
+    function parser(str){
+        var Node = $_.Tree.Node;
+        var ts = tokenizer(str);
+        var status =1;// 1:open, 0:close
+        var parentNode = new Node({root:true});
+        var stack = [parentNode];
+        $_.A.each(ts, function(t){
+            var pNode = stack[stack.length-1];
+            if(t[0] === 'open'){
+                var node = new Node({tagName:t[1],attrs:t[2], type:'element'});
+                if(!t[3]) {
+                    status = 1;
+                    stack.push(node);
+                }
+                pNode.append(node);
+            }else if(t[0] === 'close'){
+                stack.pop();
+                status = 0;
+            }else if(t[0] === 'text'){
+                pNode.append(new Node({text:t[1], type:'text'}));
+            }else if(t[0] === 'comment'){
+                pNode.append(new Node({text:t[1], type:'comment'}));
+            }else {
+                pNode.append(new Node({text:t[1], type:'cdata'}));
+            }
+        });
+        if(stack.length !== 1) throw new Error();
+        return stack[0];
+    }
+
+    $_.htmlParser={tokenizer :tokenizer,parser:parser}
 })(Asdf);
