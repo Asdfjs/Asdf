@@ -4110,7 +4110,7 @@
      * @returns {Function}
      */
     function generator(initFn, nextFn, returnFn){
-        if($_.O.isNotFunction(initFn)||$_.O.isNotFunction(nextFn)||$_.O.isNotFunction(returnFn)) throw new TypeError();
+        if($_.O.isNotFunction(initFn)||$_.O.isNotFunction(nextFn)) throw new TypeError();
         var state = 0; //0:pending, 1:running, 2:done
         var current;
         returnFn = returnFn||$_.F.identity;
