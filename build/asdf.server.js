@@ -4102,10 +4102,18 @@ module.exports = Asdf;
             state = 2;
         }
         return function(){
+            var arg = $_.A.toArray(arguments);
             if(state === 2){
                 return {done:true}
             }else {
-                current = state===0?(state=1,initFn.call(this, stop)):nextFn(current, stop);
+                if(state === 0){
+                    state = 1;
+                    current = initFn.call(this, stop);
+                }else {
+                    arg.unshift(stop);
+                    arg.unshift(current);
+                    current = nextFn.apply(this, arg);
+                }
                 if (state === 2) {
                     return {done: true}
                 }
