@@ -508,24 +508,30 @@
 			}
 		};
 		function f(obj){
-			obj._next = [];
+			obj._next = [];//parent
 			obj._status = 'pending';
 			function next(succ, fail){
-				var o = {};
+				var o = {};//child
 				var n = f(o);
 				var snext = su(o);
 				var fnext = fa(o);
 				if(obj._status == 'resolved'){
-					succ.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+					try {
+						succ.apply(this, $_.A.merge([snext, fnext], obj.arg || []));
+					}catch(e){
+						fnext(e);
+					}
 				}else if(obj._status == 'rejected'){
-					fail.apply(this, $_.A.merge([snext,fnext],o.arg||[]));
+					fail.apply(this, $_.A.merge([snext,fnext],obj.arg||[]));
 				}else {
 					obj._next.push([function () {
-						o.arg = slice.call(arguments);
-						succ.apply(this, $_.A.merge([snext, fnext], o.arg || []));
+						try {
+							succ.apply(this, $_.A.merge([snext, fnext], obj.arg || []));
+						}catch(e){
+							fnext(e);
+						}
 					}, function () {
-						o.arg = slice.call(arguments);
-						fail.apply(this, $_.A.merge([snext, fnext], o.arg || []));
+						fail.apply(this, $_.A.merge([snext, fnext], obj.arg || []));
 					}]);
 				}
 				return n;
@@ -535,7 +541,13 @@
 		function run(func){
 			var o = {};
 			var res = f(o);
-			func(su(o),fa(o));
+			var snext = su(o);
+			var fnext = fa(o);
+			try {
+				func(snext, fnext);
+			}catch(e){
+				fnext(e);
+			}
 			return res;
 		}
 
