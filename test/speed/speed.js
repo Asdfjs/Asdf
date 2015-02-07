@@ -62,7 +62,7 @@ function( Benchmark, document, selectors ) {
 		// Selector engines
 		engines = {
 			"qsa":                  "d.querySelectorAll( s )",
-			'asdf':'Asdf.Element.find(d,s)',
+			'asdf':'Asdf.Selector.select(s,d)',
 			//"jquery-1.7.2/jquery":  "jQuery.find( s, d )",
 			// "jquery-1.8.3/jquery":  "jQuery.find( s, d )",
 			//"sizzle-old/sizzle":    "Sizzle( s, d )",

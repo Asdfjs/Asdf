@@ -124,8 +124,8 @@
 	
 	/**
 	 * @memberof Asdf.Asdf.A
-	 * @param {collection} first 대상 객체
-	 * @param {collection} second 추가 객체
+	 * @param {collection||array} first 대상 객체
+	 * @param {collection||array} second 추가 객체
 	 * @returns {collection} first에 second를 추가한다.  first 객체를 반환한다.
 	 * @desc 두개의 객체를 합치는 것에 대해서는 concat과 유사하지만, 새로운 collection 객체를 생성하여 반환하는 것이 아니라, first 객체에 second 객체를 추가하여 반환하는것이다. 
 	 * @example
@@ -142,7 +142,7 @@
 			return first;
 		}
 		var fl = first.length, l = fl + second.length;
-		each(second, function (value, key,list){
+		each(second, function (value, key){
 			first[fl+key] = value;
 		} );
 		first.length = l;

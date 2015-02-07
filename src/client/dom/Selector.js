@@ -140,6 +140,12 @@
                     String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
         };
     var _rbuggyMathches = [];
+    /**
+     * @type {number}
+     * @private
+     * @desc element id
+     */
+    var _sid =1;
 
     var opposite = {
         'parentNode': 'childNode',
@@ -148,39 +154,42 @@
         'nextSibling': 'previousSibling'
     };
     var combinators = {
-        ' ': function(node, token){
+        ' ': function(node, token, eachCallback){
             var item, i=0;
             var type = token[0].type;
             if(type === 'ID'){
                 item = $_.Element.getElementById(node, token[0].matches[0]);
                 if(!item|| !_matchSelector(item, _matchFn(token.slice(1))))
-                    return [];
-                return [item];
+                    return ;
+                return eachCallback(item);
             }
             item = (type === 'CLASS')? ($_.Element.getElementsByClassName(node, $_.A.reduce(token, function(acc, v){
                 if(v.type === 'CLASS') {acc.push(v.matches[0]);i++;}
                 return acc;
             },[]).join(' '))): type==='TAG'?$_.Element.getElementsByTagName(node, token[0].matches[0]):[];
-            return $_.A.filter(item, function(el) {
-                    return _matchSelector(el, _matchFn(token.slice(i||1)));
-                })||[];
+            return $_.A.each(item, function(el) {
+                    if(_matchSelector(el, _matchFn(token.slice(i||1))))
+                        eachCallback(el);
+                });
         },
-        '>': function(node, token){
+        '>': function(node, token, eachCallback){
             var item = $_.Element.children(node);
-            return $_.A.filter(item, function(el) {
-                    return _matchSelector(el, _matchFn(token));
-                })||[];
+            return $_.A.each(item, function(el) {
+                    if( _matchSelector(el, _matchFn(token)))
+                        eachCallback(el);
+                });
         },
-        '+':function(node, token){
+        '+':function(node, token, eachCallback){
             var item = $_.Element.next(node);
-            if(!item|| !_matchSelector(item, _matchFn(token))) return [];
-            return [item];
+            if(!item|| !_matchSelector(item, _matchFn(token))) return ;
+            return eachCallback(item);
         },
-        '~':function(node, token){
+        '~':function(node, token, eachCallback){
             var item = $_.Element.nexts(node);
-            return $_.A.filter(item, function(el) {
-                    return _matchSelector(el, _matchFn(token));
-                })||[];
+            return $_.A.each(item, function(el) {
+                    if( _matchSelector(el, _matchFn(token)))
+                        eachCallback(el);
+                });
         }
     };
     var filters = {
@@ -257,6 +266,17 @@
     var filter = $_.O.keys(filters);
     function _tokenize(selector){
         var str = selector,res = [], matched, match, tokens;
+        var f = function(type){
+            if((match = matchExpr[type].exec(str)) && (!matchFunction[type]|| (match = matchFunction[type](match)))){
+                matched = match.shift();
+                tokens.push({
+                    value:matched,
+                    type:type,
+                    matches:match
+                });
+                str = str.slice(matched.length);
+            }
+        };
         while(str){
             if(!matched||(match = rcomma.exec(str))) {
                 if (match)
@@ -272,17 +292,7 @@
                 });
                 str = str.slice(matched.length)
             }
-            $_.A.each(filter, function(type){
-                if((match = matchExpr[type].exec(str)) && (!matchFunction[type]|| (match = matchFunction[type](match)))){
-                    matched = match.shift();
-                    tokens.push({
-                        value:matched,
-                        type:type,
-                        matches:match
-                    });
-                    str = str.slice(matched.length);
-                }
-            });
+            $_.A.each(filter, f);
             if(!matched){
                 break;
             }
@@ -291,10 +301,20 @@
         return res;
     }
     var tokenize = $_.F.compose($_.F.memoize(_tokenize, function(str){return str+' '}), $_.O.clone);
-    function _findMerge(res, combinator, token){
+    function getId(el){
+        return (el._sid)? el._sid:(el._sid=_sid++);
+    }
+    function _findUniqueMerge(res, combinator, token){
+        var _cacheMap = $_.A.toMap(res, function(el){return getId(el)}, $_.F.alwaysTrue);
+        var eachCallback = function(el){
+            var sid = getId(el);
+            if(_cacheMap[sid]) return;
+            _cacheMap[sid] = true;
+            res.push(el);
+        };
         $_.N.times(res.length, function(){
             var node = res.shift();
-            $_.A.merge(res,combinator(node, token));
+            combinator(node, token, eachCallback);
         });
     }
     function compareToken(t1,t2) {
@@ -320,20 +340,21 @@
         expression = expression.replace(rtrim, '$1');
         var tokens = tokenize(expression);
         var types = filter;
+        var needSort = results.length>0||tokens.length>1;
         results =  $_.A.reduce(tokens, function(res, token){
             var i = 0,j = 0, t, combinator= combinators[' '],r = [element];
             while(t=token[i++]){
                 var type = t.type;
                 if(!$_.A.include(types, type)){
-                    _findMerge(r, combinator, token.slice(j, i-1).sort(compareToken));
+                    _findUniqueMerge(r, combinator, token.slice(j, i-1).sort(compareToken));
                     combinator = combinators[type];
                     j = i;
                 }
             }
-            _findMerge(r, combinator, token.slice(j).sort(compareToken));
-            return $_.A.unique($_.A.merge(res,r));
+            _findUniqueMerge(r, combinator, token.slice(j).sort(compareToken));
+            return $_.A.merge(res,r);
         }, results);
-        return results.sort($_.Element.compareNode);
+        return (!needSort)?results:results.sort($_.Element.compareNode);
     }
 
     function toSelector(tokens){
@@ -341,201 +362,7 @@
             return str+ i.value;
         }, '');
     }
-    /*
-    function markFunction(fn){
-        fn[expando] = true;
-        return fn;
-    }
-
-    function t(){
-        return true;
-    }
-
-    function f(){
-        return false;
-    }
-
-    function eachList(list, fn, untilFn){
-        untilFn = untilFn|| $_.F.identity;
-        while(list&&untilFn(list)){
-            fn(list[0]);
-            list = list[1];
-        }
-    }
-
-    var mAnyList = {};
-    function anyList(list, fn){
-        var res = false, el;
-        eachList(list, function(){}, function(l){
-            if(mAnyList[l[0].pid]&&mAnyList[l[0].pid][fn.fid]){
-                res = mAnyList[l[0].pid][fn.fid];
-            }else {
-                res = fn(l[0]);
-            }
-            if(res) {
-                if (!mAnyList[l[0].pid])
-                    mAnyList[l[0].pid] = {};
-                mAnyList[l[0].pid][fn.fid] = res;
-                el = l[0];
-            }
-            return !res;
-        });
-        if(res){
-            eachList(list, function(l){
-                if(!mAnyList[l.pid])
-                    mAnyList[l.pid] = {};
-                mAnyList[l.pid][fn.fid] =true;
-            }, function(ls){
-                return ls[0] !== el;
-            });
-        }
-        return res;
-    }
-
-    function recursivelyCollect(element, nextFn, testFn, untilFn) {
-        var elements = [];
-        if($_.O.isNotNode(element)||$_.O.isNotFunction(nextFn)||$_.O.isNotFunction(testFn)) throw new TypeError();
-        untilFn = untilFn||f;
-        while ((element = nextFn(element)) && !untilFn(element)) {
-            if (testFn(element))
-                elements.push(element);
-        }
-        return elements;
-    }
-
-    function recursively( element, nextFn, testFn ) {
-        do {
-            element = nextFn(element);
-        } while ( testFn(element) );
-        return element;
-    }
-
-    var mParentList = {};
-    function getParentList(element){
-        function rec(el){
-            var p;
-            el.pid = el.pid? el.pid:'p'+$_.Utils.makeuid();
-            if(p = el['parentNode']){
-                var ps = mParentList[el.pid]? mParentList[el.pid]:rec(p);
-                mParentList[el.pid] = ps;
-                return [el, ps]
-            }
-
-        }
-        return rec(element);
-    }
-
-    var ancestors = $_.F.partial(recursivelyCollect, undefined,
-        function(element){ return element['parentNode']}, undefined, undefined);
-
-    var ancestor = $_.F.partial(recursively, undefined,
-        function(element){ return element['parentNode']}, undefined, undefined)
-
-    function descentors(element, testFn) {
-        if($_.O.isNotNode(element)||$_.O.isNotFunction(testFn)) throw new TypeError();
-        if(document == element) element = document.body;
-        var elements = [];
-        var q = [element];
-        while(q.length) {
-            element = q.shift();
-            q.unshift.apply(q, $_.Element.children(element));
-            if(testFn(element))
-                elements.push(element);
-        }
-        return elements;
-    }
-
-    function equalId(el, id){
-        if($_.O.isNotNode(el)||$_.O.isNotString(id)) throw new TypeError();
-        return el.id === id;
-    }
-
-    function equalClassName(el, className){
-        if($_.O.isNotNode(el)||$_.O.isNotString(className)) throw new TypeError();
-        return $_.Element.hasClass(el, className);
-    }
-
-    function equalTagName(el, tagName){
-        if($_.O.isNotNode(el)||$_.O.isNotString(tagName)) throw new TypeError();
-        return el.tagName === tagName.toUpperCase();
-    }
-
-    function ofnToElements(arr){
-        var run = $_.O.clone(arr).reverse();
-        var res = [];
-        $_.A.each(run, function(o){
-            if(!res.length){
-                res = document.getElementsByTagName('li')//descentors(document, o.fn);
-            }else {
-                $_.A.filter(res, function (v){
-                    var pl = getParentList(v);
-                    return !anyList(pl, o.fn);
-                });
-            }
-        });
-        return res;
-    }
-    //Asdf.Selector.ofnToElements([{fn: function(e){return e.tagName="LI"}},{fn: function(e){ return e.className=='test-name'}}])
-    var fnMap = {
-        className: equalClassName,
-        id: equalId,
-        tagName: equalTagName,
-        and: $_.F.and,
-        or: $_.F.or
-    };
-
-    function adapterEqualFn(fn, str){
-        return $_.F.partial(fn, undefined, str);
-    }
-
-    var mCompositFn = {};
-    function compositFn(obj){
-        function rec(o) {
-            var res = [];
-            $_.O.each(o, function (v, k) {
-                if ($_.O.isString(v)) {
-                    res.push(adapterEqualFn(fnMap[k], v));
-                    return;
-                }
-                if ($_.O.isPlainObject(v)) {
-                    res.push(fnMap[k].apply(this, rec(v)));
-                    return;
-                }
-            });
-            return  res;
-        }
-        var f = rec(obj)[0];
-        f.fid = 'f'+$_.Utils.makeuid();
-        return f;
-    }
-    //Asdf.Selector.compositFn({and:{id: 'qunit',tagName:'div'}})
-
-
-    function oToOfn(arr){
-        var res = [];
-        $_.A.each(arr, function(v){
-            res.push({fn:compositFn(v)});
-        });
-        return res;
-    }
-    //Asdf.Selector.ofnToElements(Asdf.Selector.oToOfn([{tagName: 'body'}, {and:{id: 'qunit',tagName:'div'}}]));
-
-    */
     $_.O.extend(o, {
-        /*
-        descentors: descentors,
-        ancestor: ancestor,
-        ancestors: ancestors,
-        getParentList:getParentList,
-        anyList:anyList,
-        eachList:eachList,
-        equalId:equalId,
-        equalClassName:equalClassName,
-        equalTagName:equalTagName,
-        ofnToElements:ofnToElements,
-        compositFn:compositFn,
-        oToOfn:oToOfn,
-        */
         tokenize:tokenize,
         toSelector:toSelector,
         select:select

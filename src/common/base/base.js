@@ -53,7 +53,7 @@
             $_.O.each(c.prototype, function(v, k){
                 if(!$_.O.isFunction(v))self[k] = $_.O.clone(v);
             });
-        }
+        };
         return c;
     }
 	$_.O.extend($_.Base, {
