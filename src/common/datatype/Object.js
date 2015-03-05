@@ -229,7 +229,7 @@
 			return Array.isArray(object);
 		}
 		return nativeToString.call(object) === objectType.ARRAY_CLASS;
-	}
+	};
 	/**
 	 * @memberof Asdf.O
 	 * @func
@@ -742,6 +742,13 @@
         return obj;
     }
 
+    function prototypedCopy(obj){
+        if(!isObject(obj)) new TypeError();
+        var c = function(){};
+        c.prototype = obj;
+        return new c();
+    }
+
 	extend(o, {
 		each: each,
 		map: map,
@@ -802,6 +809,7 @@
 		set: set,
 		type:type,
         equals:equals,
-        tap:tap
+        tap:tap,
+        prototypedCopy:prototypedCopy
 	});
 })(Asdf);

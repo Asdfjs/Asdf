@@ -181,3 +181,9 @@ test("Asdf.O.tap", function(){
         deepEqual(o, {a:1}, 'tap ok')
     });
 });
+test("Asdf.O.prototypedCopy", function(){
+    var obj = {a:1, b:2};
+    var po = Asdf.O.prototypedCopy(obj);
+    console.log(po);
+    deepEqual(obj, po, 'prototypedCopy');
+});
