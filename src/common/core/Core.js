@@ -410,7 +410,7 @@
 	 'keys': keys,
 	 'loop': 'if (callback(iterable[index], index, collection) === false) return result'
 	 };
-	baseEach = createIterator(eachIteratorOptions);
+	var baseEach = createIterator(eachIteratorOptions);
 
 	core.support = support;
 	core.op = op;
