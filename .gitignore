@@ -1,3 +1,6 @@
 .idea/
 Asdf.iml
+Asdf.ipr
 node_modules/
+coverage/
+.settings/
