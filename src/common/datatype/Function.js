@@ -897,6 +897,15 @@
         return results;
     }
 
+	function trampoline(fn){
+		var args = slice.call(arguments, 1);
+		var r = fn.apply(this, args);
+		while($_.O.isFunction(r)){
+			r = r.apply(this, args)
+		}
+		return r;
+	}
+
     var complement = before(curry(compose, $_.Core.op["!"]),exisFunction);
 
 
@@ -946,7 +955,8 @@
         complement:complement,
 		alwaysFalse: toFunction(false),
 		alwaysTrue:  toFunction(true),
-		promise:promise
+		promise:promise,
+		trampoline:trampoline
 	}, true);
 
 })(Asdf);
