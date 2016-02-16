@@ -515,6 +515,8 @@
 				var n = f(o);
 				var snext = su(o);
 				var fnext = fa(o);
+				succ = succ||function(s){s.apply(this, obj.arg)};
+				fail = fail||function(s,f){f.apply(this,obj.arg)};
 				if(obj._status == 'resolved'){
 					try {
 						succ.apply(this, $_.A.merge([snext, fnext], obj.arg || []));
