@@ -272,3 +272,12 @@ test("Asdf.F.zip", function(){
 test("Asdf.F.complement", function(){
     ok(Asdf.F.complement(Asdf.O.isNotFunction)(function(){}), 'Asdf.complement ok');
 });
+test("Asdf.F.trampoline", function(){
+    equal(Asdf.F.trampoline(function(arr, sum){
+        return function r(){
+            if(arr.length ==0) return sum;
+            sum+=arr.pop();
+            return r;
+        }
+    },[1,2,3,4,5,6,7],0),28, "Asdf.F.trampoline ok");
+});

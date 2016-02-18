@@ -144,6 +144,15 @@
         }
     }
 
+    function toArray(n, fn){
+        if($_.O.isNotNumber(n)||!$_.O.isFunction(fn)) throw new TypeError();
+        var res = [];
+        for(var i = 0; i < n; i++){
+            res.push(fn(i));
+        }
+        return res;
+    }
+
     $_.O.extend($_.N, {
 		sum: sum,
         add: add,
@@ -172,6 +181,7 @@
 		isNotUntil: isNotLessThan,
         isFinite:isFinite,
         clamp:clamp,
-        times:times
+        times:times,
+        toArray: toArray
 	});
 })(Asdf);
