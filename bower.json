@@ -1,0 +1,23 @@
+{
+  "name": "asdfjs",
+  "description": "Javascript library",
+  "main": "",
+  "authors": [
+    "sungwon"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Javscript",
+    "library"
+  ],
+  "homepage": "https://github.com/asdfjs/asdf",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "coverage"
+  ]
+}
