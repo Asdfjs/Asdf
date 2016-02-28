@@ -13,7 +13,7 @@
         },
         initialize: function(data, options){
             if(data==null && options==null)
-                return
+                return;
             else if(!$_.O.isPlainObject(data)&& !$_.O.isPlainObject(options))
                 throw new TypeError();
             if(options.types && !$_.O.type(data, options.types))
