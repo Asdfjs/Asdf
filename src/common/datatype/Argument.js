@@ -1,8 +1,8 @@
 (function($_) {
-	$_.Arg = {};
-	function toArray(){
-		return $_.A.toArray(arguments);
-	}
+    $_.Arg = {};
+    function toArray(){
+        return $_.A.toArray(arguments);
+    }
     function relocate(arr, fn, context){
         if(!$_.O.isArray(arr)|| $_.A.any(arr, $_.O.isNotNumber))
             throw new TypeError();
@@ -29,9 +29,9 @@
             return fn.apply(context, res);
         }
     }
-	$_.O.extend($_.Arg, {
-		toArray:toArray,
+    $_.O.extend($_.Arg, {
+        toArray:toArray,
         relocate:relocate,
         transfer:transfer
-	});
+    });
 })(Asdf);

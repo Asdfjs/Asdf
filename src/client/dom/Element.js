@@ -4,39 +4,39 @@
  * @namespace Asdf.Element
  */
 (function($_) {
-	var NODETYPE = {
-		ELEMENT_NODE : 1,
-		ATTRIBUTE_NODE : 2,
-		TEXT_NODE : 3,
-		CDATA_SECTION_NODE : 4,
-		ENTITY_REFERENCE_NODE : 5,
-		ENTITY_NODE: 6,
-		PROCESSING_INSTRUCTION_NODE: 7,
-		COMMENT_NODE: 8,
-		DOCUMENT_NODE: 9,
-		DOCUMENT_TYPE_NODE: 10,
-		DOCUMENT_FRAGMENT_NODE: 11,
-		NOTATION_NODE: 12
-	};
-	var nativeSlice = Array.prototype.slice, extend = $_.O.extend, isString = $_.O.isString;
-	var tempParent = document.createElement('div');
-	$_.Element = {};
-	function recursivelyCollect(element, property, until, isReverse) {
-		var elements = [];
-		while (element = element[property]) {
-			if (element.nodeType == 1)
-				elements[isReverse?'unshift':'push'](element);
-			if ($_.O.isFunction(until)?until(element):element == until)
-				break;
-		}
-		return elements;
-	}
-	function recursively( element, property ) {
-		do {
-			element = element[ property ];
-		} while ( element && element.nodeType !== 1 );
-		return element;
-	}
+    var NODETYPE = {
+        ELEMENT_NODE : 1,
+        ATTRIBUTE_NODE : 2,
+        TEXT_NODE : 3,
+        CDATA_SECTION_NODE : 4,
+        ENTITY_REFERENCE_NODE : 5,
+        ENTITY_NODE: 6,
+        PROCESSING_INSTRUCTION_NODE: 7,
+        COMMENT_NODE: 8,
+        DOCUMENT_NODE: 9,
+        DOCUMENT_TYPE_NODE: 10,
+        DOCUMENT_FRAGMENT_NODE: 11,
+        NOTATION_NODE: 12
+    };
+    var nativeSlice = Array.prototype.slice, extend = $_.O.extend, isString = $_.O.isString;
+    var tempParent = document.createElement('div');
+    $_.Element = {};
+    function recursivelyCollect(element, property, until, isReverse) {
+        var elements = [];
+        while (element = element[property]) {
+            if (element.nodeType == 1)
+                elements[isReverse?'unshift':'push'](element);
+            if ($_.O.isFunction(until)?until(element):element == until)
+                break;
+        }
+        return elements;
+    }
+    function recursively( element, property ) {
+        do {
+            element = element[ property ];
+        } while ( element && element.nodeType !== 1 );
+        return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -49,15 +49,15 @@
      * Asdf.Element.walk(e, Asdf.F.partial(Asdf.Element.addClass, undefined, '11'));
      * //return <div class="11">aa<div class="11">bb</div><div class="11">cc</div></div>
      */
-	function walk(element, fun, context) {
-		context = context || this;
-		var i, ch = childNodes(element);
-		fun.call(context, element);
-		for (i = 0; i < ch.length ; i++) {
-			walk(ch[i], fun, context);
-		}
-		return element;
-	}
+    function walk(element, fun, context) {
+        context = context || this;
+        var i, ch = childNodes(element);
+        fun.call(context, element);
+        for (i = 0; i < ch.length ; i++) {
+            walk(ch[i], fun, context);
+        }
+        return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -65,11 +65,11 @@
      * @desc element가 display가 none 여부를 반환한다.
      *
      */
-	function visible(element){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return element.style.display !='none';
-	}
+    function visible(element){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return element.style.display !='none';
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -80,12 +80,12 @@
      * Asdf.Element.toggle(div);
      * Asdf.Element.visible(div); //return false;
      */
-	function toggle(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-	    visible(element) ? hide(element) : show(element);
-	    return element;
-	}
+    function toggle(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        visible(element) ? hide(element) : show(element);
+        return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -96,12 +96,12 @@
      * Asdf.Element.hide(div);
      * Asdf.Element.visible(div); //return false;
      */
-	function hide(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		element.style.display = 'none';
-	    return element;
-	}
+    function hide(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        element.style.display = 'none';
+        return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -114,12 +114,12 @@
      * Asdf.Element.show(div);
      * Asdf.Element.visible(div); //return true;
      */
-	function show(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		 element.style.display = '';
-		 return element;
-	}
+    function show(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+         element.style.display = '';
+         return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -131,28 +131,28 @@
      * Asdf.Element.text(div, 'hi'); //return <div>hi</div>
      * Asdf.Element.text(div); //return "hi";
      */
-	function text(element, value) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		var ret = '';
-		if( value == null ){
-			if ( typeof element.textContent === "string" ) {
-				return element.textContent;
-			} else {
-				walk(element, function(e) {
-					var nodeType = e.nodeType;
-					if( nodeType === 3 || nodeType === 4 ) {
-						ret += e.nodeValue;
-					}
-					return false;
-				});
-				return ret;
-			}
-		}else {
-			append(empty(element), (element.ownerDocument || document ).createTextNode( value ) );
+    function text(element, value) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        var ret = '';
+        if( value == null ){
+            if ( typeof element.textContent === "string" ) {
+                return element.textContent;
+            } else {
+                walk(element, function(e) {
+                    var nodeType = e.nodeType;
+                    if( nodeType === 3 || nodeType === 4 ) {
+                        ret += e.nodeValue;
+                    }
+                    return false;
+                });
+                return ret;
+            }
+        }else {
+            append(empty(element), (element.ownerDocument || document ).createTextNode( value ) );
             return element;
-		}
-	}
+        }
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -164,11 +164,11 @@
      * Asdf.Element.value(input, 'hi');
      * Asdf.Element.value(input); //return "hi";
      */
-	function value(element, val) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return (val==null)? element.value : (element.value = val, element);
-	}
+    function value(element, val) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return (val==null)? element.value : (element.value = val, element);
+    }
     /**
      * @memberof Asdf.Element
      * @param {HTMLElement} element 대상element
@@ -180,11 +180,11 @@
      * Asdf.Element.html(div, 'hi'); //return <div>hi</div>
      * Asdf.Element.html(div); //return "hi";
      */
-	function html(element, htm) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return (htm==null)? element.innerHTML: (element.innerHTML = htm, element);
-	}
+    function html(element, htm) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return (htm==null)? element.innerHTML: (element.innerHTML = htm, element);
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -196,11 +196,11 @@
      * p.appendChild(c);
      * Asdf.Element.parent(c); //return p;
      */
-	function parent(element){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return recursively(element, 'parentNode');
-	}
+    function parent(element){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return recursively(element, 'parentNode');
+    }
 
     function commonParent(element /*,element...*/){
         if($_.A.any(arguments, $_.O.isNotElement)) throw new TypeError();
@@ -243,11 +243,11 @@
      * Asdf.Element.parents(c); //return [p, pp];
      * Asdf.Element.parents(c, p); //return [p];
      */
-	function parents(element, until) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		 return recursivelyCollect(element, 'parentNode', until);
-	}
+    function parents(element, until) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+         return recursivelyCollect(element, 'parentNode', until);
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -261,11 +261,11 @@
      * p.appendChild(nc);
      * Asdf.Element.next(c); //return nc;
      */
-	function next(element){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return recursively(element, 'nextSibling');
-	}
+    function next(element){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return recursively(element, 'nextSibling');
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -279,11 +279,11 @@
      * p.appendChild(c);
      * Asdf.Element.prev(c); //return nc;
      */
-	function prev(element){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return recursively(element, 'previousSibling');
-	}
+    function prev(element){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return recursively(element, 'previousSibling');
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -300,11 +300,11 @@
      * p.appendChild(nc2);
      * Asdf.Element.nexts(c); //return [nc1, nc2];
      */
-	function nexts(element, until) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return recursivelyCollect(element, 'nextSibling', until);
-	}
+    function nexts(element, until) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return recursivelyCollect(element, 'nextSibling', until);
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -321,11 +321,11 @@
      * p.appendChild(c);
      * Asdf.Element.prevs(c); //return [pc2,pc1];
      */
-	function prevs(element, until) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return recursivelyCollect(element, 'previousSibling', until);
-	}
+    function prevs(element, until) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return recursivelyCollect(element, 'previousSibling', until);
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -341,11 +341,11 @@
      * p.appendChild(nc);
      * Asdf.Element.siblings(c); //return [pc,nc];
      */
-	function siblings(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return $_.A.without($_.A.toArray(element.parentNode.childNodes), element);
-	}
+    function siblings(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return $_.A.without($_.A.toArray(element.parentNode.childNodes), element);
+    }
     /**
      * @memberof Asdf.Element
      * @param {Element} element 대상element
@@ -363,12 +363,12 @@
      * p.appendChild(nc);
      * Asdf.Element.childNodes(p); //return [text, pc,c,nc];
      */
-	function childNodes(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
+    function childNodes(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
         if(!element.firstChild) return [];
-		return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
-	}
+        return Asdf.A.merge([element.firstChild],nexts(element.firstChild, 'nextSibling'));
+    }
     function children(element){
         if(!$_.O.isNode(element))
             throw new TypeError();
@@ -394,11 +394,11 @@
      * var iframe = document.createElement('iframe');
      * var doc = Asdf.Element.contents(iframe);
      */
-	function contents(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return (element.nodeName === 'IFRAME')? (element.contentDocument||(element.contentWindow&&element.contentWindow.document)) : element.childNodes ;
-	}
+    function contents(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return (element.nodeName === 'IFRAME')? (element.contentDocument||(element.contentWindow&&element.contentWindow.document)) : element.childNodes ;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -413,13 +413,13 @@
      * var el = Asdf.Element.wrap(c, wrap); //return wrap;
      * el.innerHTML; //'<div></div>'
      */
-	function wrap(element, newContent) {
-		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
-			throw new TypeError();
-		element.parentNode.replaceChild(newContent, element);
-		newContent.appendChild(element);
-		return newContent;
-	}
+    function wrap(element, newContent) {
+        if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
+            throw new TypeError();
+        element.parentNode.replaceChild(newContent, element);
+        newContent.appendChild(element);
+        return newContent;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상element
@@ -434,17 +434,17 @@
      * var el = Asdf.Element.unwrap(wrap); //return wrap;
      * p.innerHTML; //'<div></div>'
      */
-	function unwrap(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		var bin = document.createDocumentFragment();
-		var parentNode = element.parentNode;
-		Asdf.A.each(childNodes(element), function(el){
+    function unwrap(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        var bin = document.createDocumentFragment();
+        var parentNode = element.parentNode;
+        Asdf.A.each(childNodes(element), function(el){
             bin.appendChild(el);
         });
-		parentNode.replaceChild(bin, element);
-		return element;
-	}
+        parentNode.replaceChild(bin, element);
+        return element;
+    }
 
     function createDom(doc, name, attributes, children){
         if(Asdf.O.isNotDocument(doc)||Asdf.O.isNotString(name)) throw new TypeError();
@@ -504,15 +504,15 @@
      * Asdf.Element.append(p, cs);
      * p.innerHTML; //'<div></div><span></span>'
      */
-	function append(element, newContent) {
-		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
-			throw new TypeError();
-		var nodeType = element.nodeType;
-		if ( nodeType === 1 || nodeType === 11 ) {
-			element.appendChild( newContent );
-		}
-		return element;
-	}
+    function append(element, newContent) {
+        if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
+            throw new TypeError();
+        var nodeType = element.nodeType;
+        if ( nodeType === 1 || nodeType === 11 ) {
+            element.appendChild( newContent );
+        }
+        return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 부모Element
@@ -527,15 +527,15 @@
      * Asdf.Element.prepend(p, cs);
      * p.innerHTML; //'<span></span><div></div>'
      */
-	function prepend(element, newContent) {
-		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
-			throw new TypeError();
-		var nodeType = element.nodeType;
-		if ( nodeType === 1 || nodeType === 11 ) {
-			element.insertBefore( newContent, element.firstChild );
-		}
-		return element;
-	}
+    function prepend(element, newContent) {
+        if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
+            throw new TypeError();
+        var nodeType = element.nodeType;
+        if ( nodeType === 1 || nodeType === 11 ) {
+            element.insertBefore( newContent, element.firstChild );
+        }
+        return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 기준Element
@@ -550,12 +550,12 @@
      * Asdf.Element.before(c, cs);
      * p.innerHTML; //'<span></span><div></div>'
      */
-	function before(element, newContent) {
-		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
-			throw new TypeError();
-		element.parentNode.insertBefore(newContent, element);
-		return element;
-	}
+    function before(element, newContent) {
+        if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
+            throw new TypeError();
+        element.parentNode.insertBefore(newContent, element);
+        return element;
+    }
 
     /**
      * @memberof Asdf.Element
@@ -571,12 +571,12 @@
      * Asdf.Element.after(c, cs);
      * p.innerHTML; //'<div></div><span></span>'
      */
-	function after(element, newContent) {
-		if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
-			throw new TypeError();
-		element.parentNode.insertBefore(newContent, element.nextSibling);
-		return element;		
-	}
+    function after(element, newContent) {
+        if(!$_.O.isNode(element)||!$_.O.isNode(newContent))
+            throw new TypeError();
+        element.parentNode.insertBefore(newContent, element.nextSibling);
+        return element;
+    }
     /**
      * @memberof Asdf.Element
      * @param {element} element 대상Element
@@ -589,23 +589,23 @@
      * Asdf.Element.empty(p);
      * p.innerHTML; //''
      */
-	function empty(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		element.innerHTML = '';
-		return element;
-	}
+    function empty(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        element.innerHTML = '';
+        return element;
+    }
 
     /**
      * @memberof Asdf.Element
      * @param {Element} element
      */
-	function remove(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
+    function remove(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
         if(element.parentNode)
-		    element.parentNode.removeChild(element);
-	}
+            element.parentNode.removeChild(element);
+    }
 
     /**
      * @memberof Asdf.Element
@@ -651,63 +651,63 @@
      * @param {String=} value
      * @returns {null|Element|*}
      */
-	function attr(element, name, value) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		var result, key;
-		if(!name || !isString(name)){
-			return null;
-		}
-		if(element.nodeType !== 1){
-			return null;
-		}
-		if(value == null){
-			if(name === 'value' && element.nodeName === 'INPUT' ){
-				return element.value;
-			}
-			return (!(result = element.getAttribute(name)) && name in element) ? element[name] : result;
-		}else {
-			if (typeof name === 'object'){
-				for (key in name)
-					element.setAttribute(key, name[key]);
-			}else {
-				element.setAttribute(name, value);
-			}
-			return element;
-		}
-	}
-	function hasAttr(element, name){
-		if($_.R.FN_NATIVE.test(element.querySelectorAll)){
-			element.hasAttribute(element, name);
-		}
-		element = element.getAttributeNode(name);
-		return !!(element && (element.specified || element.nodeValue));
+    function attr(element, name, value) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        var result, key;
+        if(!name || !isString(name)){
+            return null;
+        }
+        if(element.nodeType !== 1){
+            return null;
+        }
+        if(value == null){
+            if(name === 'value' && element.nodeName === 'INPUT' ){
+                return element.value;
+            }
+            return (!(result = element.getAttribute(name)) && name in element) ? element[name] : result;
+        }else {
+            if (typeof name === 'object'){
+                for (key in name)
+                    element.setAttribute(key, name[key]);
+            }else {
+                element.setAttribute(name, value);
+            }
+            return element;
+        }
+    }
+    function hasAttr(element, name){
+        if($_.R.FN_NATIVE.test(element.querySelectorAll)){
+            element.hasAttribute(element, name);
+        }
+        element = element.getAttributeNode(name);
+        return !!(element && (element.specified || element.nodeValue));
 
-	}
-	function removeAttr(element, name) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(element.nodeType === 1)
-			element.removeAttribute(name);
-		return element;
-	}
-	function prop(element, name, value) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if( value == null){
-			return element[name];
-		} else {
-			element[name] = value;
-			return element;
-		}
-	}
-	function removeProp(element, name){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(element[name])
-			delete element[name];
-		return element;
-	}
+    }
+    function removeAttr(element, name) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if(element.nodeType === 1)
+            element.removeAttribute(name);
+        return element;
+    }
+    function prop(element, name, value) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if( value == null){
+            return element[name];
+        } else {
+            element[name] = value;
+            return element;
+        }
+    }
+    function removeProp(element, name){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if(element[name])
+            delete element[name];
+        return element;
+    }
 
     /**
      * @memberof Asdf.Element
@@ -726,57 +726,57 @@
      * @param {Node} target
      * @returns {{left: number, top: number, height: number, width: number, right: number, bottom: number}}
      */
-	function relatedOffset(element, target) {
-		if(!$_.O.isNode(element)||!$_.O.isNode(target))
-			throw new TypeError();
-		var offsetEl = offset(element);
-		var offsetTar = offset(target);
-		return {left: offsetEl.left - offsetTar.left, 
-				top: offsetEl.top - offsetTar.top,
-				height:offsetEl.height,
-				width:offsetEl.width,
-				right: offsetEl.right - offsetTar.left,
-				bottom: offsetEl.bottom - offsetTar.top
-			};
-	}
+    function relatedOffset(element, target) {
+        if(!$_.O.isNode(element)||!$_.O.isNode(target))
+            throw new TypeError();
+        var offsetEl = offset(element);
+        var offsetTar = offset(target);
+        return {left: offsetEl.left - offsetTar.left,
+                top: offsetEl.top - offsetTar.top,
+                height:offsetEl.height,
+                width:offsetEl.width,
+                right: offsetEl.right - offsetTar.left,
+                bottom: offsetEl.bottom - offsetTar.top
+            };
+    }
 
     /**
      * @memberof Asdf.Element
      * @param {Node} element
      * @returns {{height: number, width: number, top: number, bottom: number, right: number, left: number}}
      */
-	function offset(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
+    function offset(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
         var doc = element.ownerDocument;
         var docElem = doc.documentElement;
         var win = getWindow(doc);
-		// IE 경우 document.documentElement.scrollTop 그 외 document.body.scrollTop
-		var width = 0,
-			height = 0,
-			rect = element.getBoundingClientRect(),
+        // IE 경우 document.documentElement.scrollTop 그 외 document.body.scrollTop
+        var width = 0,
+            height = 0,
+            rect = element.getBoundingClientRect(),
             ot = ( win.pageYOffset || docElem.scrollTop )  - ( docElem.clientTop  || 0 ),
             ol = ( win.pageXOffset || docElem.scrollLeft ) - ( docElem.clientLeft || 0 ),
-			top = rect.top + ot,
-			bottom = rect.bottom + ot,
-			right = rect.right + ol,
-			left = rect.left + ol;
-		if (rect.height) {
-			height = rect.height;
-			width = rect.width;
-		} else {
-			height = element.offsetHeight || bottom - top;
-			width = element.offsetWidth || right - left;
-		}
-		return {
-			height : height,
-			width : width,
-			top : top,
-			bottom : bottom,
-			right : right,
-			left : left
-		};
-	}
+            top = rect.top + ot,
+            bottom = rect.bottom + ot,
+            right = rect.right + ol,
+            left = rect.left + ol;
+        if (rect.height) {
+            height = rect.height;
+            width = rect.width;
+        } else {
+            height = element.offsetHeight || bottom - top;
+            width = element.offsetWidth || right - left;
+        }
+        return {
+            height : height,
+            width : width,
+            top : top,
+            bottom : bottom,
+            right : right,
+            left : left
+        };
+    }
 
     /**
      * @memberof Asdf.Element
@@ -800,16 +800,16 @@
      * @param {String} name
      * @returns {HTMLElement}
      */
-	function addClass(element, name){
-		if(!$_.O.isNode(element)||!$_.O.isString(name))
-			throw new TypeError();
-		var nms = name.replace(/\s+/g,' ').split(' ');
-		$_.A.each(nms, function(name) {
-			if(!hasClass(element, name))		
-				element.className += (element.className? ' ':'') + name;
-		});
-		return element;
-	}
+    function addClass(element, name){
+        if(!$_.O.isNode(element)||!$_.O.isString(name))
+            throw new TypeError();
+        var nms = name.replace(/\s+/g,' ').split(' ');
+        $_.A.each(nms, function(name) {
+            if(!hasClass(element, name))
+                element.className += (element.className? ' ':'') + name;
+        });
+        return element;
+    }
 
     /**
      * @memberof Asdf.Element
@@ -817,19 +817,19 @@
      * @param {String} name
      * @returns {HTMLElement}
      */
-	function removeClass(element, name) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(!name)
-			element.className = '';
-		else {
-			var nms = name.replace(/\s+/g,' ').split(' ');
-			$_.A.each(nms, function(name) {
-				element.className = $_.S.trim(element.className.replace(new RegExp("(^|\\s+)" + name + "(\\s+|$)"), ' '));
-			});
-		}
-		return element;
-	}
+    function removeClass(element, name) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if(!name)
+            element.className = '';
+        else {
+            var nms = name.replace(/\s+/g,' ').split(' ');
+            $_.A.each(nms, function(name) {
+                element.className = $_.S.trim(element.className.replace(new RegExp("(^|\\s+)" + name + "(\\s+|$)"), ' '));
+            });
+        }
+        return element;
+    }
 
     /**
      * @memberof Asdf.Element
@@ -837,18 +837,18 @@
      * @param {String} name
      * @returns {HTMLElement}
      */
-	function toggleClass(element, name) {
-		if(!$_.O.isNode(element)||!$_.O.isString(name))
-			throw new TypeError();
-		var nms = name.replace(/\s+/g,' ').split(' ');
-		$_.A.each(nms, function(name) {
-			if(hasClass(element, name)){
-				return removeClass(element, name);
-			}
-			return addClass(element, name);
-		});
-		return element;
-	}
+    function toggleClass(element, name) {
+        if(!$_.O.isNode(element)||!$_.O.isString(name))
+            throw new TypeError();
+        var nms = name.replace(/\s+/g,' ').split(' ');
+        $_.A.each(nms, function(name) {
+            if(hasClass(element, name)){
+                return removeClass(element, name);
+            }
+            return addClass(element, name);
+        });
+        return element;
+    }
 
     /**
      * @memberof Asdf.Element
@@ -856,76 +856,76 @@
      * @param {String} name
      * @returns {boolean}
      */
-	function hasClass(element, name) {
-		if(!$_.O.isNode(element)||!$_.O.isString(name))
-			throw new TypeError();
-		return !!element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
-	}
+    function hasClass(element, name) {
+        if(!$_.O.isNode(element)||!$_.O.isString(name))
+            throw new TypeError();
+        return !!element.className && new RegExp("(^|\\s)" + name + "(\\s|$)").test(element.className);
+    }
 
-	function _findByQSA(element, selector){
-		var nid, old;
-		nid = old = $_.Utils.makeuid();
-		var nel = element;
-		var nsel = $_.O.isDocument(element)&&selector;
-		if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
-			var groups = $_.Selector.tokenize(selector);
-			if((old = attr(element,'id'))) {
-				nid = old.replace(/'|\\/g, "\\$&");
-			} else {
-				attr(element,'id', nid);
-			}
-			nid = "[id='"+nid+"'] ";
-			groups =  $_.A.map(groups, function(v){
-				return nid + $_.Selector.toSelector(v);
-			});
-			nel = /[+~]/.test(selector) && parent(element)||element;
-			nsel = groups.join(',');
-		}
-		if(nsel){
-			try{
-				return  nel.querySelectorAll(nsel);
-			} catch(e){
-			}finally{
-				if(!old){
-					removeAttr(element, 'id');
-				}
-			}
-		}
-	}
+    function _findByQSA(element, selector){
+        var nid, old;
+        nid = old = $_.Utils.makeuid();
+        var nel = element;
+        var nsel = $_.O.isDocument(element)&&selector;
+        if($_.O.isElement(element) && element.nodeName.toLowerCase() !== 'object'){
+            var groups = $_.Selector.tokenize(selector);
+            if((old = attr(element,'id'))) {
+                nid = old.replace(/'|\\/g, "\\$&");
+            } else {
+                attr(element,'id', nid);
+            }
+            nid = "[id='"+nid+"'] ";
+            groups =  $_.A.map(groups, function(v){
+                return nid + $_.Selector.toSelector(v);
+            });
+            nel = /[+~]/.test(selector) && parent(element)||element;
+            nsel = groups.join(',');
+        }
+        if(nsel){
+            try{
+                return  nel.querySelectorAll(nsel);
+            } catch(e){
+            }finally{
+                if(!old){
+                    removeAttr(element, 'id');
+                }
+            }
+        }
+    }
     var rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
-	function _merge(a, b){
-		if(a.length === 0)
-			return b;
-		return $_.A.merge(a,b);
-	}
-	function querySelectorAll(element, selector, results) {
+    function _merge(a, b){
+        if(a.length === 0)
+            return b;
+        return $_.A.merge(a,b);
+    }
+    function querySelectorAll(element, selector, results) {
         results = results||[];
         var match,m, nodeType = element.nodeType, els;
         if($_.O.isNotDocument(element)&&$_.O.isNotElement(element)&&nodeType !==11){
             return results;
         }
-		selector = $_.S.trim(selector);
+        selector = $_.S.trim(selector);
         if(nodeType !== 11 && (match = rquickExpr.exec(selector))){
             if(m = match[1]){
                 return $_.A.append(results,getElementById(element, m));
             }else if(match[2]){
-				return _merge(results, getElementsByTagName(element, selector));
-			}else if((m = match[3])){
-				return _merge(results,getElementsByClassName(element, m));
-			}
+                return _merge(results, getElementsByTagName(element, selector));
+            }else if((m = match[3])){
+                return _merge(results,getElementsByClassName(element, m));
+            }
         }
-		if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector) && (els = _findByQSA(element, selector))){
-			return _merge(results,els);
-		}
-		return $_.Selector.select(selector, element, results);
-	}
-	function closest(element, selector, context){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		while (element && !matchesSelector(element, selector))
-			element = element !== context && element !== document && element.parentNode;
-	    return element;
-	}
+        if(element.querySelectorAll && !$_.Bom.features.qsaNotSupport(selector) && (els = _findByQSA(element, selector))){
+            return _merge(results,els);
+        }
+        return $_.Selector.select(selector, element, results);
+    }
+    function closest(element, selector, context){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        while (element && !matchesSelector(element, selector))
+            element = element !== context && element !== document && element.parentNode;
+        return element;
+    }
 
     /**
      *
@@ -933,17 +933,17 @@
      * @param selector
      * @returns {boolean}
      */
-	function matchesSelector(element, selector){
-		if(!$_.O.isElement(element))
-			throw new TypeError();
-	    var mSelector = element.matches||element.mozMatchesSelector||element.webkitMatchesSelector;
-	    if (mSelector) return mSelector.call(element, selector);
-	    var match, parent = element.parentNode, temp = !parent;
-	    if (temp) (parent = tempParent).appendChild(element);
-	    match =  $_.A.indexOf( find(parent, selector), element);
-	    temp && tempParent.removeChild(element);
-	    return match !==-1;
-	}
+    function matchesSelector(element, selector){
+        if(!$_.O.isElement(element))
+            throw new TypeError();
+        var mSelector = element.matches||element.mozMatchesSelector||element.webkitMatchesSelector;
+        if (mSelector) return mSelector.call(element, selector);
+        var match, parent = element.parentNode, temp = !parent;
+        if (temp) (parent = tempParent).appendChild(element);
+        match =  $_.A.indexOf( find(parent, selector), element);
+        temp && tempParent.removeChild(element);
+        return match !==-1;
+    }
 
     /**
      * @memberof Asdf.Element
@@ -952,69 +952,69 @@
      * @param {String=} value
      * @returns {*}
      */
-	function css(element, name, value){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(value!=null){
-			var elementStyle = element.style;
-			elementStyle[name] =  value;
-		}else {
-			var cssStyle, res;
+    function css(element, name, value){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if(value!=null){
+            var elementStyle = element.style;
+            elementStyle[name] =  value;
+        }else {
+            var cssStyle, res;
             if (window.getComputedStyle) {
                 cssStyle = window.getComputedStyle(element, null);
             } //ie
-			else if (element.currentStyle) {
+            else if (element.currentStyle) {
                 cssStyle = element.currentStyle;
             } else {
-				return new TypeError();
-			}
+                return new TypeError();
+            }
 
-			if(!name) {
+            if(!name) {
                 res = {};
-				$_.O.each(cssStyle, function(value, key) {
+                $_.O.each(cssStyle, function(value, key) {
                     res[key] = value == 'auto'? '': value;
                 });
                 return res;
-			}
-			else if (isString(name)) {
-				return res = cssStyle[name];
-			} else if($_.O.isArray(name)){
-				res = {};
+            }
+            else if (isString(name)) {
+                return res = cssStyle[name];
+            } else if($_.O.isArray(name)){
+                res = {};
                 $_.O.each(name, function(v){
                     res[v] = cssStyle[v] == 'auto'? '' : cssStyle[v];
                 });
                 return res;
-			} else 
-				throw new TypeError();
-		}
-	}
+            } else
+                throw new TypeError();
+        }
+    }
 
     /**
      * @memberof Asdf.Element
      * @param {node} element
      * @returns {string}
      */
-	function toHTML(element){
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		if(!element) throw new TypeError;
-		var d = document.createElement('div');
-		if($_.O.isNode(element))
-			element = element.cloneNode(true);
-		d.appendChild(element);
-		return d.innerHTML;
-	}
+    function toHTML(element){
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        if(!element) throw new TypeError;
+        var d = document.createElement('div');
+        if($_.O.isNode(element))
+            element = element.cloneNode(true);
+        d.appendChild(element);
+        return d.innerHTML;
+    }
 
     /**
      * @memberof Asdf.Element
      * @param {Node} element
      * @returns {boolean}
      */
-	function isWhitespace(element) {
-		if(!$_.O.isNode(element))
-			throw new TypeError();
-		return $_.S.isBlank(element.innerHTML);
-	}
+    function isWhitespace(element) {
+        if(!$_.O.isNode(element))
+            throw new TypeError();
+        return $_.S.isBlank(element.innerHTML);
+    }
 
     var data = (function(){
         var data = {};
@@ -1077,12 +1077,12 @@
         if(element.getElementsByClassName){
             return element.getElementsByClassName(className);
         }else if(element.querySelectorAll){
-			return _findByQSA(element, '.'+className.replace(/\s+/,'.'))||[];
+            return _findByQSA(element, '.'+className.replace(/\s+/,'.'))||[];
         }else if(element.getElementsByTagName){
-			var cls = className.split(' ');
-			return $_.A.filter(element.getElementsByTagName('*'), function(el){
-				return $_.A.every($_.A.map(cls, $_.F.curry(hasClass, el)), $_.F.identity);
-			})||[];
+            var cls = className.split(' ');
+            return $_.A.filter(element.getElementsByTagName('*'), function(el){
+                return $_.A.every($_.A.map(cls, $_.F.curry(hasClass, el)), $_.F.identity);
+            })||[];
         }else {
             throw new Error();
         }
@@ -1108,14 +1108,14 @@
         if($_.O.isDocument(element)){
             el = element.getElementById(id);
             if(el && el.parentNode && el.id === id){
-				return el;
+                return el;
             }
         } else {
             if(element.ownerDocument && (el = element.ownerDocument.getElementById(id)) && contains(element, el) && el.id === id){
                 return el;
             }
         }
-		return null;
+        return null;
     }
     function _isParent(p, c){
         if (c) do {
@@ -1243,10 +1243,10 @@
         'selected': function(element){
             return element.selected;
         },
-		'target': function(element){
-			var hash = window.location && window.location.hash;
-			return hash && hash.slice( 1 ) === element.id;
-		}
+        'target': function(element){
+            var hash = window.location && window.location.hash;
+            return hash && hash.slice( 1 ) === element.id;
+        }
 
     };
     function getElementsByXPath(element, expression){
@@ -1258,102 +1258,102 @@
             results.push(query.snapshotItem(i));
         return results;
     }
-	function getOwnerDocument(node){
-		if($_.O.isNotNode(node)) throw new TypeError();
-		return $_.O.isDocument(node)? node : node.ownerDocument||node.document;
-	}
-	function getOwnerWindow(node){
-		if($_.O.isNotNode(node)) throw new TypeError();
-		return getWindow(getOwnerDocument(node));
-	}
-	function getFrameContentDocument(frame){
-		return frame.contentDocument||frame.contentWindow||document
-	}
-	function findNodes(node, p, context){
-		var res = [];
-		walk(node, function(el){
-			if(p.call(context, el))
-				res.push(el);
-		});
-		return res;
-	}
-	var TAGS_TO_IGNORE = {
-		'SCRIPT': 1,
-		'STYLE': 1,
-		'HEAD': 1,
-		'IFRAME': 1,
-		'OBJECT': 1
-	};
-	var PREDEFINED_TAG_VALUES_ = {'IMG': ' ', 'BR': '\n'};
-	function getNodeAtOffset(parent, offset){
-		var stack = [parent], pos = 0, cur = null;
-		while (stack.length > 0 && pos < offset) {
-			cur = stack.pop();
-			if (cur.nodeName in TAGS_TO_IGNORE) {
-			} else if (cur.nodeType == 3) {
-				var text = cur.nodeValue.replace(/(\r\n|\r|\n)/g, '').replace(/ +/g, ' ');
-				pos += text.length;
-			} else if (cur.nodeName in PREDEFINED_TAG_VALUES_) {
-				pos += PREDEFINED_TAG_VALUES_[cur.nodeName].length;
-			} else {
-				for (var i = cur.childNodes.length - 1; i >= 0; i--) {
-					stack.push(cur.childNodes[i]);
-				}
-			}
-		}
-		return {node: cur, remainder:cur ? cur.nodeValue.length + offset - pos - 1 : 0}
-	}
+    function getOwnerDocument(node){
+        if($_.O.isNotNode(node)) throw new TypeError();
+        return $_.O.isDocument(node)? node : node.ownerDocument||node.document;
+    }
+    function getOwnerWindow(node){
+        if($_.O.isNotNode(node)) throw new TypeError();
+        return getWindow(getOwnerDocument(node));
+    }
+    function getFrameContentDocument(frame){
+        return frame.contentDocument||frame.contentWindow||document
+    }
+    function findNodes(node, p, context){
+        var res = [];
+        walk(node, function(el){
+            if(p.call(context, el))
+                res.push(el);
+        });
+        return res;
+    }
+    var TAGS_TO_IGNORE = {
+        'SCRIPT': 1,
+        'STYLE': 1,
+        'HEAD': 1,
+        'IFRAME': 1,
+        'OBJECT': 1
+    };
+    var PREDEFINED_TAG_VALUES_ = {'IMG': ' ', 'BR': '\n'};
+    function getNodeAtOffset(parent, offset){
+        var stack = [parent], pos = 0, cur = null;
+        while (stack.length > 0 && pos < offset) {
+            cur = stack.pop();
+            if (cur.nodeName in TAGS_TO_IGNORE) {
+            } else if (cur.nodeType == 3) {
+                var text = cur.nodeValue.replace(/(\r\n|\r|\n)/g, '').replace(/ +/g, ' ');
+                pos += text.length;
+            } else if (cur.nodeName in PREDEFINED_TAG_VALUES_) {
+                pos += PREDEFINED_TAG_VALUES_[cur.nodeName].length;
+            } else {
+                for (var i = cur.childNodes.length - 1; i >= 0; i--) {
+                    stack.push(cur.childNodes[i]);
+                }
+            }
+        }
+        return {node: cur, remainder:cur ? cur.nodeValue.length + offset - pos - 1 : 0}
+    }
 
-	extend($_.Element,  {
-		walk: walk,
-		visible: visible,
-		toggle: toggle,
-		hide: hide,
-		show: show,
-		remove: remove,
-		text: text,
-		value: value,
-		html: html,
-		parent: parent,
-		parents: parents,
+    extend($_.Element,  {
+        walk: walk,
+        visible: visible,
+        toggle: toggle,
+        hide: hide,
+        show: show,
+        remove: remove,
+        text: text,
+        value: value,
+        html: html,
+        parent: parent,
+        parents: parents,
         commonParent:commonParent,
-		next: next,
-		prev: prev,
-		nexts: nexts,
-		prevs: prevs,
-		siblings: siblings,
+        next: next,
+        prev: prev,
+        nexts: nexts,
+        prevs: prevs,
+        siblings: siblings,
         childNodes:childNodes,
-		children: children,
-		contents: contents,
-		wrap: wrap,
-		unwrap: unwrap,
-		append: append,
-		prepend: prepend,
-		before: before,
-		after: after,
-		empty: empty,
+        children: children,
+        contents: contents,
+        wrap: wrap,
+        unwrap: unwrap,
+        append: append,
+        prepend: prepend,
+        before: before,
+        after: after,
+        empty: empty,
         first: first,
         eq: eq,
         last:last,
-		attr: attr,
-		hasAttr:hasAttr,
-		removeAttr: removeAttr,
-		prop: prop,
-		removeProp: removeProp,
-		relatedOffset:relatedOffset,
-		offset: offset,
-		addClass: addClass,
-		removeClass: removeClass,
-		toggleClass: toggleClass,
-		hasClass: hasClass,
-		find: querySelectorAll,
-		querySelectorAll: querySelectorAll,
-		matchesSelector:matchesSelector,
-		is: matchesSelector,
-		closest:closest,
-		css:css,
-		toHTML: toHTML,
-		isWhitespace: isWhitespace,
+        attr: attr,
+        hasAttr:hasAttr,
+        removeAttr: removeAttr,
+        prop: prop,
+        removeProp: removeProp,
+        relatedOffset:relatedOffset,
+        offset: offset,
+        addClass: addClass,
+        removeClass: removeClass,
+        toggleClass: toggleClass,
+        hasClass: hasClass,
+        find: querySelectorAll,
+        querySelectorAll: querySelectorAll,
+        matchesSelector:matchesSelector,
+        is: matchesSelector,
+        closest:closest,
+        css:css,
+        toHTML: toHTML,
+        isWhitespace: isWhitespace,
         createDom: createDom,
         createText: createText,
         get: data.get,
@@ -1361,9 +1361,9 @@
         has: data.has,
         del: data.del,
         getWindow: getWindow,
-		getOwnerDocument:getOwnerDocument,
-		getOwnerWindow:getOwnerWindow,
-		getFrameContentDocument:getFrameContentDocument,
+        getOwnerDocument:getOwnerDocument,
+        getOwnerWindow:getOwnerWindow,
+        getFrameContentDocument:getFrameContentDocument,
         offsetParent: offsetParent,
         getElementsByClassName:getElementsByClassName,
         contains:contains,
@@ -1373,11 +1373,11 @@
         getElementsByTagName:getElementsByTagName,
         outerHTML:outerHTML,
         getNTH:getNTH,
-		getElementById:getElementById,
-		findNodes:findNodes,
-		getNodeAtOffset:getNodeAtOffset,
-		NODETYPE:NODETYPE
-	});
+        getElementById:getElementById,
+        findNodes:findNodes,
+        getNodeAtOffset:getNodeAtOffset,
+        NODETYPE:NODETYPE
+    });
     $_.O.each(pseudos, function(v,k){
         $_.Element['is'+$_.S.camelize($_.S.capitalize(k))] =v;
     });

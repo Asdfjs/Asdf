@@ -6,5 +6,5 @@
         definition();
     }
 })(function() {
-	window.Asdf = {};
+    window.Asdf = {};
 });

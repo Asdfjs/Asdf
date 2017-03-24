@@ -1,8 +1,8 @@
 (function($_) {
-	$_.Bom = {};
+    $_.Bom = {};
     var alwaysFalse = $_.F.alwaysFalse;
     var rnative = $_.R.FN_NATIVE;
-	var Browser = getBrowser(window);
+    var Browser = getBrowser(window);
     function getBrowser(win) {
         var ua = win.navigator.userAgent;
         var doc = win.document;
@@ -144,13 +144,13 @@
         return support;
     }
 
-	var features = {
+    var features = {
         CanAddNameOrTypeAttributes : Browser.browser != 'msie' || Browser.documentMode >= 9,
         CanUseChildrenAttribute : Browser.browser != 'msie' && Browser.browser != 'mozilla' ||
             Browser.browser == 'msie' && Browser.documentMode >= 9 ||
             Browser.browser == 'mozilla' && Asdf.S.compareVersion(Browser.version, '1.9.1') >=0,
         CanUseParentElementProperty : Browser.browser == 'msie' || Browser.browser == 'opera' || Browser.browser == 'webkit'
-	};
+    };
     $_.O.extend(features, getSupport(window));
     var browserMap = {
         'firefox' : 'mozilla',
@@ -164,13 +164,13 @@
     function compareVersion(version){
         return Asdf.S.compareVersion(Browser.version, version);
     }
-	$_.O.extend($_.Bom, {
+    $_.O.extend($_.Bom, {
         isBrowser: isBrowser,
         compareVersion: compareVersion,
-		browser : Browser.browser,
-		version: Browser.version,
+        browser : Browser.browser,
+        version: Browser.version,
         documentMode: Browser.documentMode,
-		features:features,
+        features:features,
         getSupport:getSupport
-	});
+    });
 })(Asdf);
